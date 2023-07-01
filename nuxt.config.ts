@@ -15,6 +15,11 @@ export default defineNuxtConfig({
       link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
     }
   },
+  runtimeConfig: {
+    public: {
+      BASE_URL: process.env.BASE_URL,
+    },
+  },
   devtools: { enabled: true },
   modules: [
     '@element-plus/nuxt',

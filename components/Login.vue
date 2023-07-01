@@ -1,102 +1,100 @@
+<script setup lang="ts" >
+import { FormInstance, FormRules } from 'element-plus';
+
+const formUser = ref<FormInstance>()
+
+interface UserForm {
+  username: string,
+  password: string
+}
+const rules = reactive<FormRules<UserForm>>({
+  username: [
+    {
+      required: true,
+      message: "Usuario es requerido",
+      trigger: "blur"
+    },
+    {
+      min: 4,
+      message: "El usuario debe de ser minimo de 4 letras",
+      trigger: "blur"
+    }
+  ],
+  password: [
+    { required: true, message: "Contraseña requerida", trigger: "blur" },
+    {
+      min: 5,
+      message: "Minimo 5 caracteres",
+      trigger: "blur"
+    }
+  ]
+})
+
+const user = reactive<UserForm>(
+  {
+    username: "",
+    password: ""
+  },
+)
+let loading = ref(false);
+
+const login = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+
+  await formEl.validate((valid, fields) => {
+    if (!valid) return;
+  })
+
+  const options = {
+    method: 'post',
+    body: {
+      user: user.username,
+      password: user.password,
+    }
+  }
+  const { data, pending, error } = useIndexa('/login', options);
+
+  loading.value = pending.value
+
+  console.log("1")
+  console.log(loading.value)
+  setTimeout(() => {
+
+    console.log("5")
+    console.log(loading.value)
+  }, 5000);
+}
+
+
+</script>
+
 <template>
   <div class="login">
     <el-card>
       <h2>Indexa</h2>
-      <el-form
-        class="login-form"
-        :model="model"
-        :rules="rules"
-        ref="form"
-        @submit.native.prevent="login"
-      >
+      <el-form class="login-form" :model="user" :rules="rules" ref="formUser" status-icon
+        @submit.native.prevent="login(formUser)">
         <el-form-item prop="username">
-          <el-input v-model="model.username" placeholder="Nombre de usuario"></el-input>
+          <el-input v-model="user.username" placeholder="Nombre de usuario">
+            <template #prepend>
+              <Icon name="carbon:user"></Icon>
+            </template>
+          </el-input>
         </el-form-item>
         <el-form-item prop="password">
-          <el-input
-            v-model="model.password"
-            placeholder="Contraseña"
-            type="password"
-          ></el-input>
+          <el-input v-model="user.password" placeholder="Contraseña" type="password">
+            <template #prepend>
+              <Icon name="carbon:password"></Icon>
+            </template></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button
-            :loading="loading"
-            class="login-button"
-            type="primary"
-            native-type="submit"
-            block
-          >Iniciar seccion</el-button>
+          <el-button :loading="loading" class="login-button" type="primary" native-type="submit" block>Iniciar
+            seccion</el-button>
         </el-form-item>
       </el-form>
     </el-card>
   </div>
 </template>
-
-<script>
-export default {
-  name: "login",
-  data() {
-    return {
-      validCredentials: {
-        username: "lightscope",
-        password: "lightscope"
-      },
-      model: {
-        username: "",
-        password: ""
-      },
-      loading: false,
-      rules: {
-        username: [
-          {
-            required: true,
-            message: "Username is required",
-            trigger: "blur"
-          },
-          {
-            min: 4,
-            message: "Username length should be at least 5 characters",
-            trigger: "blur"
-          }
-        ],
-        password: [
-          { required: true, message: "Password is required", trigger: "blur" },
-          {
-            min: 5,
-            message: "Password length should be at least 5 characters",
-            trigger: "blur"
-          }
-        ]
-      }
-    };
-  },
-  methods: {
-    simulateLogin() {
-      return new Promise(resolve => {
-        setTimeout(resolve, 800);
-      });
-    },
-    async login() {
-      let valid = await this.$refs.form.validate();
-      if (!valid) {
-        return;
-      }
-      this.loading = true;
-      await this.simulateLogin();
-      this.loading = false;
-      if (
-        this.model.username === this.validCredentials.username &&
-        this.model.password === this.validCredentials.password
-      ) {
-        this.$message.success("Login successfull");
-      } else {
-        this.$message.error("Username or password is invalid");
-      }
-    }
-  }
-};
-</script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
@@ -111,15 +109,18 @@ export default {
   width: 100%;
   margin-top: 40px;
 }
+
 .login-form {
   width: 290px;
 }
+
 .forgot-password {
   margin-top: 10px;
 }
 </style>
 <style lang="scss">
 $teal: rgb(0, 124, 137);
+
 .el-button--primary {
   background: $teal;
   border-color: $teal;
@@ -131,9 +132,11 @@ $teal: rgb(0, 124, 137);
     border-color: lighten($teal, 7);
   }
 }
+
 .login .el-input__inner:hover {
   border-color: $teal;
 }
+
 .login .el-input__prefix {
   background: rgb(238, 237, 234);
   left: 0;
@@ -141,32 +144,39 @@ $teal: rgb(0, 124, 137);
   left: 1px;
   top: 1px;
   border-radius: 3px;
+
   .el-input__icon {
     width: 30px;
   }
 }
+
 .login .el-input input {
   padding-left: 35px;
 }
+
 .login .el-card {
   padding-top: 0;
   padding-bottom: 30px;
 }
+
 h2 {
   font-family: "Open Sans";
   letter-spacing: 1px;
   font-family: Roboto, sans-serif;
   padding-bottom: 20px;
 }
+
 a {
   color: $teal;
   text-decoration: none;
+
   &:hover,
   &:active,
   &:focus {
     color: lighten($teal, 7);
   }
 }
+
 .login .el-card {
   width: 340px;
   display: flex;
