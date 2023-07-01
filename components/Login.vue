@@ -1,7 +1,7 @@
 <template>
   <div class="login">
     <el-card>
-      <h2>Login</h2>
+      <h2>Indexa</h2>
       <el-form
         class="login-form"
         :model="model"
@@ -10,12 +10,12 @@
         @submit.native.prevent="login"
       >
         <el-form-item prop="username">
-          <el-input v-model="model.username" placeholder="Username"></el-input>
+          <el-input v-model="model.username" placeholder="Nombre de usuario"></el-input>
         </el-form-item>
         <el-form-item prop="password">
           <el-input
             v-model="model.password"
-            placeholder="Password"
+            placeholder="Contraseña"
             type="password"
           ></el-input>
         </el-form-item>
@@ -26,9 +26,8 @@
             type="primary"
             native-type="submit"
             block
-          >Login</el-button>
+          >Iniciar seccion</el-button>
         </el-form-item>
-        <a class="forgot-password" href="https://oxfordinformatics.com/">Forgot password ?</a>
       </el-form>
     </el-card>
   </div>

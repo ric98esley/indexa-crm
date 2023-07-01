@@ -16,9 +16,27 @@ export default defineNuxtConfig({
     }
   },
   devtools: { enabled: true },
-  modules: ['@element-plus/nuxt', '@nuxtjs/tailwindcss'],
+  modules: [
+    '@element-plus/nuxt',
+    '@nuxtjs/tailwindcss',
+    '@pinia/nuxt',
+    '@pinia-plugin-persistedstate/nuxt',
+    '@nuxtjs/google-fonts',
+    'nuxt-icon',
+  ],
   elementPlus: {
     locale: 'es',
+  },
+  googleFonts: {
+    families: {
+      Roboto: true,
+      'Josefin+Sans': true,
+      Lato: [100, 300],
+      Raleway: {
+        wght: [100, 400],
+        ital: [100]
+      },
+    }
   },
   tailwindcss: {
     cssPath: '~/assets/css/tailwind.css',

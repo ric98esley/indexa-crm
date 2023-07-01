@@ -15,10 +15,14 @@
     "@types/node": "^18",
     "element-plus": "^2.3.7",
     "nuxt": "^3.6.1",
+    "nuxt-icon": "^0.4.2",
     "sass": "^1.63.6",
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "@pinia/nuxt": "^0.4.11"
+    "@nuxtjs/google-fonts": "^3.0.1",
+    "@pinia-plugin-persistedstate/nuxt": "^1.1.1",
+    "@pinia/nuxt": "^0.4.11",
+    "pinia": "^2.1.4"
   }
 }
