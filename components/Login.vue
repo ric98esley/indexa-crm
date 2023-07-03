@@ -1,5 +1,7 @@
 <script setup lang="ts" >
 import { FormInstance, FormRules } from 'element-plus';
+import { useAuthStore } from '@/stores/authStore'
+const auth = useAuthStore();
 
 const formUser = ref<FormInstance>()
 
@@ -7,6 +9,13 @@ interface UserForm {
   username: string,
   password: string
 }
+
+interface User {
+  name: string,
+  lastaName: string,
+  email: string,
+}
+
 const rules = reactive<FormRules<UserForm>>({
   username: [
     {
@@ -30,7 +39,7 @@ const rules = reactive<FormRules<UserForm>>({
   ]
 })
 
-const user = reactive<UserForm>(
+const userCredencials = reactive<UserForm>(
   {
     username: "",
     password: ""
@@ -48,44 +57,41 @@ const login = async (formEl: FormInstance | undefined) => {
   const options = {
     method: 'post',
     body: {
-      user: user.username,
-      password: user.password,
+      user: userCredencials.username,
+      password: userCredencials.password,
     }
   }
   loading.value = true;
   const { data, pending, error } = useIndexa('/login', options);
 
+
   watch(pending, (newPending) => {
+    const token = data._value.token;
+    const user = data._value.user<User>;
+
+    auth.setAuthState(token, user);
     loading.value = newPending;
+
+
   });
-
-  console.log("1")
-  console.log(loading.value)
-  setTimeout(() => {
-
-    console.log("5")
-    console.log(loading.value)
-  }, 5000);
 }
-
-
 </script>
 
 <template>
   <div class="login">
     <el-card>
       <h2>Indexa</h2>
-      <el-form class="login-form" :model="user" :rules="rules" ref="formUser" status-icon
+      <el-form class="login-form" :model="userCredencials" :rules="rules" ref="formUser" status-icon
         @submit.native.prevent="login(formUser)">
         <el-form-item prop="username">
-          <el-input v-model="user.username" placeholder="Nombre de usuario">
+          <el-input v-model="userCredencials.username" placeholder="Nombre de usuario">
             <template #prepend>
               <Icon name="carbon:user"></Icon>
             </template>
           </el-input>
         </el-form-item>
         <el-form-item prop="password">
-          <el-input v-model="user.password" placeholder="Contraseña" type="password">
+          <el-input v-model="userCredencials.password" placeholder="Contraseña" type="password">
             <template #prepend>
               <Icon name="carbon:password"></Icon>
             </template></el-input>

@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  ssr: false,
   app: {
     // head
     head: {
@@ -15,6 +16,7 @@ export default defineNuxtConfig({
       link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
     }
   },
+  plugins: ['~/plugins/ofetch.ts'],
   runtimeConfig: {
     public: {
       BASE_URL: process.env.BASE_URL,

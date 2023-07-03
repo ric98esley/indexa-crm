@@ -1,10 +1,9 @@
 import { UseFetchOptions } from "nuxt/app"
-import { KeysOf } from "nuxt/dist/app/composables/asyncData"
 
-export const useIndexa = (request: string, options: UseFetchOptions = {}) => {
+export const useIndexa = (request: string, options: any) => {
   const config = useRuntimeConfig()
-  return useLazyFetch(request, {
-    baseURL: config.public.BASE_URL,
+    const {data, error, pending, refresh} = useLazyFetch(request, {
     ...options
   })
+  return {data, error, pending, refresh}
 }
