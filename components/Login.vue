@@ -52,9 +52,12 @@ const login = async (formEl: FormInstance | undefined) => {
       password: user.password,
     }
   }
+  loading.value = true;
   const { data, pending, error } = useIndexa('/login', options);
 
-  loading.value = pending.value
+  watch(pending, (newPending) => {
+    loading.value = newPending;
+  });
 
   console.log("1")
   console.log(loading.value)
