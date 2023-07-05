@@ -4,13 +4,13 @@ export default defineNuxtConfig({
   app: {
     // head
     head: {
-      title: 'Indexa CRM',
+      title: 'Indexa ERP',
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         {
           hid: 'Indexa crm',
           name: 'Control de mantenimientos y soportes',
-          content: 'Indexa CRM',
+          content: 'Indexa ERP',
         },
       ],
       link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
@@ -31,6 +31,10 @@ export default defineNuxtConfig({
     '@nuxtjs/google-fonts',
     'nuxt-icon',
   ],
+  piniaPersistedstate: {
+    storage: 'localStorage',
+    debbug: true,
+  },
   elementPlus: {
     locale: 'es',
   },

@@ -7,25 +7,32 @@ interface User {
 }
 
 export const useAuthStore = defineStore('auth', {
-  state: (): { token: string | undefined, user: User | undefined } => ({
-    token: undefined,
-    user: undefined,
+  state: (): { token?: string | null, user?: User | null } => ({
+    token: null,
+    user: null,
   }),
   persist: {
-    storage: localStorage,
+    storage: persistedState.localStorage,
   },
   // optional getters
   getters: {
     // getters receive the state as first parameter
-    getToken: (state): string | undefined => state.token,
+    getToken: (state): string | null | undefined => state.token,
     // use getters in other getters
-    getUser: (state): User | undefined => state.user
+    getUser: (state): User | null | undefined => state.user
   },
   // optional actions
   actions: {
-    authState(token?: string, user?: User ) {
+    setAuthState(token?: string, user?: User) {
       this.token = token;
       this.user = user;
+
+      const auth = {
+        token,
+        user,
+      }
+      //set auth object in localStorage - Grabamos el token en localStorage
+      localStorage.setItem('auth', JSON.stringify(auth));
     },
 
     reset() {
@@ -33,5 +40,31 @@ export const useAuthStore = defineStore('auth', {
       this.user = undefined;
       navigateTo("/login");
     },
+
+    readToken() {
+      let auth = {
+        token: undefined,
+        user: undefined,
+      };
+      try {
+        auth = JSON.parse(localStorage.getItem("auth"));
+      } catch (error) {
+        console.log(error);
+      }
+
+      console.log(auth)
+      //saving auth in state
+      if (!auth) {
+        this.token = undefined;
+        this.user = undefined;
+      }
+      if (auth) {
+        this.token = auth.token;
+        this.user = auth.user;
+      }
+    },
+    getNotifications() {
+      console.log('notificaciones')
+    }
   },
 })

@@ -62,18 +62,23 @@ const login = async (formEl: FormInstance | undefined) => {
     }
   }
   loading.value = true;
-  const { data, pending, error } = useIndexa('/login', options);
 
+  try {
+    const { data, pending, error } = await useIndexa('/login', options);
+    watch(pending, (newPending) => {
+      if (!error.value) {
+        const token = data.value.token;
+        const user = data.value.user<User>;
 
-  watch(pending, (newPending) => {
-    const token = data._value.token;
-    const user = data._value.user<User>;
+        auth.setAuthState(token, user);
+      }
+      loading.value = newPending;
+      navigateTo('/');
+    });
 
-    auth.setAuthState(token, user);
-    loading.value = newPending;
-
-
-  });
+  } catch (error) {
+    loading.value = true;
+  }
 }
 </script>
 

@@ -5,10 +5,16 @@ import { useAuthStore } from '@/stores/authStore'
 
 
 export default defineNuxtRouteMiddleware((to) => {
-  if (to.meta.layout == 'auth') return
   const auth = useAuthStore();
-  console.log('auth')
-  if (!auth.getToken) {
-    return navigateTo("/login");
+  auth.readToken();
+  if (to.meta.layout == 'auth') {
+    if (auth.getToken) {
+      return navigateTo("/");
+    }
+  }
+  else{
+    if (!auth.getToken) {
+      return navigateTo("/login");
+    }
   }
 })
