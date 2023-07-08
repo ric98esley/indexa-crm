@@ -68,7 +68,7 @@ const login = async (formEl: FormInstance | undefined) => {
     watch(pending, (newPending) => {
       if (!error.value) {
         const token = data.value.token;
-        const user = data.value.user<User>;
+        const user = data.value.user;
 
         auth.setAuthState(token, user);
       }
@@ -85,7 +85,7 @@ const login = async (formEl: FormInstance | undefined) => {
 <template>
   <div class="login">
     <el-card>
-      <h2>Indexa</h2>
+      <Logo width="w-40" margin="m-3" />
       <el-form class="login-form" :model="userCredencials" :rules="rules" ref="formUser" status-icon
         @submit.native.prevent="login(formUser)">
         <el-form-item prop="username">

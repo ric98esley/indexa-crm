@@ -19,7 +19,7 @@ export default defineNuxtConfig({
   plugins: ['~/plugins/ofetch.ts'],
   runtimeConfig: {
     public: {
-      BASE_URL: process.env.BASE_URL,
+      baseUrl: process.env.BASE_URL,
     },
   },
   devtools: { enabled: true },
@@ -49,13 +49,4 @@ export default defineNuxtConfig({
       },
     }
   },
-  tailwindcss: {
-    cssPath: '~/assets/css/tailwind.css',
-    configPath: 'tailwind.config.ts',
-    exposeConfig: false,
-    exposeLevel: 2,
-    config: {},
-    injectPosition: 'first',
-    viewer: true,
-  }
 })

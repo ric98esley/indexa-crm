@@ -2,10 +2,11 @@ import { ofetch } from 'ofetch';
 
 import { useAuthStore } from '@/stores/authStore';
 
+
 export default defineNuxtPlugin(() => {
   const authStore = useAuthStore()
   globalThis.$fetch = ofetch.create({
-    baseURL: 'http://192.168.3.107:3001/api/v1',
+    baseURL: useRuntimeConfig().public.baseUrl,
     onRequest ({ request, options }) {
       if (authStore.getToken) {
         options.headers = { Authorization: `Bearer ${authStore.getToken}` }
