@@ -2,7 +2,7 @@
   <el-aside width="13rem">
     <Logo width="w-32" margin="m-0" />
       <el-scrollbar height="90%" noresize>
-        <el-menu>
+        <el-menu :router="true">
           <el-sub-menu v-for="(menu, indexMenu) in menus" :index="`${indexMenu}`">
             <template #title>
               <Icon :name="menu.icon" class="mx-1 text-lg" /> {{ menu.title }}
@@ -11,7 +11,7 @@
               <template #title>
                 {{ group.title }}
               </template>
-              <el-menu-item :index="`${indexMenu}-${indexGroup}`" v-for="menu in group.menus">
+              <el-menu-item :index="`${indexMenu}-${indexGroup}`" v-for="menu in group.menus" route="/about">
                 {{ menu.title }}
               </el-menu-item>
             </el-menu-item-group>
