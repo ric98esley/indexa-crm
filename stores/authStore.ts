@@ -17,9 +17,9 @@ export const useAuthStore = defineStore('auth', {
   // optional getters
   getters: {
     // getters receive the state as first parameter
-    getToken: (state): string | null | undefined => state.token,
+    getToken: (state): string => state.token,
     // use getters in other getters
-    getUser: (state): User | null | undefined => state.user
+    getUser: (state): User => state.user
   },
   // optional actions
   actions: {
@@ -51,8 +51,6 @@ export const useAuthStore = defineStore('auth', {
       } catch (error) {
         console.log(error);
       }
-
-      console.log(auth)
       //saving auth in state
       if (!auth) {
         this.token = undefined;

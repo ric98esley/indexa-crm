@@ -3,6 +3,8 @@
 .nuxt
 .nitro
 .cache
+package-lock.json
+yarn.lock
 dist
 
 # Node dependencies
@@ -19,3 +21,9 @@ logs
 
 # Local env files
 .env
+.nuxt
+
+#locks
+
+yarn.lock
+yarn-error.log

@@ -70,6 +70,10 @@ const login = async (formEl: FormInstance | undefined) => {
         const token = data.value.token;
         const user = data.value.user;
 
+        const userRoles = useRoles()
+
+        userRoles.value = [user.role]  //
+
         auth.setAuthState(token, user);
       }
       loading.value = newPending;

@@ -1,25 +1,10 @@
 <template>
   <el-container class="layout-container-demo h-screen">
-    <TabMenu />
-    <el-container>
+    <TabMenu :menus="menusA" />
+    <el-container >
       <el-header style="text-align: right; font-size: 12px" class="relative bg-cyan-800 text-slate-300">
-        <div class="toolbar">
-          <el-dropdown>
-            <div class="mr-2 mt-0.5 text-slate-300">
-              <Icon name="ep:setting" class="" />
-            </div>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item>View</el-dropdown-item>
-                <el-dropdown-item>Add</el-dropdown-item>
-                <el-dropdown-item>Delete</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-          <span>Tom</span>
-        </div>
+        <Header :name="user.name"/>
       </el-header>
-
       <el-main>
         <el-scrollbar>
           <slot />
@@ -30,14 +15,51 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { useAuthStore } from '@/stores/authStore';
 
-const item = {
-  date: '2016-05-02',
-  name: 'Tom',
-  address: 'No. 189, Grove St, Los Angeles',
-}
-const tableData = ref(Array.from({ length: 20 }).fill(item))
+
+const auth = useAuthStore();
+
+const user = auth.getUser;
+
+const menusA = reactive([
+  {
+    title: 'Activos',
+    icon: 'ep:files',
+    groups: [
+      {
+        title: 'Lista de activos',
+        items: [
+          {
+            title: 'Todos los activos',
+            path: '/assets'
+          }
+        ]
+      }
+    ],
+    submenus: [
+      {
+        title: 'Acciones',
+        icon: 'ep:element-plus',
+        items: [
+          {
+            title: 'Agregar',
+            path: '/assets/add'
+          },
+          {
+            title: 'Recibir',
+            path: '#'
+          },
+          {
+            title: 'Agregar',
+            path: '#'
+          }
+        ]
+      }
+    ]
+  }
+])
+
 </script>
 
 <style scoped>
