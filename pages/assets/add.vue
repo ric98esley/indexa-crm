@@ -5,14 +5,8 @@
     </el-col>
     <el-col :sm="24" :md="24" :lg="8">
       <el-card>
-        <el-form
-          label-position="top"
-          label-width="auto"
-          autocomplete="off"
-          ref="ruleFormRef"
-          :model="ruleForm"
-          :rules="rules"
-          >
+        <el-form label-position="top" label-width="auto" autocomplete="off" ref="ruleFormRef" :model="ruleForm"
+          :rules="rules">
           <el-form-item label="Serial">
             <el-input placeholder="Serial" v-model="asset.serial">
             </el-input>
@@ -36,7 +30,8 @@
           </el-form-item>
           <el-row justify="space-between" align="middle">
             <el-form-item>
-              <el-button type="primary" :disabled="!asset.serial || !asset.modelId || !asset.stateId" @click="addAsset()">Agregar</el-button>
+              <el-button type="primary" :disabled="!asset.serial || !asset.modelId || !asset.stateId"
+                @click="addAsset()">Agregar</el-button>
             </el-form-item>
             <el-form-item>
               <el-button link plain>Facturar</el-button>
@@ -48,11 +43,41 @@
     <el-col :sm="24" :md="24" :lg="16">
       <el-card>
         <el-table :data="toAdd.assets">
-          <el-table-column label="Serial">
+          <el-table-column label="Serial" prop="serial">
           </el-table-column>
           <el-table-column label="Modelo">
+            <template type="text" #default="{ row }">
+              <el-select v-model="row.modelId" class="select-success" placeholder="Selecciona un estado" label="Estados"
+                style="width: 100%" name="Modelo de activo" filterable>
+                <el-option v-for="option in models" :key="option.id" :value="option.id"
+                  :label="`${option?.category?.name} - ${option?.brand?.name} - ${option?.name}`">
+                  {{ option?.category?.name }} - {{ option?.brand?.name }} -
+                  {{ option?.name }}
+                </el-option>
+              </el-select>
+            </template>
           </el-table-column>
           <el-table-column label="Estado">
+            <template type="text" #default="{ row }">
+              <el-select
+                v-model="row.stateId"
+                class="select-success"
+                placeholder="Selecciona un estado"
+                label="Estados"
+                style="width: 100%"
+                name="assetState"
+                filterable
+              >
+                <el-option
+                  v-for="option in status"
+                  :key="option.id"
+                  :value="option.id"
+                  :label="`${option.id} - ${option.name}`"
+                >
+                  {{ option.id }} - {{ option.name }}
+                </el-option>
+              </el-select>
+            </template>
           </el-table-column>
           <el-table-column label="Acciones">
           </el-table-column>
@@ -71,21 +96,6 @@ definePageMeta({
   ],
   roles: ['superuser', 'admin', 'auditor'],
 })
-
-
-interface Asset {
-  serial?: string
-  modelId?: number
-  stateId?: number
-}
-
-interface Invoice {
-  id?: number,
-  code?: string,
-  providerId?: number,
-  total?: string,
-  invoiceDate?: string,
-}
 
 const ruleFormRef = ref<FormInstance>()
 const ruleForm = reactive<Asset>({
@@ -160,6 +170,8 @@ const addAsset = () => {
   asset.serial = '';
   toAdd.assets.push(newAsset);
 }
+
+
 onMounted(async () => {
   let modelsApi = await getModels() || [];
   let statusApi = await getStatus() || [];
