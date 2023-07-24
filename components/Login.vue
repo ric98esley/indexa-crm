@@ -12,7 +12,7 @@ interface UserForm {
 
 interface User {
   name: string,
-  lastaName: string,
+  lastName: string,
   email: string,
 }
 

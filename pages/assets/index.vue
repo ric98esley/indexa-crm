@@ -10,7 +10,7 @@
             <el-input v-model="filters.serial" placeholder="Serial" clearable class="w-50 m-4" />
           </el-col>
           <el-col :span="2">
-            <Icon name="ep:filter" class="m-4"/>
+            <Icon name="ep:filter" class="m-4" />
           </el-col>
         </el-row>
       </el-card>
@@ -50,7 +50,10 @@ definePageMeta({
   roles: ['superuser', 'admin', 'tecnico'],
 })
 
-const response = reactive({
+const response = reactive<{
+  assets: Asset[],
+  total: number
+}>({
   assets: [],
   total: 0
 });
@@ -62,13 +65,12 @@ const filters = reactive({
   serial: ''
 })
 
-const { data, pending, error } = useIndexa('/assets', {
-  method: 'get'
-});
+const { data, pending, error } = useLazyFetch<{ assets: Asset[], total: number }>('/assets');
 
 watch(pending, () => {
-  response.assets = data.value.assets;
-  response.total = data.value.total;
+  console.log(data.value)
+  response.assets = data.value?.assets || [];
+  response.total = data.value?.total || 0;
 })
 
 const handleSizeChange = (val: number) => {

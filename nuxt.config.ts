@@ -34,10 +34,6 @@ export default defineNuxtConfig({
   ],
   piniaPersistedstate: {
     storage: 'localStorage',
-    debbug: true,
-  },
-  elementPlus: {
-    locale: 'es',
   },
   googleFonts: {
     families: {
