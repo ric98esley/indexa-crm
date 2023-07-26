@@ -49,7 +49,7 @@
             <template type="text" #default="{ row }">
               <el-select v-model="row.modelId" class="select-success" placeholder="Selecciona un estado" label="Estados"
                 style="width: 100%" name="Modelo de activo" filterable>
-                <el-option v-for="option in models" :key="option.id" :value="option.id"
+                <el-option v-for="option in models" :key="option.id" :value="option.id!"
                   :label="`${option?.category?.name} - ${option?.brand?.name} - ${option?.name}`">
                   {{ option?.category?.name }} - {{ option?.brand?.name }} -
                   {{ option?.name }}
@@ -61,7 +61,7 @@
             <template type="text" #default="{ row }">
               <el-select v-model="row.stateId" class="select-success" placeholder="Selecciona un estado" label="Estados"
                 style="width: 100%" name="assetState" filterable>
-                <el-option v-for="option in status" :key="option.id" :value="option.id"
+                <el-option v-for="option in status" :key="option.id" :value="option.id!"
                   :label="`${option.id} - ${option.name}`">
                   {{ option.id }} - {{ option.name }}
                 </el-option>
@@ -82,17 +82,19 @@
         </el-table>
       </el-card>
     </el-col>
-    <el-dialog v-model="modals.invoice" title="Tips" width="30%" draggable>
+    <el-dialog v-model="modals.invoice" title="Agregar factura" width="80%">
+      <template #header>
+        <h2>Datos de la factura</h2>
+      </template>
       <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
         <el-tab-pane label="Factura nueva" name="factura-nueva">
-          <h2>Datos de la factura</h2>
-          <el-form label-position="top" >
+          <el-form label-position="top">
             <el-form-item label="Numero de factura">
               <el-input v-model="toAdd.invoice.code" type="text" clearable></el-input>
             </el-form-item>
             <el-form-item label="Provedor">
               <el-autocomplete type="text" clearable :fetch-suggestions="searchProvider" placeholder="Buscar Provedor"
-                @select="handleSelectProvider" v-model="provider.name" class="w-100">
+                @select="handleSelectProvider" v-model="provider.name" class="w-full">
                 <template #default="{ item }">
                   <div class="value">
                     <b>{{ item.name }}</b>, <span class="link">{{ item.rif }}</span>
@@ -104,29 +106,52 @@
               <el-input type="number" v-model="toAdd.invoice.total">
               </el-input>
             </el-form-item>
-            <el-form-item label="Serial">
-              <el-date-picker v-model="toAdd.invoice.invoiceDate" type="date"
-                placeholder="Elige la fecha de facturacion"></el-date-picker>
+            <el-form-item label="Fecha de la factura">
+              <el-date-picker v-model="toAdd.invoice.invoiceDate" type="date" placeholder="Elige la fecha de facturacion"
+                style="width: 100%;"></el-date-picker>
             </el-form-item>
           </el-form>
         </el-tab-pane>
         <el-tab-pane label="Factura antigua" name="factura-antigua">
-          <el-form label-position="top" >
-            <el-autocomplete type="text" clearable :fetch-suggestions="searchInvoice" placeholder="Buscar factura"
-              @select="handleSelectInvoice" v-model="toAdd.invoice.code" class="w-100">
-              <template #default="{ item }">
-                <div class="value">
-                  <b>{{ item.code }}</b>, <span class="link">{{ item.provider?.name }}</span>
-                </div>
-              </template>
-            </el-autocomplete>
+          <el-form label-position="top">
+            <el-form-item label="Buscar factura">
+              <el-autocomplete type="text" clearable :fetch-suggestions="searchInvoice" placeholder="Codigo de la factura"
+                @select="handleSelectInvoice" v-model="toAdd.invoice.code" class="w-full">
+                <template #default="{ item }">
+                  <div class="value">
+                    <b>{{ item.code }}</b>, <span class="link">{{ item.provider?.name }}</span>
+                  </div>
+                </template>
+              </el-autocomplete>
+            </el-form-item>
           </el-form>
         </el-tab-pane>
       </el-tabs>
-      <span>It's a draggable Dialog</span>
       <template #footer>
-        <span class="dialog-footer">
-        </span>
+        <el-row class="m-1" justify="space-between">
+          <el-button @click="addAssets()" type="warning">Guardar</el-button>
+          <el-button @click="modals.provider = true" v-if="activeName === 'factura-nueva'" link type="primary">
+            Agregar Proveedor
+          </el-button>
+        </el-row>
+      </template>
+    </el-dialog>
+    <el-dialog v-model="modals.provider">
+      <template #header>
+        <h2>Agregar Proveedor</h2>
+      </template>
+      <template #default>
+        <el-form @submit.native.prevent="addProvider" label-position="top">
+          <el-form-item label="Nombre del proveedor">
+            <el-input type="text" label="Nombre" v-model="provider.name">
+            </el-input>
+          </el-form-item>
+          <el-form-item label="R.I.F del proveedor">
+            <el-input type="text" label="R.I.F" v-model="provider.rif">
+            </el-input>
+          </el-form-item>
+          <el-button @click="addProvider" type="primary">Agregar proveedor</el-button>
+        </el-form>
       </template>
     </el-dialog>
   </el-row>
@@ -134,6 +159,7 @@
 
 <script setup lang="ts">
 import type { FormInstance, FormRules, TabsPaneContext } from 'element-plus';
+import { UseFetchOptions } from 'nuxt/app';
 
 definePageMeta({
   middleware: [
@@ -143,7 +169,7 @@ definePageMeta({
 })
 
 const ruleFormRef = ref<FormInstance>();
-const activeName = ref('first');
+const activeName = ref('factura-nueva');
 
 const asset = reactive<NewAsset>({
   serial: undefined,
@@ -156,6 +182,8 @@ const provider = reactive<Provider>({
 });
 const modals = reactive({
   invoice: false,
+  confirm: false,
+  provider: false
 })
 
 const models = reactive<Model[]>([]);
@@ -234,6 +262,41 @@ const searchInvoice = async (queryString: string, cb: (arg: any) => void) => {
     console.log(error);
   }
 }
+
+const addProvider = async () => {
+  try {
+    const newProvider = { ...provider };
+
+    const { data, error } = await useFetch<Provider>('/invoices/providers', {
+      method: 'post',
+      body: newProvider
+    });
+
+
+    if (error.value) {
+      return ElNotification({
+        title: 'Poveedor no creado',
+        message: `${error.value.data.message.message}`,
+        type: 'error',
+      });
+    }
+    if (data.value)
+      ElNotification({
+        title: 'Poveedor creado',
+        message: `nombre: ${data.value.name}`,
+        type: 'success',
+      });
+    modals.provider = false;
+    provider.name = undefined;
+
+  } catch (error) {
+    ElNotification({
+      title: 'Poveedor no creado',
+      message: ``,
+      type: 'error',
+    });
+  }
+}
 const searchProvider = async (queryString: string, cb: (arg: any) => void) => {
   try {
     let toSend = {
@@ -251,6 +314,7 @@ const searchProvider = async (queryString: string, cb: (arg: any) => void) => {
     console.log(error);
   }
 }
+
 const addAsset = () => {
   const newAsset = { ...asset };
   if (!newAsset.serial || !newAsset.modelId || !newAsset.stateId) return;
@@ -260,11 +324,73 @@ const addAsset = () => {
   asset.serial = '';
   toAdd.assets.push(newAsset);
 }
-
 const removeAsset = (row: NewAsset) => {
   const index = toAdd.assets.indexOf(row);
   if (index !== -1) {
     toAdd.assets.splice(index, 1);
+  }
+}
+
+const addAssets = async () => {
+  try {
+    const newAssets = [...toAdd.assets];
+    const newInvoice = { ...toAdd.invoice };
+    const invoiceId = newInvoice.id;
+
+    delete newInvoice.id;
+
+    const { data, error } = await useFetch<{
+      created: Asset[],
+      errors: Asset[]
+    }>('/assets', {
+      method: 'post',
+      body: {
+        ...(invoiceId && {
+          invoiceId
+        }),
+        ...(!invoiceId && newInvoice.invoiceDate && newInvoice.providerId && newInvoice.code && {
+          invoice: newInvoice
+        }),
+        ...(newAssets && {
+          assets: newAssets
+        })
+      }
+    });
+
+    if (data.value) {
+      for (const asset of data.value.created) {
+        console.log(asset);
+        ElNotification({
+          title: 'Activo creado correctamente',
+          message: `serial: ${asset.serial}`,
+          type: 'success',
+        });
+      };
+
+      for (const asset of data.value.errors) {
+        console.log(asset);
+        ElNotification({
+          title: 'Activo duplicado',
+          message: `Serial: ${asset.serial}`,
+          type: 'error',
+        });
+      }
+    }
+
+
+    toAdd.invoice = {
+      id: undefined,
+      code: undefined,
+      providerId: undefined,
+      total: undefined,
+      invoiceDate: undefined,
+    }
+
+    provider.name = '',
+      provider.rif = '',
+      toAdd.assets = [];
+  } catch (error) {
+    console.log(error);
   }
 }
 
