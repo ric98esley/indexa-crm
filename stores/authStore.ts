@@ -17,9 +17,9 @@ export const useAuthStore = defineStore('auth', {
   // optional getters
   getters: {
     // getters receive the state as first parameter
-    getToken: (state): string => state.token,
+    getToken: (state): string => state.token!,
     // use getters in other getters
-    getUser: (state): User => state.user
+    getUser: (state): User => state.user!,
   },
   // optional actions
   actions: {
@@ -48,7 +48,7 @@ export const useAuthStore = defineStore('auth', {
         user: undefined,
       };
       try {
-        auth = JSON.parse(localStorage.getItem("auth"));
+        auth = JSON.parse(localStorage.getItem("auth")!);
       } catch (error) {
         console.log(error);
       }
