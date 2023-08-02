@@ -57,6 +57,44 @@ const menusA = reactive([
         ]
       }
     ]
+  },
+  {
+    title: 'Configuración',
+    icon: 'ep:setting',
+
+    submenus: [
+      {
+        title: 'Categorias',
+        icon: 'ep:memo',
+        items: [
+          {
+            title: 'Ver Categorias',
+            path: '/config/category'
+          },
+          {
+            title: 'Campos personalizados'
+          }
+        ]
+      },
+      {
+        title: 'Marcas',
+        icon: 'ep:collection',
+        items: [
+          {
+            title: 'Ver marcas'
+          }
+        ]
+      },
+      {
+        title: 'Modelos',
+        icon: 'ep:coin',
+        items: [
+          {
+            title: 'Ver modelos'
+          }
+        ]
+      },
+    ]
   }
 ])
 

@@ -17,6 +17,7 @@
     </el-row>
 
     <el-table :data="response.assets" v-loading="loading">
+      <el-table-column type="index" width="50" />
       <el-table-column type="expand">
         <template #default="props">
           <div m="4">

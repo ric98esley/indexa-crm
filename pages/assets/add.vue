@@ -30,8 +30,8 @@
           </el-form-item>
           <el-row justify="space-between" align="middle">
             <el-form-item>
-              <el-button type="primary" :disabled="!asset.serial || !asset.modelId || !asset.stateId"
-                @click="addAsset()">Agregar</el-button>
+              <el-button type="primary" :disabled="!asset.serial || !asset.modelId || !asset.stateId" @click="addAsset()"
+                native-type="submit">Agregar</el-button>
             </el-form-item>
             <el-form-item>
               <el-button link plain @click="modals.invoice = true">Facturar</el-button>
@@ -110,6 +110,7 @@
               <el-date-picker v-model="toAdd.invoice.invoiceDate" type="date" placeholder="Elige la fecha de facturacion"
                 style="width: 100%;"></el-date-picker>
             </el-form-item>
+
           </el-form>
         </el-tab-pane>
         <el-tab-pane label="Factura antigua" name="factura-antigua">
@@ -159,7 +160,6 @@
 
 <script setup lang="ts">
 import type { FormInstance, FormRules, TabsPaneContext } from 'element-plus';
-import { UseFetchOptions } from 'nuxt/app';
 
 definePageMeta({
   middleware: [
@@ -230,10 +230,12 @@ const handleSelectInvoice = (item: Invoice) => {
   toAdd.invoice.providerId = item.id;
 }
 
+
+
 const getModels = async () => {
   try {
-    const { data } = await useFetch<Model[]>('/assets/models');
-    return data.value
+    const { data } = await useFetch<{ count: number, rows: Model[] }>('/assets/models');
+    return data.value?.rows
   } catch (error) {
     console.log(error);
   }
@@ -242,7 +244,7 @@ const getModels = async () => {
 const getStatus = async () => {
   try {
     const { data } = await useFetch<State[]>('/assets/status');
-    return data.value
+    return data.value;
   } catch (error) {
     console.log(error);
   }

@@ -35,9 +35,11 @@ declare global {
     cardId?: string
   }
   interface Category extends Base {
+    brands: Brand[],
   }
 
   interface Brand extends Base {
+    models: Model[]
   }
 
   interface Model extends Base {
