@@ -1,6 +1,6 @@
 <template>
   <el-container direction="vertical" class="p-3">
-    <el-row :span="24" :gutter="12" >
+    <el-row :span="24" :gutter="12">
       <el-col :lg="16">
         <el-card class="w-full">
           <template #header>
@@ -14,6 +14,11 @@
               <Icon name="ep:filter" class="m-4" />
             </el-col>
           </el-row>
+        </el-card>
+      </el-col>
+      <el-col :span="8">
+        <el-card>
+          <el-button type="primary" @click="modals.create = true">Crear nueva categoria</el-button>
         </el-card>
       </el-col>
 
@@ -41,7 +46,7 @@
                 <el-button type="info" circle @click="modals.edit = true">
                   <Icon name="ep:edit" />
                 </el-button>
-                <el-button type="primary" circle @click="modals.create = true">
+                <el-button type="primary" circle>
                   <Icon name="ep:view" />
                 </el-button>
                 <el-button type="danger" circle @click="removeCategory(props.row.id)">
@@ -132,7 +137,7 @@ const newCategory = reactive<{
 const getCategories = async () => {
   try {
     loadingCategory.value = true;
-    const { data } = await useFetch<{ total: number, rows: Category[] }>('/assets/categories',
+    const { data, error } = await useFetch<{ total: number, rows: Category[] }>('/assets/categories',
       {
         params: {
           ...(filters.name != '' && filters.name && {
@@ -147,6 +152,12 @@ const getCategories = async () => {
         }
       }
     );
+    if (error.value) {
+      ElNotification({
+        message: 'Error al obtener las categorias intente de nuevo mas tarde'
+      })
+    }
+
     loadingCategory.value = false;
     return data.value
   } catch (error) {
@@ -164,20 +175,19 @@ const createCategory = async () => {
     const body = {
       name: newCategory.name
     }
-    const { data, error } = await useFetch<{ total: number, rows: Category[] }>('/assets/categories',
+
+    const { data, error } = await useAsyncData('createCategory', () => useFetch<Category>('/assets/categories',
       {
         method: 'post',
         body
       }
-    );
+    ))
     loadingCategory.value = false;
 
-    if (error) {
-      ElNotification({
-        title: 'Error al crear categorias intente de nuevo mas tarde',
-        message: error.value?.data.message.message
-      });
-      return
+    console.log(error.value)
+
+    if (error.value) {
+      throw error
     }
     await setCategories()
     ElNotification({
@@ -199,9 +209,23 @@ const removeCategory = async (id: number) => {
     const { data, error } = await useFetch<Category>(`/assets/categories/${id}`, {
       method: 'delete'
     })
+
+    if (error) {
+      loadingCategory.value = false;
+      ElNotification({
+        message: 'Error al borrar la categoria intente de nuevo mas tarde.'
+      });
+      return
+    }
+
+    ElNotification({
+      message: 'La categoria ha sido borrada.'
+    })
     await setCategories()
   } catch (error) {
-
+    ElNotification({
+      message: 'Error al borrar la categoria intente de nuevo mas tarde.'
+    })
   }
 }
 
