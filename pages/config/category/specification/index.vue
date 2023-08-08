@@ -4,7 +4,7 @@
       <el-col :lg="16">
         <el-card class="w-full">
           <template #header>
-            Buscar categoría
+            Busca Especificaciones
           </template>
           <el-row :gutter="20" align="middle">
             <el-col :span="22">
@@ -18,23 +18,18 @@
       </el-col>
       <el-col :span="8">
         <el-card>
-          <el-button type="primary" @click="modals.create = true">Crear nueva categoria</el-button>
+          <el-button type="primary" @click="modals.create = true">Crear nueva especificación</el-button>
         </el-card>
       </el-col>
 
     </el-row>
     <el-row :span="24" :gutter="20">
       <el-col :span="24">
-        <el-table :data="response.categories" stripe v-loading="loadingCategory">
+        <el-table :data="response.specifications" stripe v-loading="loadingSpecification">
           <el-table-column type="index" width="50" />
           <el-table-column prop="name" label="Nombre">
             <template #header>
               <el-input v-model="filters.name" placeholder="Nombre" clearable />
-            </template>
-          </el-table-column>
-          <el-table-column label="Cantidad de marcas">
-            <template #default="props">
-              {{ props.row.brands.length }}
             </template>
           </el-table-column>
           <el-table-column label="Acciones">
@@ -61,7 +56,7 @@
     <el-container>
       <el-dialog v-model="modals.edit">
         <template #header>
-          <h2>Editar la categoria</h2>
+          <h2>Editar la especificación</h2>
         </template>
         <template #default>
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon>
@@ -77,19 +72,12 @@
         </template>
         <template #default>
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="newCategory"
-            @submit.prevent="createCategory()">
+            @submit.prevent="createSpecification()">
             <el-form-item label="Nombre">
               <el-input v-model="newCategory.name" placeholder="Ingrese aqui el nombre"></el-input>
             </el-form-item>
-            <el-form-item v-for="field in newCategory.customFields">
-              <el-input></el-input>
-            </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!newCategory.name" @click="createCategory()"
-                native-type="submit">Crear</el-button>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :disabled="!newCategory.name" @click="createCategory()"
+              <el-button type="primary" :disabled="!newCategory.name" @click="createSpecification()"
                 native-type="submit">Crear</el-button>
             </el-form-item>
           </el-form>
@@ -108,7 +96,7 @@ definePageMeta({
   roles: ['superuser', 'admin', 'auditor'],
 });
 
-const loadingCategory = ref(false)
+const loadingSpecification = ref(false)
 
 const filters = reactive({
   limit: 10,
@@ -117,10 +105,10 @@ const filters = reactive({
 })
 
 const response = reactive<{
-  categories: Category[],
+  specifications: Specification[],
   total: number
 }>({
-  categories: [],
+  specifications: [],
   total: 0
 })
 
@@ -138,10 +126,10 @@ const newCategory = reactive<{
   customFields: undefined
 })
 
-const getCategories = async () => {
+const getSpecification = async () => {
   try {
-    loadingCategory.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Category[] }>('/assets/categories',
+    loadingSpecification.value = true;
+    const { data, error } = await useFetch<{ total: number, rows: Specification[] }>('/assets/specification',
       {
         params: {
           ...(filters.name != '' && filters.name && {
@@ -162,47 +150,47 @@ const getCategories = async () => {
       })
     }
 
-    loadingCategory.value = false;
+    loadingSpecification.value = false;
     return data.value
   } catch (error) {
-    loadingCategory.value = false;
+    loadingSpecification.value = false;
     ElNotification({
       message: 'Error al obtener las categorias intente de nuevo mas tarde'
     })
   }
 }
 
-const createCategory = async () => {
+const createSpecification = async () => {
   try {
-    loadingCategory.value = true;
+    loadingSpecification.value = true;
 
     const body = {
       name: newCategory.name
     }
 
-    const { data, error } = await useAsyncData('createCategory', () => useFetch<Category>('/assets/categories',
+    const { data, error } = await useAsyncData('createSpecification', () => useFetch<Specification>('/assets/specification',
       {
         method: 'post',
         body
       }
     ))
-    loadingCategory.value = false;
+    loadingSpecification.value = false;
 
     console.log(error.value)
 
     if (error.value) {
       throw error
     }
-    await setCategories()
+    await setSpecification()
     ElNotification({
-      title: 'Categoria creada correctamente',
+      title: 'Especificación creada correctamente',
       message: `${data}`
     })
     return data.value
   } catch (error) {
-    loadingCategory.value = false;
+    loadingSpecification.value = false;
     ElNotification({
-      title: 'Error al crear categorias intente de nuevo mas tarde',
+      title: 'Error al crear especificación intente de nuevo mas tarde',
     })
     console.log(error)
   }
@@ -210,41 +198,41 @@ const createCategory = async () => {
 
 const removeCategory = async (id: number) => {
   try {
-    const { data, error } = await useFetch<Category>(`/assets/categories/${id}`, {
+    const { data, error } = await useFetch<Specification>(`/assets/specification/${id}`, {
       method: 'delete'
     })
 
     if (error) {
-      loadingCategory.value = false;
+      loadingSpecification.value = false;
       ElNotification({
-        message: 'Error al borrar la categoria intente de nuevo mas tarde.'
+        message: 'Error al borrar la especificación intente de nuevo mas tarde.'
       });
       return
     }
 
     ElNotification({
-      message: 'La categoria ha sido borrada.'
+      message: 'La especificación ha sido borrada.'
     })
-    await setCategories()
+    await setSpecification()
   } catch (error) {
     ElNotification({
-      message: 'Error al borrar la categoria intente de nuevo mas tarde.'
+      message: 'Error al borrar la especificación intente de nuevo mas tarde.'
     })
   }
 }
 
-const setCategories = async () => {
-  const rta = await getCategories();
-  response.categories = rta?.rows || []
+const setSpecification = async () => {
+  const rta = await getSpecification();
+  response.specifications = rta?.rows || []
   response.total = rta?.total || 0
 }
 
 watch(filters, async () => {
-  await setCategories()
+  await setSpecification()
 })
 
 onMounted(async () => {
-  await setCategories()
+  await setSpecification()
 });
 
 </script>

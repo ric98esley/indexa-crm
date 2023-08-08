@@ -63,4 +63,6 @@ declare global {
   interface Provider extends Base{
     rif: string
   }
+  interface Specification extends Base{
+  }
 }

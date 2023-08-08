@@ -72,7 +72,8 @@ const menusA = reactive([
             path: '/config/category'
           },
           {
-            title: 'Campos personalizados'
+            title: 'Campos personalizados',
+            path: '/config/category/specification'
           }
         ]
       },
