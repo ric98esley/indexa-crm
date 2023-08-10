@@ -12,9 +12,9 @@
             </el-input>
           </el-form-item>
           <el-form-item label="Modelo">
-            <el-select v-model="asset.modelId" filterable class="select-success" placeholder="Selecciona una modelo"
-              label="Modelo" style="width: 100%">
-              <el-option v-for="option in models" :key="option.id" :value="option.id!"
+            <el-select v-model="asset.modelId" remote filterable class="select-success" placeholder="Selecciona una modelo"
+              label="Modelo" style="width: 100%" :remote-method="getModels">
+              <el-option v-for="option in response.models" :key="option.id" :value="option.id!"
                 :label="`${option.category.name} - ${option.name} - ${option.brand?.name}`">
               </el-option>
             </el-select>
@@ -49,7 +49,7 @@
             <template type="text" #default="{ row }">
               <el-select v-model="row.modelId" class="select-success" placeholder="Selecciona un estado" label="Estados"
                 style="width: 100%" name="Modelo de activo" filterable>
-                <el-option v-for="option in models" :key="option.id" :value="option.id!"
+                <el-option v-for="option in response.models" :key="option.id" :value="option.id!"
                   :label="`${option?.category?.name} - ${option?.brand?.name} - ${option?.name}`">
                   {{ option?.category?.name }} - {{ option?.brand?.name }} -
                   {{ option?.name }}
@@ -186,7 +186,16 @@ const modals = reactive({
   provider: false
 })
 
-const models = reactive<Model[]>([]);
+
+const response = reactive<{
+  models: Model[],
+  status: State[]
+  categories: Category[]
+}>({
+  categories: [],
+  models: [],
+  status: []
+})
 const status = reactive<State[]>([]);
 
 const toAdd = reactive<{
@@ -232,10 +241,23 @@ const handleSelectInvoice = (item: Invoice) => {
 
 
 
-const getModels = async () => {
+const getModels = async (query: string) => {
   try {
-    const { data } = await useFetch<{ count: number, rows: Model[] }>('/assets/models');
-    return data.value?.rows
+    const { data } = await useFetch<{ count: number, rows: Model[] }>('/assets/models',{
+      params: {
+        name: query
+      }
+    });
+    response.models = data.value?.rows || [];
+  } catch (error) {
+    console.log(error);
+  }
+}
+const getCategories = async () => {
+  try {
+    const { data } = await useFetch<{ count: number, rows: Category[] }>('/assets/categories',{
+    });
+    response.categories = data.value?.rows || [];
   } catch (error) {
     console.log(error);
   }
@@ -279,7 +301,7 @@ const addProvider = async () => {
       return ElNotification({
         title: 'Poveedor no creado',
         message: `${error.value.data.message.message}`,
-        type: 'error',
+        type: 'error'
       });
     }
     if (data.value)
@@ -397,9 +419,8 @@ const addAssets = async () => {
 }
 
 onMounted(async () => {
-  let modelsApi = await getModels() || [];
+  await getCategories()
   let statusApi = await getStatus() || [];
-  models.push(...modelsApi);
   status.push(...statusApi);
 });
 

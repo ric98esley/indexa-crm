@@ -81,12 +81,11 @@
             <el-form-item label="Nombre">
               <el-input v-model="newCategory.name" placeholder="Ingrese aqui el nombre"></el-input>
             </el-form-item>
-            <el-form-item v-for="field in newCategory.customFields">
-              <el-input></el-input>
-            </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!newCategory.name" @click="createCategory()"
-                native-type="submit">Crear</el-button>
+              <el-select v-model="newCategory.customFields" multiple filterable remote reserve-keyword placeholder="Porfavor escoge una categoria"
+                :remote-method="remoteMethod" :loading="loadingCustomFields">
+                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" :disabled="!newCategory.name" @click="createCategory()"
@@ -109,6 +108,7 @@ definePageMeta({
 });
 
 const loadingCategory = ref(false)
+const loadingCustomFields = ref(false)
 
 const filters = reactive({
   limit: 10,
@@ -136,7 +136,47 @@ const newCategory = reactive<{
 }>({
   name: undefined,
   customFields: undefined
-})
+});
+
+const getSpecification = async (query: string) => {
+  try {
+    loadingCustomFields.value = true;
+    const { data, error } = await useFetch<{ total: number, rows: Specification[] }>('/assets/specification',
+      {
+        params: {
+          ...(query != '' && query && {
+            name: query
+          })
+        }
+      }
+    );
+    if (error.value) {
+      ElNotification({
+        message: 'Error al obtener las campos personalizados intente de nuevo mas tarde'
+      })
+    }
+
+    loadingCustomFields.value = false;
+    return data.value?.rows;
+  } catch (error) {
+    loadingCustomFields.value = false;
+    ElNotification({
+      message: 'Error al obtener las personalizados intente de nuevo mas tarde'
+    })
+    return []
+  }
+}
+
+const remoteMethod = (query: string) => {
+  if (query) {
+    setTimeout(() => {
+      options.value = list.value.filter((item) => {
+        return item.label.toLowerCase().includes(query.toLowerCase())
+      })
+    }, 200)
+  } else {
+  }
+}
 
 const getCategories = async () => {
   try {
