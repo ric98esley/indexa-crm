@@ -1,15 +1,17 @@
 <template>
   <el-container class="layout-container-demo h-screen">
     <TabMenu :menus="menusA" />
-    <el-container >
+    <el-container>
       <el-header style="text-align: right; font-size: 12px" class="relative bg-cyan-800 text-slate-300">
-        <Header :name="user.name"/>
+        <Header :name="user.name" />
       </el-header>
-      <el-main>
-        <el-scrollbar>
-          <slot />
-        </el-scrollbar>
-      </el-main>
+      <ClientOnly>
+        <el-main>
+          <el-scrollbar>
+            <slot />
+          </el-scrollbar>
+        </el-main>
+      </ClientOnly>
     </el-container>
   </el-container>
 </template>
@@ -82,7 +84,8 @@ const menusA = reactive([
         icon: 'ep:collection',
         items: [
           {
-            title: 'Ver marcas'
+            title: 'Ver marcas',
+            path: '/config/brand'
           }
         ]
       },
@@ -91,7 +94,8 @@ const menusA = reactive([
         icon: 'ep:coin',
         items: [
           {
-            title: 'Ver modelos'
+            title: 'Ver modelos',
+            path: '/config/model'
           }
         ]
       },

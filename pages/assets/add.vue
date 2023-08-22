@@ -12,13 +12,20 @@
             </el-input>
           </el-form-item>
           <el-form-item label="Modelo">
-            <el-select v-model="asset.modelId" remote filterable class="select-success" placeholder="Selecciona una modelo"
-              label="Modelo" style="width: 100%" :remote-method="getModels">
+            <el-cascader v-model="asset.modelId" :options="response.categories"
+              :filter-method="(node, keyword) => node.text.toLowerCase().includes(keyword.toLowerCase())" class="w-full"
+              filterable separator=" - " clearable :popper-class="'.hover:bg-sky-700'"
+              :on-change="(value) => console.log(value)">
+            </el-cascader>
+          </el-form-item>
+          <!-- <el-form-item label="Modelo">
+            <el-select v-model="asset.modelId" remote filterable class="select-success"
+              placeholder="Selecciona una modelo" label="Modelo" style="width: 100%" :remote-method="getModels">
               <el-option v-for="option in response.models" :key="option.id" :value="option.id!"
                 :label="`${option.category.name} - ${option.name} - ${option.brand?.name}`">
               </el-option>
             </el-select>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="Estatus del activo">
             <el-select v-model="asset.stateId" class="select-success" placeholder="Selecciona un estado" label="Estado"
               style="width: 100%" filterable>
@@ -47,14 +54,10 @@
           </el-table-column>
           <el-table-column label="Modelo">
             <template type="text" #default="{ row }">
-              <el-select v-model="row.modelId" class="select-success" placeholder="Selecciona un estado" label="Estados"
-                style="width: 100%" name="Modelo de activo" filterable>
-                <el-option v-for="option in response.models" :key="option.id" :value="option.id!"
-                  :label="`${option?.category?.name} - ${option?.brand?.name} - ${option?.name}`">
-                  {{ option?.category?.name }} - {{ option?.brand?.name }} -
-                  {{ option?.name }}
-                </el-option>
-              </el-select>
+              <el-cascader v-model="row.modelId" :options="response.categories"
+                :filter-method="(node, keyword) => node.text.toLowerCase().includes(keyword.toLowerCase())" class="w-full"
+                filterable separator=" - ">
+              </el-cascader>
             </template>
           </el-table-column>
           <el-table-column label="Estado">
@@ -190,7 +193,7 @@ const modals = reactive({
 const response = reactive<{
   models: Model[],
   status: State[]
-  categories: Category[]
+  categories: any[]
 }>({
   categories: [],
   models: [],
@@ -241,23 +244,45 @@ const handleSelectInvoice = (item: Invoice) => {
 
 
 
-const getModels = async (query: string) => {
-  try {
-    const { data } = await useFetch<{ count: number, rows: Model[] }>('/assets/models',{
-      params: {
-        name: query
-      }
-    });
-    response.models = data.value?.rows || [];
-  } catch (error) {
-    console.log(error);
-  }
-}
+// const getModels = async (query: string) => {
+//   try {
+//     const { data } = await useFetch<{ count: number, rows: Model[] }>('/assets/models', {
+//       params: {
+//         name: query
+//       }
+//     });
+//     response.models = data.value?.rows || [];
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
 const getCategories = async () => {
   try {
-    const { data } = await useFetch<{ count: number, rows: Category[] }>('/assets/categories',{
+    const { data } = await useFetch<{ count: number, rows: Category[] }>('/assets/categories', {
     });
-    response.categories = data.value?.rows || [];
+
+    const categoriesOptions = data.value?.rows.map((row) => {
+      const children = row.brands.map((brand) => {
+        const children = brand.models.map((model) => {
+          return {
+            value: model.id,
+            label: model.name
+          }
+        })
+        return {
+          value: brand.id,
+          label: brand.name,
+          children
+        }
+      })
+      return {
+        value: row.id,
+        label: row.name,
+        children
+      }
+    }
+    );
+    response.categories = categoriesOptions || [];
   } catch (error) {
     console.log(error);
   }
@@ -357,7 +382,14 @@ const removeAsset = (row: NewAsset) => {
 
 const addAssets = async () => {
   try {
-    const newAssets = [...toAdd.assets];
+    const newAssets = toAdd.assets.map((asset) => {
+      const { modelId , ...rest } = asset;
+      return {
+        modelId: modelId![modelId!.length -1],
+        ...rest
+      }
+    }
+    )
     const newInvoice = { ...toAdd.invoice };
     const invoiceId = newInvoice.id;
 
@@ -383,7 +415,6 @@ const addAssets = async () => {
 
     if (data.value) {
       for (const asset of data.value.created) {
-        console.log(asset);
         ElNotification({
           title: 'Activo creado correctamente',
           message: `serial: ${asset.serial}`,
@@ -392,7 +423,6 @@ const addAssets = async () => {
       };
 
       for (const asset of data.value.errors) {
-        console.log(asset);
         ElNotification({
           title: 'Activo duplicado',
           message: `Serial: ${asset.serial}`,
@@ -423,6 +453,4 @@ onMounted(async () => {
   let statusApi = await getStatus() || [];
   status.push(...statusApi);
 });
-
-
 </script>

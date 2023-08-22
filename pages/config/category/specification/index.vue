@@ -61,7 +61,7 @@
         <template #default>
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon>
             <el-form-item label="Nombre">
-              <el-input></el-input>
+              <el-input v-model="newField.name"></el-input>
             </el-form-item>
           </el-form>
         </template>
@@ -71,13 +71,13 @@
           <h2>Crear nueva categoria</h2>
         </template>
         <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="newCategory"
+          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="newField"
             @submit.prevent="createSpecification()">
             <el-form-item label="Nombre">
-              <el-input v-model="newCategory.name" placeholder="Ingrese aqui el nombre"></el-input>
+              <el-input v-model="newField.name" placeholder="Ingrese aqui el nombre"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!newCategory.name" @click="createSpecification()"
+              <el-button type="primary" :disabled="!newField.name" @click="createSpecification()"
                 native-type="submit">Crear</el-button>
             </el-form-item>
           </el-form>
@@ -118,13 +118,13 @@ const modals = reactive({
   create: false,
 })
 
-const newCategory = reactive<{
+const newField = reactive<{
   name?: string,
-  customFields?: { typeId: number }[]
 }>({
   name: undefined,
-  customFields: undefined
 })
+
+
 
 const getSpecification = async () => {
   try {
@@ -165,7 +165,7 @@ const createSpecification = async () => {
     loadingSpecification.value = true;
 
     const body = {
-      name: newCategory.name
+      name: newField.name
     }
 
     const { data, error } = await useAsyncData('createSpecification', () => useFetch<Specification>('/assets/specification',
@@ -176,15 +176,12 @@ const createSpecification = async () => {
     ))
     loadingSpecification.value = false;
 
-    console.log(error.value)
-
-    if (error.value) {
-      throw error
-    }
+    if (error.value) throw error;
     await setSpecification()
+
+
     ElNotification({
       title: 'Especificación creada correctamente',
-      message: `${data}`
     })
     return data.value
   } catch (error) {
@@ -217,6 +214,28 @@ const removeCategory = async (id: number) => {
   } catch (error) {
     ElNotification({
       message: 'Error al borrar la especificación intente de nuevo mas tarde.'
+    })
+  }
+}
+
+const updateCategory = async (id: number, ) => {
+  try {
+    loadingSpecification.value = true;
+
+    const body = {
+      name: newField.name
+    }
+    
+    const { data, error } = await useAsyncData('createSpecification', () => useFetch<Specification>(`/assets/specification/${id}`,
+      {
+        method: 'patch',
+        body
+      }
+    ))
+  } catch (error) {
+    loadingSpecification.value = false;
+    ElNotification({
+      title: 'error al actualizar el campo'
     })
   }
 }

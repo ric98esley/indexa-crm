@@ -12,7 +12,7 @@ declare global {
   }
   interface NewAsset {
     serial?: string
-    modelId?: number
+    modelId?: number[]
     stateId?: number
   }
 
@@ -36,6 +36,7 @@ declare global {
   }
   interface Category extends Base {
     brands: Brand[],
+    customFields?: Specification[]
   }
 
   interface Brand extends Base {
@@ -64,5 +65,6 @@ declare global {
     rif: string
   }
   interface Specification extends Base{
+    typeId?: number
   }
 }

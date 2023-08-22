@@ -26,6 +26,13 @@
     <el-row :span="24" :gutter="20">
       <el-col :span="24">
         <el-table :data="response.categories" stripe v-loading="loadingCategory">
+          <el-table-column type="expand" width="50">
+            <template #default="props">
+              <el-table :data="props.row.customFields" :border="true">
+                <el-table-column label="Campos personalizados" prop="name"></el-table-column>
+              </el-table>
+            </template>
+          </el-table-column>
           <el-table-column type="index" width="50" />
           <el-table-column prop="name" label="Nombre">
             <template #header>
@@ -40,7 +47,7 @@
           <el-table-column label="Acciones">
             <template #default="props">
               <el-row>
-                <el-button type="info" circle @click="modals.edit = true">
+                <el-button type="info" circle @click="editCategory(props.row)">
                   <Icon name="ep:edit" />
                 </el-button>
                 <el-button type="primary" circle>
@@ -64,9 +71,20 @@
           <h2>Editar la categoria</h2>
         </template>
         <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon>
+          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon
+            @submit.prevent="patchCategory()">
             <el-form-item label="Nombre">
-              <el-input></el-input>
+              <el-input v-model="newCategory.name" placeholder="Ingrese aqui el nombre"></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-select class="w-full" v-model="newCategory.customFields" multiple filterable reserve-keyword
+                placeholder="Porfavor escoge un campo personalizado" :loading="loadingCustomFields"
+                @remove-tag="removeField">
+                <el-option v-for="item in specification.rows" :key="item.id" :label="item.name" :value="item.id!" />
+              </el-select>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" :disabled="!newCategory.name" native-type="submit">Editar</el-button>
             </el-form-item>
           </el-form>
         </template>
@@ -82,14 +100,13 @@
               <el-input v-model="newCategory.name" placeholder="Ingrese aqui el nombre"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-select v-model="newCategory.customFields" multiple filterable remote reserve-keyword placeholder="Porfavor escoge una categoria"
-                :remote-method="remoteMethod" :loading="loadingCustomFields">
-                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+              <el-select class="w-full" v-model="newCategory.customFields" multiple filterable reserve-keyword
+                placeholder="Porfavor escoge una categoria" :loading="loadingCustomFields">
+                <el-option v-for="item in specification.rows" :key="item.id" :label="item.name" :value="item.id!" />
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!newCategory.name" @click="createCategory()"
-                native-type="submit">Crear</el-button>
+              <el-button type="primary" :disabled="!newCategory.name" native-type="submit">Crear</el-button>
             </el-form-item>
           </el-form>
         </template>
@@ -115,6 +132,13 @@ const filters = reactive({
   offset: 0,
   name: ''
 })
+const specification = reactive<{
+  rows: Specification[],
+  total: number,
+}>({
+  rows: [],
+  total: 0
+})
 
 const response = reactive<{
   categories: Category[],
@@ -132,24 +156,18 @@ const modals = reactive({
 
 const newCategory = reactive<{
   name?: string,
-  customFields?: { typeId: number }[]
+  customFields?: number[],
+  removeFields?: number[]
 }>({
   name: undefined,
-  customFields: undefined
+  customFields: undefined,
+  removeFields: undefined
 });
 
-const getSpecification = async (query: string) => {
+const getSpecification = async () => {
   try {
     loadingCustomFields.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Specification[] }>('/assets/specification',
-      {
-        params: {
-          ...(query != '' && query && {
-            name: query
-          })
-        }
-      }
-    );
+    const { data, error } = await useFetch<{ total: number, rows: Specification[] }>('/assets/specification');
     if (error.value) {
       ElNotification({
         message: 'Error al obtener las campos personalizados intente de nuevo mas tarde'
@@ -157,24 +175,12 @@ const getSpecification = async (query: string) => {
     }
 
     loadingCustomFields.value = false;
-    return data.value?.rows;
+    return data.value;
   } catch (error) {
     loadingCustomFields.value = false;
     ElNotification({
       message: 'Error al obtener las personalizados intente de nuevo mas tarde'
     })
-    return []
-  }
-}
-
-const remoteMethod = (query: string) => {
-  if (query) {
-    setTimeout(() => {
-      options.value = list.value.filter((item) => {
-        return item.label.toLowerCase().includes(query.toLowerCase())
-      })
-    }, 200)
-  } else {
   }
 }
 
@@ -216,19 +222,65 @@ const createCategory = async () => {
   try {
     loadingCategory.value = true;
 
-    const body = {
-      name: newCategory.name
-    }
-
-    const { data, error } = await useAsyncData('createCategory', () => useFetch<Category>('/assets/categories',
+    const { data, error } = await useFetch<Category>('/assets/categories',
       {
         method: 'post',
-        body
-      }
-    ))
+        body: {
+          name: newCategory.name,
+          customFields: newCategory.customFields?.map((field) => {
+            return { typeId: field }
+          })
+        }
+      },
+    )
     loadingCategory.value = false;
 
-    console.log(error.value)
+    if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
+      ElNotification({
+        title: 'Error al crear categorias intente de nuevo mas tarde',
+        message: error.value?.data.message.message,
+      })
+      return
+    }
+    await setCategories()
+    ElNotification({
+      title: 'Categoria creada correctamente',
+      message: `${data.value?.name}`
+    })
+    newCategory.name = undefined;
+    newCategory.customFields = undefined;
+    newCategory.removeFields = undefined;
+    return data.value
+  } catch (error) {
+    loadingCategory.value = false;
+    ElNotification({
+      title: 'Error al crear categorias intente de nuevo mas tarde',
+    })
+  }
+}
+
+const patchCategory = async () => {
+  try {
+    loadingCategory.value = true;
+
+    const body = {
+      name: newCategory.name,
+      customFields: newCategory.customFields?.map((field) => {
+        return { typeId: field }
+      }),
+      removeFields: newCategory.removeFields?.map((field) => {
+        return { typeId: field }
+      })
+    }
+
+    const { data, error } = await useFetch<Category>('/assets/categories',
+      {
+        method: 'patch',
+        body
+      }
+    );
+    loadingCategory.value = false;
+
 
     if (error.value) {
       throw error
@@ -236,7 +288,7 @@ const createCategory = async () => {
     await setCategories()
     ElNotification({
       title: 'Categoria creada correctamente',
-      message: `${data}`
+      message: `${data.value.data.message.message}`
     })
     return data.value
   } catch (error) {
@@ -248,13 +300,23 @@ const createCategory = async () => {
   }
 }
 
+const editCategory = (row: Category) => {
+  modals.edit = true;
+  const fields = row.customFields!.map((field) => field.id!)
+  newCategory.name = row.name;
+  newCategory.customFields = fields;
+}
+const removeField = (field: number) => {
+  newCategory.removeFields?.push(field)
+}
+
 const removeCategory = async (id: number) => {
   try {
     const { data, error } = await useFetch<Category>(`/assets/categories/${id}`, {
       method: 'delete'
     })
 
-    if (error) {
+    if (error.value) {
       loadingCategory.value = false;
       ElNotification({
         message: 'Error al borrar la categoria intente de nuevo mas tarde.'
@@ -278,13 +340,25 @@ const setCategories = async () => {
   response.categories = rta?.rows || []
   response.total = rta?.total || 0
 }
+const setSpecification = async () => {
+  const rta = await getSpecification();
+  specification.rows = rta?.rows || [];
+  specification.total = rta?.total || 0;
+
+}
 
 watch(filters, async () => {
   await setCategories()
 })
 
+watch(modals.edit, async () => {
+  console.log(newCategory.removeFields)
+  newCategory.removeFields = undefined
+})
+
 onMounted(async () => {
-  await setCategories()
+  await setCategories();
+  await setSpecification();
 });
 
 </script>
