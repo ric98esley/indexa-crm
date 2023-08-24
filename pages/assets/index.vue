@@ -7,7 +7,7 @@
         </template>
         <el-row :gutter="20" align="middle">
           <el-col :span="22">
-            <el-input v-model="filters.serial" placeholder="Serial" clearable class="w-50 m-4" @input="getAssets" />
+            <el-input v-model="filters.serial" placeholder="Serial" clearable class="w-50 m-4" />
           </el-col>
           <el-col :span="2">
             <Icon name="ep:filter" class="m-4" />
@@ -39,7 +39,7 @@
     </el-table>
     <el-pagination class="m-4" v-model:current-page="filters.offset" v-model:page-size="filters.limit"
       :page-sizes="[10, 20, 50, 100, 200, 300, 400]" :background="true" layout="total, sizes, prev, pager, next, jumper"
-      :total="response.total" @size-change="handleSizeChange" @current-change="handleCurrentChange" />
+      :total="response.total"/>
   </el-container>
 </template>
 
@@ -95,12 +95,16 @@ const getAssets = async () => {
     loading.value = false;
   }
 }
-const handleSizeChange = async (val: number) => {
-  await getAssets();
-}
-const handleCurrentChange = async (val: number) => {
-  await getAssets();
-}
+// const handleSizeChange = async (val: number) => {
+//   await getAssets();
+// }
+// const handleCurrentChange = async (val: number) => {
+//   await getAssets();
+// }
+
+watch(filters, useDebounce(async () =>{
+  await getAssets()
+}, 500))
 
 onMounted(async () => {
   await getAssets();

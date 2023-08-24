@@ -36,7 +36,7 @@
           <el-table-column type="index" width="50" />
           <el-table-column prop="name" label="Nombre">
             <template #header>
-              <el-input v-model="filters.name" placeholder="Nombre" clearable />
+              <el-input :debounce="2000" v-model="filters.name" placeholder="Nombre" clearable />
             </template>
           </el-table-column>
           <el-table-column label="Cantidad de marcas">
@@ -74,17 +74,17 @@
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon
             @submit.prevent="patchCategory()">
             <el-form-item label="Nombre">
-              <el-input v-model="newCategory.name" placeholder="Ingrese aqui el nombre"></el-input>
+              <el-input v-model="category.name" placeholder="Ingrese aqui el nombre"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-select class="w-full" v-model="newCategory.customFields" multiple filterable reserve-keyword
+              <el-select class="w-full" v-model="category.customFields" multiple filterable reserve-keyword
                 placeholder="Porfavor escoge un campo personalizado" :loading="loadingCustomFields"
                 @remove-tag="removeField">
                 <el-option v-for="item in specification.rows" :key="item.id" :label="item.name" :value="item.id!" />
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!newCategory.name" native-type="submit">Editar</el-button>
+              <el-button type="primary" :disabled="!category.name" native-type="submit">Editar</el-button>
             </el-form-item>
           </el-form>
         </template>
@@ -94,19 +94,19 @@
           <h2>Crear nueva categoria</h2>
         </template>
         <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="newCategory"
+          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="category"
             @submit.prevent="createCategory()">
             <el-form-item label="Nombre">
-              <el-input v-model="newCategory.name" placeholder="Ingrese aqui el nombre"></el-input>
+              <el-input v-model="category.name" placeholder="Ingrese aqui el nombre"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-select class="w-full" v-model="newCategory.customFields" multiple filterable reserve-keyword
+              <el-select class="w-full" v-model="category.customFields" multiple filterable reserve-keyword
                 placeholder="Porfavor escoge una categoria" :loading="loadingCustomFields">
                 <el-option v-for="item in specification.rows" :key="item.id" :label="item.name" :value="item.id!" />
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!newCategory.name" native-type="submit">Crear</el-button>
+              <el-button type="primary" :disabled="!category.name" native-type="submit">Crear</el-button>
             </el-form-item>
           </el-form>
         </template>
@@ -124,8 +124,10 @@ definePageMeta({
   roles: ['superuser', 'admin', 'auditor'],
 });
 
-const loadingCategory = ref(false)
-const loadingCustomFields = ref(false)
+const loadingCategory = ref(false);
+const loadingCustomFields = ref(false);
+
+const debounceTimeout = ref(undefined);
 
 const filters = reactive({
   limit: 10,
@@ -154,14 +156,16 @@ const modals = reactive({
   create: false,
 })
 
-const newCategory = reactive<{
-  name?: string,
-  customFields?: number[],
-  removeFields?: number[]
+const category = reactive<{
+  id?: number,
+  name: string,
+  customFields: number[],
+  removeFields: number[]
 }>({
-  name: undefined,
-  customFields: undefined,
-  removeFields: undefined
+  id: undefined,
+  name: '',
+  customFields: [],
+  removeFields: []
 });
 
 const getSpecification = async () => {
@@ -226,8 +230,8 @@ const createCategory = async () => {
       {
         method: 'post',
         body: {
-          name: newCategory.name,
-          customFields: newCategory.customFields?.map((field) => {
+          name: category.name,
+          customFields: category.customFields?.map((field) => {
             return { typeId: field }
           })
         }
@@ -247,9 +251,10 @@ const createCategory = async () => {
       title: 'Categoria creada correctamente',
       message: `${data.value?.name}`
     })
-    newCategory.name = undefined;
-    newCategory.customFields = undefined;
-    newCategory.removeFields = undefined;
+    category.id = undefined;
+    category.name = '';
+    category.customFields = [];
+    category.removeFields = [];
     return data.value
   } catch (error) {
     loadingCategory.value = false;
@@ -264,18 +269,18 @@ const patchCategory = async () => {
     loadingCategory.value = true;
 
     const body = {
-      name: newCategory.name,
-      customFields: newCategory.customFields?.map((field) => {
+      name: category.name,
+      customFields: category.customFields?.map((field) => {
         return { typeId: field }
       }),
-      removeFields: newCategory.removeFields?.map((field) => {
+      removeFields: category.removeFields?.map((field) => {
         return { typeId: field }
       })
     }
 
-    const { data, error } = await useFetch<Category>('/assets/categories',
+    const { data, error } = await useFetch<Category>(`/assets/categories/${category.id}`,
       {
-        method: 'patch',
+        method: 'PATCH',
         body
       }
     );
@@ -287,14 +292,19 @@ const patchCategory = async () => {
     }
     await setCategories()
     ElNotification({
-      title: 'Categoria creada correctamente',
-      message: `${data.value.data.message.message}`
+      title: 'Categoria modificada correctamente',
+      message: `${data.value?.name}`
     })
+
+    category.id = undefined;
+    category.name = '';
+    category.customFields = [];
+    category.removeFields = [];
     return data.value
   } catch (error) {
     loadingCategory.value = false;
     ElNotification({
-      title: 'Error al crear categorias intente de nuevo mas tarde',
+      title: 'Error al modificar la categoria intente de nuevo mas tarde',
     })
     console.log(error)
   }
@@ -302,12 +312,14 @@ const patchCategory = async () => {
 
 const editCategory = (row: Category) => {
   modals.edit = true;
+
   const fields = row.customFields!.map((field) => field.id!)
-  newCategory.name = row.name;
-  newCategory.customFields = fields;
+  category.id = row.id;
+  category.name = row.name || '';
+  category.customFields = fields;
 }
 const removeField = (field: number) => {
-  newCategory.removeFields?.push(field)
+  category.removeFields?.push(field)
 }
 
 const removeCategory = async (id: number) => {
@@ -347,13 +359,14 @@ const setSpecification = async () => {
 
 }
 
-watch(filters, async () => {
-  await setCategories()
-})
+watch(filters, useDebounce(async () => {
+    await setCategories()
+  }, 500)
+)
 
-watch(modals.edit, async () => {
-  console.log(newCategory.removeFields)
-  newCategory.removeFields = undefined
+watch(() => modals.edit, async () => {
+  console.log(category.removeFields)
+  category.removeFields = []
 })
 
 onMounted(async () => {
