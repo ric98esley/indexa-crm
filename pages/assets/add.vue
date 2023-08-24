@@ -35,6 +35,9 @@
               </el-option>
             </el-select>
           </el-form-item>
+          <el-form-item label="prueba" v-for="model in customFields">
+            <el-input></el-input>
+          </el-form-item>
           <el-row justify="space-between" align="middle">
             <el-form-item>
               <el-button type="primary" :disabled="!asset.serial || !asset.modelId || !asset.stateId" @click="addAsset()"
@@ -230,6 +233,19 @@ const rules = reactive<FormRules<NewAsset>>({
 
 });
 
+const customFields = computed(() => {
+  console.log('entro');
+  
+  if (!asset.modelId) return []
+  const foundCategory = response.categories.find((elemento) => {
+    return elemento.value == asset.modelId![0]})
+  console.log('categoria');
+  console.log(foundCategory);
+
+  if(!foundCategory) return []
+  return foundCategory.customFields;
+})
+
 const handleClick = (tab: TabsPaneContext, event: Event) => {
   console.log(tab, event)
 }
@@ -244,18 +260,7 @@ const handleSelectInvoice = (item: Invoice) => {
 
 
 
-// const getModels = async (query: string) => {
-//   try {
-//     const { data } = await useFetch<{ count: number, rows: Model[] }>('/assets/models', {
-//       params: {
-//         name: query
-//       }
-//     });
-//     response.models = data.value?.rows || [];
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
+
 const getCategories = async () => {
   try {
     const { data } = await useFetch<{ count: number, rows: Category[] }>('/assets/categories', {
@@ -272,12 +277,15 @@ const getCategories = async () => {
         return {
           value: brand.id,
           label: brand.name,
+          ...(!(children.length > 0) && { disabled: true }),
           children
         }
       })
       return {
         value: row.id,
         label: row.name,
+        customFields: row.customFields,
+        ...(!(children.length > 0) && { disabled: true }),
         children
       }
     }
@@ -383,9 +391,9 @@ const removeAsset = (row: NewAsset) => {
 const addAssets = async () => {
   try {
     const newAssets = toAdd.assets.map((asset) => {
-      const { modelId , ...rest } = asset;
+      const { modelId, ...rest } = asset;
       return {
-        modelId: modelId![modelId!.length -1],
+        modelId: modelId![modelId!.length - 1],
         ...rest
       }
     }
