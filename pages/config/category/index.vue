@@ -127,8 +127,6 @@ definePageMeta({
 const loadingCategory = ref(false);
 const loadingCustomFields = ref(false);
 
-const debounceTimeout = ref(undefined);
-
 const filters = reactive({
   limit: 10,
   offset: 0,

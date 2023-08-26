@@ -18,28 +18,58 @@
 
     <el-table :data="response.assets" v-loading="loading">
       <el-table-column type="index" width="50" />
-      <el-table-column type="expand">
+      <el-table-column type="expand" width="50">
         <template #default="props">
-          <div m="4">
-            <p m="t-0 b-2">prueba</p>
-          </div>
+          <el-table :data="props.row.customFields" :border="true">
+            <el-table-column label="Campo" prop="name"></el-table-column>
+            <el-table-column label="Valor" prop="value"></el-table-column>
+          </el-table>
         </template>
       </el-table-column>
       <el-table-column label="Serial" prop="serial">
+        <template #header>
+          <el-input v-model="filters.serial" placeholder="Serial" clearable />
+        </template>
       </el-table-column>
       <el-table-column label="Estado" prop="state.name">
+        <template #header>
+          <el-input v-model="filters.state" placeholder="Estado" clearable />
+        </template>
       </el-table-column>
-      <el-table-column label="Descripción">
-        <template #default="{ row }">
-          <div m="4">
-            <p m="t-0 b-2">{{ row.model.category.name }} - {{ row.model.brand.name }} - {{ row.model.name }}</p>
-          </div>
+      <el-table-column label="Categoria" prop="model.category.name">
+        <template #header>
+          <el-input v-model="filters.category" placeholder="Categoria" clearable />
+        </template>
+      </el-table-column>
+      <el-table-column label="Marca" prop="model.brand.name">
+        <template #header>
+          <el-input v-model="filters.brand" placeholder="Marca" clearable />
+        </template>
+      </el-table-column>
+      <el-table-column label="Modelo" prop="model.name">
+        <template #header>
+          <el-input v-model="filters.model" placeholder="Modelo" clearable />
+        </template>
+      </el-table-column>
+      <el-table-column label="Acciones">
+        <template #default="props">
+          <el-row>
+            <el-button type="info" circle @click="modals.edit = true">
+              <Icon name="ep:edit" />
+            </el-button>
+            <el-button type="primary" circle>
+              <Icon name="ep:view" />
+            </el-button>
+            <el-button type="danger" circle @click="" v-role="['auditor', 'superuser']">
+              <Icon name="ep:delete" />
+            </el-button>
+          </el-row>
         </template>
       </el-table-column>
     </el-table>
     <el-pagination class="m-4" v-model:current-page="filters.offset" v-model:page-size="filters.limit"
       :page-sizes="[10, 20, 50, 100, 200, 300, 400]" :background="true" layout="total, sizes, prev, pager, next, jumper"
-      :total="response.total"/>
+      :total="response.total" />
   </el-container>
 </template>
 
@@ -59,12 +89,20 @@ const response = reactive<{
   total: 0
 });
 
+const modals = reactive({
+  edit: false
+})
+
 const loading = ref(true)
 
 const filters = reactive({
   limit: 10,
   offset: 0,
-  serial: ''
+  serial: '',
+  category: '',
+  brand: '',
+  model: '',
+  state: ''
 })
 
 
@@ -76,6 +114,18 @@ const getAssets = async () => {
         params: {
           ...(filters.serial != '' && filters.serial && {
             serial: filters.serial
+          }),
+          ...(filters.model != '' && filters.model && {
+            model: filters.model
+          }),
+          ...(filters.state != '' && filters.state && {
+            state: filters.state
+          }),
+          ...(filters.category != '' && filters.category && {
+            category: filters.category
+          }),
+          ...(filters.brand != '' && filters.brand && {
+            brand: filters.brand
           }),
           ...(filters.offset && {
             offset: (filters.offset - 1) * filters.limit
@@ -95,14 +145,8 @@ const getAssets = async () => {
     loading.value = false;
   }
 }
-// const handleSizeChange = async (val: number) => {
-//   await getAssets();
-// }
-// const handleCurrentChange = async (val: number) => {
-//   await getAssets();
-// }
 
-watch(filters, useDebounce(async () =>{
+watch(filters, useDebounce(async () => {
   await getAssets()
 }, 500))
 

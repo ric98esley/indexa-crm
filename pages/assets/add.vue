@@ -18,14 +18,6 @@
               :on-change="(value) => console.log(value)">
             </el-cascader>
           </el-form-item>
-          <!-- <el-form-item label="Modelo">
-            <el-select v-model="asset.modelId" remote filterable class="select-success"
-              placeholder="Selecciona una modelo" label="Modelo" style="width: 100%" :remote-method="getModels">
-              <el-option v-for="option in response.models" :key="option.id" :value="option.id!"
-                :label="`${option.category.name} - ${option.name} - ${option.brand?.name}`">
-              </el-option>
-            </el-select>
-          </el-form-item> -->
           <el-form-item label="Estatus del activo">
             <el-select v-model="asset.stateId" class="select-success" placeholder="Selecciona un estado" label="Estado"
               style="width: 100%" filterable>
@@ -35,8 +27,8 @@
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="prueba" v-for="model in customFields">
-            <el-input></el-input>
+          <el-form-item :label="field.name" v-for="field in asset.customFields">
+            <el-input v-model="field.value"></el-input>
           </el-form-item>
           <el-row justify="space-between" align="middle">
             <el-form-item>
@@ -53,6 +45,14 @@
     <el-col :sm="24" :md="24" :lg="16">
       <el-card>
         <el-table :data="toAdd.assets">
+          <el-table-column type="expand" width="50">
+            <template #default="props">
+              <el-table :data="props.row.customFields" :border="true">
+                <el-table-column label="Campo" prop="name"></el-table-column>
+                <el-table-column label="Valor" prop="value"></el-table-column>
+              </el-table>
+            </template>
+          </el-table-column>
           <el-table-column label="Serial" prop="serial">
           </el-table-column>
           <el-table-column label="Modelo">
@@ -181,6 +181,7 @@ const asset = reactive<NewAsset>({
   serial: undefined,
   modelId: undefined,
   stateId: undefined,
+  customFields: []
 });
 const provider = reactive<Provider>({
   name: '',
@@ -233,18 +234,6 @@ const rules = reactive<FormRules<NewAsset>>({
 
 });
 
-const customFields = computed(() => {
-  console.log('entro');
-  
-  if (!asset.modelId) return []
-  const foundCategory = response.categories.find((elemento) => {
-    return elemento.value == asset.modelId![0]})
-  console.log('categoria');
-  console.log(foundCategory);
-
-  if(!foundCategory) return []
-  return foundCategory.customFields;
-})
 
 const handleClick = (tab: TabsPaneContext, event: Event) => {
   console.log(tab, event)
@@ -375,9 +364,14 @@ const searchProvider = async (queryString: string, cb: (arg: any) => void) => {
 const addAsset = () => {
   const newAsset = { ...asset };
   if (!newAsset.serial || !newAsset.modelId || !newAsset.stateId) return;
+  const newCustomFields = newAsset.customFields.filter(field => field.value !== '');
+  newAsset.customFields = JSON.parse(JSON.stringify(newCustomFields.length > 0 ? newCustomFields : []));
+
   if (toAdd.assets.find(({ serial }) => serial === newAsset.serial)) {
     return;
   }
+
+  console.log(newAsset)
   asset.serial = '';
   toAdd.assets.push(newAsset);
 }
@@ -387,13 +381,17 @@ const removeAsset = (row: NewAsset) => {
     toAdd.assets.splice(index, 1);
   }
 }
-
 const addAssets = async () => {
   try {
     const newAssets = toAdd.assets.map((asset) => {
-      const { modelId, ...rest } = asset;
+      const { modelId, customFields, ...rest } = asset;
+      const specifications = customFields.map((field) => ({
+        typeId: field.id,
+        value: field.value
+      }))
       return {
         modelId: modelId![modelId!.length - 1],
+        specifications,
         ...rest
       }
     }
@@ -420,6 +418,8 @@ const addAssets = async () => {
         })
       }
     });
+
+    console.log(error)
 
     if (data.value) {
       for (const asset of data.value.created) {
@@ -455,6 +455,21 @@ const addAssets = async () => {
     console.log(error);
   }
 }
+
+watch(() => asset.modelId,async () => {
+  if (!asset.modelId) return []
+  const foundCategory = response.categories.find((elemento) => {
+    return elemento.value == asset.modelId![0]
+  })
+
+  if (!foundCategory) return []
+  const toReturn = foundCategory.customFields.map((field: Specification) => ({
+    ...(field),
+    value: ''
+  }));
+  asset.customFields = toReturn;  
+});
+
 
 onMounted(async () => {
   await getCategories()

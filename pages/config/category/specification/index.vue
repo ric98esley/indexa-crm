@@ -41,7 +41,7 @@
                 <el-button type="primary" circle>
                   <Icon name="ep:view" />
                 </el-button>
-                <el-button type="danger" circle @click="removeCategory(props.row.id)">
+                <el-button type="danger" circle @click="removeSpecification(props.row.id)">
                   <Icon name="ep:delete" />
                 </el-button>
               </el-row>
@@ -59,9 +59,14 @@
           <h2>Editar la especificación</h2>
         </template>
         <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon>
+          <el-form @submit.prevent="updateSpecification" label-position="top" label-width="auto" autocomplete="off"
+            status-icon>
             <el-form-item label="Nombre">
               <el-input v-model="newField.name"></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" :disabled="!newField.name" native-type="submit">
+              </el-button>
             </el-form-item>
           </el-form>
         </template>
@@ -77,8 +82,7 @@
               <el-input v-model="newField.name" placeholder="Ingrese aqui el nombre"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!newField.name" @click="createSpecification()"
-                native-type="submit">Crear</el-button>
+              <el-button type="primary" :disabled="!newField.name" native-type="submit">Crear</el-button>
             </el-form-item>
           </el-form>
         </template>
@@ -193,7 +197,7 @@ const createSpecification = async () => {
   }
 }
 
-const removeCategory = async (id: number) => {
+const removeSpecification = async (id: number) => {
   try {
     const { data, error } = await useFetch<Specification>(`/assets/specification/${id}`, {
       method: 'delete'
@@ -218,20 +222,26 @@ const removeCategory = async (id: number) => {
   }
 }
 
-const updateCategory = async (id: number, ) => {
+const updateSpecification = async (id: number) => {
   try {
     loadingSpecification.value = true;
 
     const body = {
       name: newField.name
     }
-    
-    const { data, error } = await useAsyncData('createSpecification', () => useFetch<Specification>(`/assets/specification/${id}`,
+
+    const { data, error } = await useFetch<Specification>(`/assets/specification/${id}`,
       {
-        method: 'patch',
+        method: 'PATCH',
         body
       }
-    ))
+    )
+
+    ElNotification({
+      title: 'La especificación ha sido actualizada.',
+      message: data.value?.name
+    });
+    await setSpecification();
   } catch (error) {
     loadingSpecification.value = false;
     ElNotification({
@@ -246,9 +256,9 @@ const setSpecification = async () => {
   response.total = rta?.total || 0
 }
 
-watch(filters, async () => {
+watch(filters, useDebounce(async () => {
   await setSpecification()
-})
+}))
 
 onMounted(async () => {
   await setSpecification()

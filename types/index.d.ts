@@ -11,9 +11,10 @@ declare global {
     deletedAt?: string,
   }
   interface NewAsset {
-    serial?: string
-    modelId?: number[]
-    stateId?: number
+    serial?: string,
+    modelId?: number[],
+    stateId?: number,
+    customFields: Specification[]
   }
 
   interface Invoice {
@@ -65,6 +66,8 @@ declare global {
     rif: string
   }
   interface Specification extends Base{
-    typeId?: number
+    typeId: number,
+    assetId?: number,
+    value: string
   }
 }
