@@ -28,11 +28,21 @@ const menusA = reactive([
   {
     title: 'Activos',
     icon: 'ep:files',
+    roles: [
+      'superuser',
+      'auditor',
+      'tecnico'
+    ],
     groups: [
       {
         title: 'Lista de activos',
         items: [
           {
+            roles: [
+              'superuser',
+              'auditor',
+              'tecnico'
+            ],
             title: 'Todos los activos',
             path: '/assets'
           }
@@ -43,19 +53,35 @@ const menusA = reactive([
       {
         title: 'Acciones',
         icon: 'ep:element-plus',
+        roles: [
+          'superuser',
+          'auditor'
+        ],
         items: [
           {
             title: 'Agregar',
-            path: '/assets/add'
+            path: '/assets/add',
+            roles: [
+              'superuser',
+              'auditor',
+            ],
+          },
+          {
+            title: 'Asignar',
+            path: '/assets/assign',
+            roles: [
+              'superuser',
+              'auditor',
+            ],
           },
           {
             title: 'Recibir',
-            path: '#'
+            path: '#',
+            roles: [
+              'superuser',
+              'auditor',
+            ],
           },
-          {
-            title: 'Agregar',
-            path: '#'
-          }
         ]
       }
     ]
@@ -63,11 +89,18 @@ const menusA = reactive([
   {
     title: 'Configuración',
     icon: 'ep:setting',
-
+    roles: [
+      'superuser',
+      'auditor'
+    ],
     submenus: [
       {
         title: 'Categorias',
         icon: 'ep:memo',
+        roles: [
+          'superuser',
+          'auditor'
+        ],
         items: [
           {
             title: 'Ver Categorias',
@@ -82,6 +115,10 @@ const menusA = reactive([
       {
         title: 'Marcas',
         icon: 'ep:collection',
+        roles: [
+          'superuser',
+          'auditor'
+        ],
         items: [
           {
             title: 'Ver marcas',
@@ -92,6 +129,10 @@ const menusA = reactive([
       {
         title: 'Modelos',
         icon: 'ep:coin',
+        roles: [
+          'superuser',
+          'auditor'
+        ],
         items: [
           {
             title: 'Ver modelos',
