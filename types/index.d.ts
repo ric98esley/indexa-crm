@@ -71,4 +71,8 @@ declare global {
     assetId?: number,
     value: string
   }
+  
+  interface Group extends Base {
+    code: string
+  }
 }
