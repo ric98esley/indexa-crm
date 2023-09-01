@@ -1,28 +1,5 @@
 <template>
   <el-container direction="vertical" class="p-3">
-    <el-row :span="24" :gutter="12">
-      <el-col :lg="16">
-        <el-card class="w-full">
-          <template #header>
-            Buscar categoría
-          </template>
-          <el-row :gutter="20" align="middle">
-            <el-col :span="22">
-              <el-input v-model="filters.name" placeholder="Nombre" clearable class="w-50 m-4" />
-            </el-col>
-            <el-col :span="2">
-              <Icon name="ep:filter" class="m-4" />
-            </el-col>
-          </el-row>
-        </el-card>
-      </el-col>
-      <el-col :span="8">
-        <el-card>
-          <el-button type="primary" @click="modals.create = true">Crear nueva categoria</el-button>
-        </el-card>
-      </el-col>
-
-    </el-row>
     <el-row :span="24" :gutter="20">
       <el-col :span="24">
         <el-table :data="response.categories" stripe v-loading="loadingCategory">
@@ -111,6 +88,13 @@
           </el-form>
         </template>
       </el-dialog>
+      <el-row justify="end" :span="24">
+        <div
+          class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
+          @click="modals.edit = true">
+          <Icon name="ep:plus" size="2rem" color="white" @click="modals.create = true" />
+        </div>
+      </el-row>
     </el-container>
   </el-container>
 </template>
@@ -358,8 +342,8 @@ const setSpecification = async () => {
 }
 
 watch(filters, useDebounce(async () => {
-    await setCategories()
-  }, 500)
+  await setCategories()
+}, 500)
 )
 
 watch(() => modals.edit, async () => {

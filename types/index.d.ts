@@ -41,6 +41,7 @@ declare global {
   }
 
   interface Brand extends Base {
+    assetCount: number,
     models: Model[]
   }
 
