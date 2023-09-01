@@ -79,8 +79,8 @@
     <el-row justify="end" :span="24">
       <div
         class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
-        @click="modals.edit = true">
-        <Icon name="ep:plus" size="2rem" color="white" @click="modals.create = true" />
+        @click="modals.create = true">
+        <Icon name="ep:plus" size="2rem" color="white"/>
       </div>
     </el-row>
   </el-container>

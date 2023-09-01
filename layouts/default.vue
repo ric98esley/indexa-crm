@@ -140,6 +140,21 @@ const menusA = reactive([
           }
         ]
       },
+      {
+        title: 'Grupos',
+        icon: 'ep:house',
+        roles: [
+          'superuser',
+          'auditor',
+          'admin'
+        ],
+        items: [
+          {
+            title: 'Ver grupos',
+            path: '/config/group'
+          }
+        ]
+      }
     ]
   }
 ])
