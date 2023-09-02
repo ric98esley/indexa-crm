@@ -17,15 +17,18 @@
         <el-table-column type="index" width="50" />
         <el-table-column prop="name" label="Nombre">
           <template #header>
-            <el-input :debounce="2000" v-model="filters.name" placeholder="Nombre" clearable />
+            <el-input v-model="filters.name" placeholder="Nombre" clearable />
           </template>
         </el-table-column>
         <el-table-column label="Codigo" prop="code">
           <template #header>
-            <el-input :debounce="2000" v-model="filters.code" placeholder="Nombre" clearable />
+            <el-input v-model="filters.code" placeholder="Código" clearable />
           </template>
         </el-table-column>
-        <el-table-column label="Padre" >
+        <el-table-column label="Padre">
+          <template #header>
+            <el-input v-model="filters.parent" placeholder="Padre" clearable />
+          </template>
           <template #default="{ row }">
             {{ row?.parent?.code }} - {{ row?.parent?.name }}
           </template>
@@ -64,6 +67,18 @@
             <el-form-item label="Código">
               <el-input v-model="group.code" placeholder="Ingrese aqui el código"></el-input>
             </el-form-item>
+            <el-form-item label="Padre">
+              <el-select class="w-full" v-model="group.parentId" filterable remote
+                placeholder="Elige un grupo padre" :loading="loadingParent" :remote-method="setParent">
+                <el-option v-for="item in parents.rows" :key="item.id" :label="item.name" :value="item.id!">
+                  <span style="float: left">{{ item.name }}</span>
+                  <span style="
+                      float: right;
+                      color: var(--el-text-color-secondary);
+                      font-size: 13px;
+                  ">{{ item.code }}</span> </el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item>
               <el-button type="primary" :disabled="!group.name && !group.code" native-type="submit">Crear</el-button>
             </el-form-item>
@@ -72,7 +87,7 @@
       </el-dialog>
       <el-dialog v-model="modals.edit">
         <template #header>
-          <h2>Crear nueva marca</h2>
+          <h2>Editar grupo</h2>
         </template>
         <template #default>
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="group"
@@ -83,8 +98,20 @@
             <el-form-item label="Código">
               <el-input v-model="group.code" placeholder="Ingrese aqui el código"></el-input>
             </el-form-item>
+            <el-form-item label="Padre">
+              <el-select class="w-full" v-model="group.parentId" filterable remote
+                placeholder="Elige un padre" :loading="loadingParent" :remote-method="setParent">
+                <el-option v-for="item in parents.rows" :key="item.id" :label="item.name" :value="item.id!">
+                  <span style="float: left">{{ item.name }}</span>
+                  <span style="
+                      float: right;
+                      color: var(--el-text-color-secondary);
+                      font-size: 13px;
+                  ">{{ item.code }}</span> </el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!group.name" native-type="submit">Editar</el-button>
+              <el-button type="primary" :disabled="!group.name && !group.code" native-type="submit">Editar</el-button>
             </el-form-item>
           </el-form>
         </template>
@@ -94,7 +121,7 @@
       <div
         class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
         @click="modals.create = true">
-        <Icon name="ep:plus" size="2rem" color="white"/>
+        <Icon name="ep:plus" size="2rem" color="white" />
       </div>
     </el-row>
   </el-container>
@@ -109,15 +136,33 @@ definePageMeta({
 });
 
 const loadingGroup = ref(false);
+const loadingParent = ref(false);
+const loadingUser = ref(false);
 
 const filters = reactive({
   limit: 10,
   offset: 0,
   name: '',
-  code: ''
+  code: '',
+  parentId: undefined,
+  parent: ''
 });
 
 const groups = reactive<{
+  rows: Group[],
+  total: number
+}>({
+  rows: [],
+  total: 0
+})
+const parents = reactive<{
+  rows: Group[],
+  total: number
+}>({
+  rows: [],
+  total: 0
+})
+const users = reactive<{
   rows: Group[],
   total: number
 }>({
@@ -137,27 +182,110 @@ const group = reactive<{
   id?: number,
   name: string,
   code: string,
+  parentId?: number,
+  managerId?: number,
 }>({
   id: undefined,
   name: '',
   code: '',
+  parentId: undefined,
+  managerId: undefined
 });
 
 
-const getGroups = async () => {
+const getGroups = async ({
+  id,
+  name,
+  code,
+  parent,
+  limit = 10,
+  offset = 0
+}: {
+  id?: number,
+  name?: string,
+  code?: string,
+  parent?: string,
+  limit?: number,
+  offset?: number
+}) => {
   try {
     loadingGroup.value = true;
     const { data, error } = await useFetch<{ total: number, rows: Group[] }>('/groups',
       {
         params: {
-          ...(filters.name != '' && filters.name && {
-            name: filters.name
+          ...(name != '' && !name && id && {
+            id
           }),
-          ...(filters.offset && {
-            offset: (filters.offset - 1) * filters.limit
+          ...(name != '' && name && {
+            name
           }),
-          ...(filters.limit && {
-            limit: filters.limit
+          ...(code != '' && code && {
+            code
+          }),
+          ...(parent != '' && parent && {
+            parent
+          }),
+          ...(offset && {
+            offset: (offset - 1) * limit
+          }),
+          ...(limit && {
+            limit
+          })
+        }
+      }
+    );
+    if (error.value) {
+      ElNotification({
+        message: 'Error al obtener las marcas intente de nuevo mas tarde'
+      })
+    }
+
+    loadingGroup.value = false;
+    return data.value
+  } catch (error) {
+    loadingGroup.value = false;
+    ElNotification({
+      message: 'Error al obtener las marcas intente de nuevo mas tarde'
+    })
+  }
+}
+const getUser = async ({
+  id,
+  name,
+  code,
+  parent,
+  limit = 10,
+  offset = 0
+}: {
+  id?: number,
+  name?: string,
+  code?: string,
+  parent?: string,
+  limit?: number,
+  offset?: number
+}) => {
+  try {
+    loadingGroup.value = true;
+    const { data, error } = await useFetch<{ total: number, rows: Group[] }>('/groups',
+      {
+        params: {
+          ...(name != '' && !name && id && {
+            id
+          }),
+          ...(name != '' && name && {
+            name
+          }),
+          ...(code != '' && code && {
+            code
+          }),
+          ...(parent != '' && parent && {
+            parent
+          }),
+          ...(offset && {
+            offset: (offset - 1) * limit
+          }),
+          ...(limit && {
+            limit
           })
         }
       }
@@ -187,6 +315,9 @@ const createGroup = async () => {
         method: 'post',
         body: {
           name: group.name,
+          code: group.code,
+          parentId: group.parentId,
+          managerId: group.managerId
         }
       },
     )
@@ -222,6 +353,7 @@ const patchGroup = async () => {
 
     const body = {
       name: group.name,
+      code: group.code
     }
 
     const { data, error } = await useFetch<Group>(`/groups/${group.id}`,
@@ -259,11 +391,14 @@ const editGroup = (row: Group) => {
   modals.edit = true;
   group.id = row.id;
   group.name = row.name || '';
+  group.code = row.code || '';
+  group.parentId = row.parent.id;
+  group.managerId = row.manager.id;
 }
 
 const removeGroup = async (id: number) => {
   try {
-    const { data, error } = await useFetch<Group>(`/assets/groups/${id}`, {
+    const { data, error } = await useFetch<Group>(`/groups/${id}`, {
       method: 'delete'
     })
 
@@ -287,15 +422,44 @@ const removeGroup = async (id: number) => {
 }
 
 const setGroups = async () => {
-  const rta = await getGroups();
+  const query = {
+    name: filters.name,
+    code: filters.code,
+    limit: filters.limit,
+    offset: filters.offset,
+    parent: filters.parent
+  }
+  const rta = await getGroups(query);
   groups.rows = rta?.rows || []
   groups.total = rta?.total || 0
+}
+
+const setParent = async (query?: string) => {
+  const search = {
+    name: query,
+    id: group.parentId
+  }
+  const rta = await getGroups(search);
+  parents.rows = rta?.rows || []
+  parents.total = rta?.total || 0
 }
 
 watch(filters, useDebounce(async () => {
   await setGroups()
 }, 500)
 )
+
+watch(() => modals.edit, async () => {
+  if (modals.edit) {
+    await setParent()
+  } else {
+    group.id = undefined;
+    group.code = '';
+    group.name = '';
+    group.parentId = undefined;
+    group.managerId = undefined;
+  }
+})
 
 onMounted(async () => {
   await setGroups();
