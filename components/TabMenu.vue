@@ -35,37 +35,32 @@ const props = defineProps({
 </script>
 
 <template>
-  <div>
-    <Logo width="w-32" margin="m-0" />
-    <el-aside width="13rem">
-      <el-scrollbar height="90%" noresize>
-        <el-menu :router="true" :collapse="props.collapse">
-          <el-sub-menu v-for="(menu, indexMenu) in props.menus" :index="`${indexMenu}`" v-role="menu.roles">
-            <template #title>
-              <el-icon>
-                <Icon :name="menu.icon" class="mx-1 text-lg" />
-              </el-icon>
-              <span> {{ menu.title }} </span>
-            </template>
-            <el-menu-item-group v-for="(group, indexGroup) in menu.groups" :index="`g-${indexMenu}-${indexGroup}`" v-role="group.roles">
-              <template #title>
-                {{ group.title }}
-              </template>
-              <el-menu-item :index="`${indexMenu}-${indexGroup}`" v-for="menu in group.items" :route="menu.path" v-role="menu.roles">
-                {{ menu.title }}
-              </el-menu-item>
-            </el-menu-item-group>
-            <el-sub-menu v-if="menu.submenus" v-for="(submenu, indexSubmenu) in menu.submenus"
-              :index="`${indexMenu}-${indexSubmenu}`" v-role="submenu.roles">
-              <template #title>
-                <Icon :name="submenu.icon" class="mx-1 text-lg" />{{ submenu.title }}
-              </template>
-              <el-menu-item v-for="(item, indexItem) in submenu.items " :route="item.path"
-                :index="`sub-${indexMenu}-${indexSubmenu}-${indexItem}`" v-role="item.roles">{{ item.title }}</el-menu-item>
-            </el-sub-menu>
-          </el-sub-menu>
-        </el-menu>
-      </el-scrollbar>
-    </el-aside>
-  </div>
+  <el-menu :router="true" :collapse="props.collapse">
+    <el-sub-menu v-for="(menu, indexMenu) in props.menus" :index="`${indexMenu}`" v-role="menu.roles">
+      <template #title>
+        <el-icon>
+          <Icon :name="menu.icon" class="mx-1 text-lg" />
+        </el-icon>
+        <span> {{ menu.title }} </span>
+      </template>
+      <el-menu-item-group v-for="(group, indexGroup) in menu.groups" :index="`g-${indexMenu}-${indexGroup}`"
+        v-role="group.roles">
+        <template #title>
+          {{ group.title }}
+        </template>
+        <el-menu-item :index="`${indexMenu}-${indexGroup}`" v-for="menu in group.items" :route="menu.path"
+          v-role="menu.roles">
+          {{ menu.title }}
+        </el-menu-item>
+      </el-menu-item-group>
+      <el-sub-menu v-if="menu.submenus" v-for="(submenu, indexSubmenu) in menu.submenus"
+        :index="`${indexMenu}-${indexSubmenu}`" v-role="submenu.roles">
+        <template #title>
+          <Icon :name="submenu.icon" class="mx-1 text-lg" />{{ submenu.title }}
+        </template>
+        <el-menu-item v-for="(item, indexItem) in submenu.items " :route="item.path"
+          :index="`sub-${indexMenu}-${indexSubmenu}-${indexItem}`" v-role="item.roles">{{ item.title }}</el-menu-item>
+      </el-sub-menu>
+    </el-sub-menu>
+  </el-menu>
 </template>
