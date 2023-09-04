@@ -94,6 +94,29 @@ const menusA = reactive([
     ]
   },
   {
+    title: 'Usuarios',
+    icon: 'ep:user',
+    roles: [
+      'superuser',
+      'auditor',
+    ],
+    groups: [
+      {
+        title: 'Ver y crear usuarios',
+        items: [
+          {
+            roles: [
+              'superuser',
+              'auditor',
+            ],
+            title: 'Usuarios',
+            path: '/users'
+          }
+        ]
+      }
+    ],
+  },
+  {
     title: 'Configuración',
     icon: 'ep:setting',
     roles: [
