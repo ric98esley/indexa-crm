@@ -310,7 +310,7 @@ const createGroup = async () => {
   try {
     loadingGroup.value = true;
 
-    const { data, error } = await useFetch<Group>('/assets/groups',
+    const { data, error } = await useFetch<Group>('/groups',
       {
         method: 'post',
         body: {

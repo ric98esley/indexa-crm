@@ -24,13 +24,12 @@ declare global {
     total?: string,
     invoiceDate?: string,
   }
-  interface User {
-    id: number,
+  interface User extends Base  {
     username: string,
     email: string,
     role: string,
     isActive?: boolean,
-    name: string,
+    password: string,
     lastName: string,
     phone?: string,
     cardId?: string

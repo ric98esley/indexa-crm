@@ -32,7 +32,8 @@
         </el-table-column>
         <el-table-column label="Activar">
           <template #default="{ row }">
-            <el-switch v-model="row.isActive" class="ml-2" @change="(val) => (updateUserStatus({active: val, userId: row.id}))" />
+            <el-switch v-model="row.isActive" class="ml-2"
+              @change="(val) => (updateUserStatus({ active: val || false, userId: row.id }))" />
           </template>
         </el-table-column>
         <el-table-column label="Acciones">
@@ -58,62 +59,97 @@
     <el-container>
       <el-dialog v-model="modals.create">
         <template #header>
-          <h2>Crear nuevo grupo</h2>
+          <h2>Crear nuevo usuario</h2>
         </template>
         <template #default>
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="user"
             @submit.prevent="createUser()">
+            <el-row :gutter="20">
+              <el-col :span="18">
+                <el-form-item label="Usuario">
+                  <el-input v-model="user.username" placeholder="Ingrese el usuario"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="4">
+                <el-form-item label="Activar">
+                  <el-switch v-model="user.isActive" class="ml-2" />
+                </el-form-item>
+              </el-col>
+            </el-row>
             <el-form-item label="Nombre">
-              <el-input v-model="user.name" placeholder="Ingrese aqui el nombre"></el-input>
+              <el-input v-model="user.name" placeholder="Ingrese el nombre"></el-input>
             </el-form-item>
-            <el-form-item label="Código">
-              <el-input v-model="user.code" placeholder="Ingrese aqui el código"></el-input>
+            <el-form-item label="Apellido">
+              <el-input v-model="user.lastName" placeholder="Ingrese el nombre"></el-input>
             </el-form-item>
-            <el-form-item label="Padre">
-              <el-select class="w-full" v-model="user.parentId" filterable remote placeholder="Elige un grupo padre"
-                :loading="loadingParent" :remote-method="setParent">
-                <el-option v-for="item in parents.rows" :key="item.id" :label="item.name" :value="item.id!">
-                  <span style="float: left">{{ item.name }}</span>
-                  <span style="
-                      float: right;
-                      color: var(--el-text-color-secondary);
-                      font-size: 13px;
-                  ">{{ item.code }}</span> </el-option>
+            <el-form-item label="Cedula o RIF">
+              <el-input v-model="user.cardId" placeholder="Ingrese la cedula"></el-input>
+            </el-form-item>
+            <el-form-item label="Correo electronico">
+              <el-input v-model="user.email" placeholder="Ingrese el email"></el-input>
+            </el-form-item>
+            <el-form-item label="Telefono">
+              <el-input v-model="user.phone" placeholder="Ingrese el telefono"></el-input>
+            </el-form-item>
+            <el-form-item label="Rol">
+              <el-select class="w-full" v-model="user.role" filterable placeholder="Elige un rol">
+                <el-option v-for="item in roles" :key="item.label" :label="item.label" :value="item.value!"></el-option>
               </el-select>
             </el-form-item>
+            <el-form-item label="Contraseña">
+              <el-input v-model="user.password" placeholder="Ingrese la contraseña"></el-input>
+            </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!user.name && !user.code" native-type="submit">Crear</el-button>
+              <el-button type="primary" :disabled="!user.name && !user.username && !user.password && !user.email"
+                native-type="submit">Crear</el-button>
             </el-form-item>
           </el-form>
         </template>
       </el-dialog>
       <el-dialog v-model="modals.edit">
         <template #header>
-          <h2>Editar grupo</h2>
+          <h2>Editar usuario</h2>
         </template>
         <template #default>
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="user"
             @submit.prevent="patchUser()">
+            <el-row :gutter="20">
+              <el-col :span="18">
+                <el-form-item label="Usuario">
+                  <el-input v-model="user.username" placeholder="Ingrese el usuario" disabled ></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="4">
+                <el-form-item label="Activar">
+                  <el-switch v-model="user.isActive" class="ml-2" />
+                </el-form-item>
+              </el-col>
+            </el-row>
             <el-form-item label="Nombre">
-              <el-input v-model="user.name" placeholder="Ingrese aqui el nombre"></el-input>
+              <el-input v-model="user.name" placeholder="Ingrese el nombre"></el-input>
             </el-form-item>
-            <el-form-item label="Código">
-              <el-input v-model="user.code" placeholder="Ingrese aqui el código"></el-input>
+            <el-form-item label="Apellido">
+              <el-input v-model="user.lastName" placeholder="Ingrese el nombre"></el-input>
             </el-form-item>
-            <el-form-item label="Padre">
-              <el-select class="w-full" v-model="user.parentId" filterable remote placeholder="Elige un padre"
-                :loading="loadingParent" :remote-method="setParent">
-                <el-option v-for="item in parents.rows" :key="item.id" :label="item.name" :value="item.id!">
-                  <span style="float: left">{{ item.name }}</span>
-                  <span style="
-                      float: right;
-                      color: var(--el-text-color-secondary);
-                      font-size: 13px;
-                  ">{{ item.code }}</span> </el-option>
+            <el-form-item label="Cedula o RIF">
+              <el-input v-model="user.cardId" placeholder="Ingrese la cedula"></el-input>
+            </el-form-item>
+            <el-form-item label="Correo electronico">
+              <el-input v-model="user.email" placeholder="Ingrese el email"></el-input>
+            </el-form-item>
+            <el-form-item label="Telefono">
+              <el-input v-model="user.phone" placeholder="Ingrese el telefono"></el-input>
+            </el-form-item>
+            <el-form-item label="Rol">
+              <el-select class="w-full" v-model="user.role" filterable placeholder="Elige un rol">
+                <el-option v-for="item in roles" :key="item.label" :label="item.label" :value="item.value!"></el-option>
               </el-select>
             </el-form-item>
+            <el-form-item label="Contraseña">
+              <el-input v-model="user.password" placeholder="Ingrese la contraseña"></el-input>
+            </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!user.name && !user.code" native-type="submit">Editar</el-button>
+              <el-button type="primary" native-type="submit">Editar</el-button>
             </el-form-item>
           </el-form>
         </template>
@@ -145,10 +181,11 @@ const loadingParent = ref(false);
 const filters = reactive({
   limit: 10,
   offset: 0,
+  username: '',
   name: '',
-  code: '',
-  parentId: undefined,
-  parent: ''
+  lastName: '',
+  cardId: '',
+  email: '',
 });
 
 const users = reactive<{
@@ -173,51 +210,35 @@ const modals = reactive({
   menu: false
 });
 
+const roles = [
+  { label: "Taquilla", value: "taquilla" },
+  { label: "Técnico", value: "tecnico" },
+  { label: "Auditor", value: "auditor" },
+  { label: "Asistente", value: "asistente" },
+];
 
-const user = reactive<{
-  id?: number,
-  name: string,
-  code: string,
-  parentId?: number,
-  managerId?: number,
-}>({
+
+const user = reactive<User>({
   id: undefined,
   name: '',
-  code: '',
-  parentId: undefined,
-  managerId: undefined
+  lastName: '',
+  username: '',
+  cardId: '',
+  phone: '',
+  email: '',
+  role: '',
+  password: '',
+  isActive: false
 });
-
-const updateUserStatus = async ({ active, userId }) => {
-  try {
-    let toSend = {
-      isActive: active,
-    };
-    const { data, error } = await useFetch<User>(
-      `/users/${userId}`,
-      {
-        method: 'patch',
-        body: toSend
-      }
-    );
-  } catch (error) {
-    console.log(error);
-  }
-}
-
 
 const getUsers = async ({
   id,
   name,
-  code,
-  parent,
   limit = 10,
   offset = 0
 }: {
   id?: number,
   name?: string,
-  code?: string,
-  parent?: string,
   limit?: number,
   offset?: number
 }) => {
@@ -232,12 +253,6 @@ const getUsers = async ({
           ...(name != '' && name && {
             name
           }),
-          ...(code != '' && code && {
-            code
-          }),
-          ...(parent != '' && parent && {
-            parent
-          }),
           ...(offset && {
             offset: (offset - 1) * limit
           }),
@@ -248,9 +263,7 @@ const getUsers = async ({
       }
     );
     if (error.value) {
-      ElNotification({
-        message: 'Error al obtener las marcas intente de nuevo mas tarde'
-      })
+      throw new Error('Error al cargar los usuarios')
     }
 
     loadingUser.value = false;
@@ -258,7 +271,7 @@ const getUsers = async ({
   } catch (error) {
     loadingUser.value = false;
     ElNotification({
-      message: 'Error al obtener las marcas intente de nuevo mas tarde'
+      message: 'Error al obtener las usuario intente de nuevo mas tarde'
     })
   }
 }
@@ -305,7 +318,7 @@ const getUser = async ({
     );
     if (error.value) {
       ElNotification({
-        message: 'Error al obtener las marcas intente de nuevo mas tarde'
+        message: 'Error al obtener las usuario intente de nuevo mas tarde'
       })
     }
 
@@ -314,7 +327,7 @@ const getUser = async ({
   } catch (error) {
     loadingUser.value = false;
     ElNotification({
-      message: 'Error al obtener las marcas intente de nuevo mas tarde'
+      message: 'Error al obtener las usuario intente de nuevo mas tarde'
     })
   }
 }
@@ -323,40 +336,68 @@ const createUser = async () => {
   try {
     loadingUser.value = true;
 
-    const { data, error } = await useFetch<User>('/assets/users',
+    const body = useFilterObject(user);
+
+    const { data, error } = await useFetch<User>('/users',
       {
-        method: 'post',
-        body: {
-          name: user.name,
-          code: user.code,
-          parentId: user.parentId,
-          managerId: user.managerId
-        }
+        method: 'POST',
+        body
       },
     )
     loadingUser.value = false;
 
     if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
       ElNotification({
-        title: 'Error al crear marcas intente de nuevo mas tarde',
+        title: 'Error al crear usuario intente de nuevo mas tarde',
         message: error.value?.data.message.message,
       })
       return
     }
     await setUsers()
     ElNotification({
-      title: 'Categoria creada correctamente',
+      title: 'Usuario creada correctamente',
       message: `${data.value?.name}`
     })
     user.id = undefined;
     user.name = '';
-    user.code = '';
+    user.lastName = '';
+    user.username = '';
+    user.cardId = '';
+    user.phone = '';
+    user.email = '';
+    user.role = '';
+    user.password = '';
+    user.isActive = false
     return data.value
   } catch (error) {
     loadingUser.value = false;
     ElNotification({
-      title: 'Error al crear marcas intente de nuevo mas tarde',
+      title: 'Error al crear usuario intente de nuevo mas tarde',
     })
+  }
+}
+
+const updateUserStatus = async ({ active, userId }: { active: string | number | boolean, userId: number }) => {
+  try {
+    let toSend = {
+      isActive: active,
+    };
+    const { data, error } = await useFetch<User>(`/users/${userId}`,
+      {
+        method: 'PATCH',
+        body: toSend
+      }
+    );
+
+    if (error.value) {
+      throw error
+    }
+    await setUsers()
+    ElNotification({
+      title: 'Usuario modificada correctamente',
+      message: `${data.value?.name}`
+    })
+  } catch (error) {
   }
 }
 
@@ -364,10 +405,9 @@ const patchUser = async () => {
   try {
     loadingUser.value = true;
 
-    const body = {
-      name: user.name,
-      code: user.code
-    }
+    const body = useFilterObject(user);
+    delete body.id
+    delete body.username
 
     const { data, error } = await useFetch<User>(`/users/${user.id}`,
       {
@@ -383,18 +423,25 @@ const patchUser = async () => {
     }
     await setUsers()
     ElNotification({
-      title: 'Categoria modificada correctamente',
+      title: 'Usuario modificada correctamente',
       message: `${data.value?.name}`
     })
 
     user.id = undefined;
     user.name = '';
-    user.code = '';
+    user.lastName = '';
+    user.username = '';
+    user.cardId = '';
+    user.phone = '';
+    user.email = '';
+    user.role = '';
+    user.password = '';
+    user.isActive = false
     return data.value
   } catch (error) {
     loadingUser.value = false;
     ElNotification({
-      title: 'Error al modificar la categoria intente de nuevo mas tarde',
+      title: 'Error al modificar el usuario intente de nuevo mas tarde',
     })
     console.log(error)
   }
@@ -403,10 +450,14 @@ const patchUser = async () => {
 const editUser = (row: User) => {
   modals.edit = true;
   user.id = row.id;
+  user.username = row.username;
   user.name = row.name || '';
-  user.code = row.code || '';
-  user.parentId = row.parent.id;
-  user.managerId = row.manager.id;
+  user.lastName = row.lastName;
+  user.phone = row.phone || '';
+  user.cardId = row.cardId || '';
+  user.email = row.email;
+  user.role = row.role || '';
+  user.isActive = row.isActive;
 }
 
 const removeUser = async (id: number) => {
@@ -418,18 +469,18 @@ const removeUser = async (id: number) => {
     if (error.value) {
       loadingUser.value = false;
       ElNotification({
-        message: 'Error al borrar la categoria intente de nuevo mas tarde.'
+        message: 'Error al borrar el usuario intente de nuevo mas tarde.'
       });
       return
     }
 
     ElNotification({
-      message: 'La categoria ha sido borrada.'
+      message: 'El usuario ha sido borrada.'
     })
     await setUsers()
   } catch (error) {
     ElNotification({
-      message: 'Error al borrar la categoria intente de nuevo mas tarde.'
+      message: 'Error al borrar el usuario intente de nuevo mas tarde.'
     })
   }
 }
@@ -437,10 +488,10 @@ const removeUser = async (id: number) => {
 const setUsers = async () => {
   const query = {
     name: filters.name,
-    code: filters.code,
+    code: filters.lastName,
     limit: filters.limit,
     offset: filters.offset,
-    parent: filters.parent
+    parent: filters.username
   }
   const rta = await getUsers(query);
   users.rows = rta?.rows || []
@@ -450,7 +501,7 @@ const setUsers = async () => {
 const setParent = async (query?: string) => {
   const search = {
     name: query,
-    id: user.parentId
+    id: user.id
   }
   const rta = await getUsers(search);
   parents.rows = rta?.rows || []
@@ -464,13 +515,12 @@ watch(filters, useDebounce(async () => {
 
 watch(() => modals.edit, async () => {
   if (modals.edit) {
-    await setParent()
   } else {
     user.id = undefined;
-    user.code = '';
+    user.username = '';
     user.name = '';
-    user.parentId = undefined;
-    user.managerId = undefined;
+    user.lastName = '';
+    user.cardId = '';
   }
 })
 
