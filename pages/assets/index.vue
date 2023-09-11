@@ -31,9 +31,9 @@
           <el-input v-model="filters.serial" placeholder="Serial" clearable />
         </template>
       </el-table-column>
-      <el-table-column label="Estado" prop="state.name">
+      <el-table-column label="Estado" prop="deposit.name">
         <template #header>
-          <el-input v-model="filters.state" placeholder="Estado" clearable />
+          <el-input v-model="filters.deposit" placeholder="Estado" clearable />
         </template>
       </el-table-column>
       <el-table-column label="Categoria" prop="model.category.name">
@@ -102,7 +102,7 @@ const filters = reactive({
   category: '',
   brand: '',
   model: '',
-  state: ''
+  deposit: ''
 })
 
 
@@ -118,8 +118,8 @@ const getAssets = async () => {
           ...(filters.model != '' && filters.model && {
             model: filters.model
           }),
-          ...(filters.state != '' && filters.state && {
-            state: filters.state
+          ...(filters.deposit != '' && filters.deposit && {
+            deposit: filters.deposit
           }),
           ...(filters.category != '' && filters.category && {
             category: filters.category
