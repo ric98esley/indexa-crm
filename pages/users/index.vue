@@ -25,6 +25,11 @@
             <el-input v-model="filters.cardId" placeholder="Cedula" clearable />
           </template>
         </el-table-column>
+        <el-table-column label="Rol" prop="role" v-role="['superuser', 'auditor']">
+          <template #header>
+            <el-input v-model="filters.cardId" placeholder="Cedula" clearable />
+          </template>
+        </el-table-column>
         <el-table-column label="Padre" prop="email">
           <template #header>
             <el-input v-model="filters.email" placeholder="Email" clearable />
@@ -214,6 +219,7 @@ const roles = [
   { label: "Taquilla", value: "taquilla" },
   { label: "Técnico", value: "tecnico" },
   { label: "Auditor", value: "auditor" },
+  { label: "Receptor", value: "receptor" },
   { label: "Asistente", value: "asistente" },
 ];
 

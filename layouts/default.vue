@@ -10,7 +10,7 @@
     </el-aside>
     <el-container>
       <el-header style="text-align: right; font-size: 12px" class="relative bg-cyan-800 text-slate-300">
-        <Header :name="user.name" />
+        <Header :name="user.name" :logout="() => auth.reset()" />
       </el-header>
       <ClientOnly>
         <el-main>
@@ -38,7 +38,8 @@ const menusA = reactive([
     roles: [
       'superuser',
       'auditor',
-      'tecnico'
+      'tecnico',
+      'receptor'
     ],
     groups: [
       {
@@ -48,7 +49,8 @@ const menusA = reactive([
             roles: [
               'superuser',
               'auditor',
-              'tecnico'
+              'tecnico',
+              'receptor'
             ],
             title: 'Todos los activos',
             path: '/assets'
@@ -99,6 +101,7 @@ const menusA = reactive([
     roles: [
       'superuser',
       'auditor',
+      'receptor'
     ],
     groups: [
       {
@@ -108,6 +111,7 @@ const menusA = reactive([
             roles: [
               'superuser',
               'auditor',
+              'receptor'
             ],
             title: 'Usuarios',
             path: '/users'
@@ -121,7 +125,8 @@ const menusA = reactive([
     icon: 'ep:setting',
     roles: [
       'superuser',
-      'auditor'
+      'auditor',
+      'receptor'
     ],
     submenus: [
       {
@@ -171,8 +176,23 @@ const menusA = reactive([
         ]
       },
       {
-        title: 'Grupos',
+        title: 'Depositos',
         icon: 'ep:house',
+        roles: [
+          'superuser',
+          'auditor',
+          'admin'
+        ],
+        items: [
+          {
+            title: 'Ver grupos',
+            path: '/config/deposit'
+          }
+        ]
+      },
+      {
+        title: 'Grupos',
+        icon: 'ep:connection',
         roles: [
           'superuser',
           'auditor',

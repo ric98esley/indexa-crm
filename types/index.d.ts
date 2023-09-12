@@ -49,8 +49,9 @@ declare global {
     brand: Brand
   }
 
-  interface State extends Base {
-    state: string
+  interface Deposit extends Base {
+    state: string,
+    group?: Group
   }
 
   interface Asset extends Omit<Base, 'name'>, NewAsset {
