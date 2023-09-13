@@ -75,7 +75,7 @@
                       float: right;
                       color: var(--el-text-color-secondary);
                       font-size: 13px;
-                  ">{{ item.name }}</span> </el-option>
+                  ">{{ item.code }}</span> </el-option>
               </el-select>
             </el-form-item>
             <el-form-item>
@@ -156,14 +156,6 @@ const deposits = reactive<{
 })
 const groups = reactive<{
   rows: Group[],
-  total: number
-}>({
-  rows: [],
-  total: 0
-})
-
-const users = reactive<{
-  rows: Deposit[],
   total: number
 }>({
   rows: [],

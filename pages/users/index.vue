@@ -30,9 +30,9 @@
             <el-input v-model="filters.cardId" placeholder="Cedula" clearable />
           </template>
         </el-table-column>
-        <el-table-column label="Padre" prop="email">
+        <el-table-column label="Padre" prop="group.name">
           <template #header>
-            <el-input v-model="filters.email" placeholder="Email" clearable />
+            <el-input v-model="filters.group" placeholder="Grupo" clearable />
           </template>
         </el-table-column>
         <el-table-column label="Activar">
@@ -101,6 +101,18 @@
                 <el-option v-for="item in roles" :key="item.label" :label="item.label" :value="item.value!"></el-option>
               </el-select>
             </el-form-item>
+            <el-form-item label="Grupo">
+              <el-select class="w-full" v-model="user.groupId" filterable remote
+                placeholder="Elige un grupo" :loading="loadingGroup" :remote-method="setGroup">
+                <el-option v-for="item in groups.rows" :key="item.id" :label="item.name" :value="item.id!">
+                  <span style="float: left">{{ item.name }}</span>
+                  <span style="
+                      float: right;
+                      color: var(--el-text-color-secondary);
+                      font-size: 13px;
+                  ">{{ item.code }}</span> </el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item label="Contraseña">
               <el-input v-model="user.password" placeholder="Ingrese la contraseña"></el-input>
             </el-form-item>
@@ -150,6 +162,18 @@
                 <el-option v-for="item in roles" :key="item.label" :label="item.label" :value="item.value!"></el-option>
               </el-select>
             </el-form-item>
+            <el-form-item label="Grupo">
+              <el-select class="w-full" v-model="user.groupId" filterable remote
+                placeholder="Elige un grupo" :loading="loadingGroup" :remote-method="setGroup">
+                <el-option v-for="item in groups.rows" :key="item.id" :label="item.name" :value="item.id!">
+                  <span style="float: left">{{ item.name }}</span>
+                  <span style="
+                      float: right;
+                      color: var(--el-text-color-secondary);
+                      font-size: 13px;
+                  ">{{ item.code }}</span> </el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item label="Contraseña">
               <el-input v-model="user.password" placeholder="Ingrese la contraseña"></el-input>
             </el-form-item>
@@ -181,11 +205,13 @@ definePageMeta({
 });
 
 const loadingUser = ref(false);
+const loadingGroup = ref(false);
 
 const filters = reactive({
   limit: 10,
   offset: 0,
   username: '',
+  group: '',
   name: '',
   lastName: '',
   cardId: '',
@@ -199,8 +225,8 @@ const users = reactive<{
   rows: [],
   total: 0
 });
-const parents = reactive<{
-  rows: User[],
+const groups = reactive<{
+  rows: Group[],
   total: number
 }>({
   rows: [],
@@ -233,7 +259,8 @@ const user = reactive<User>({
   email: '',
   role: '',
   password: '',
-  isActive: false
+  isActive: false,
+  groupId: undefined
 });
 
 const getUsers = async ({
@@ -406,9 +433,12 @@ const editUser = (row: User) => {
   user.cardId = row.cardId || '';
   user.email = row.email;
   user.role = row.role || '';
+  user.groupId = row.group?.id;
   user.isActive = row.isActive;
-}
 
+  if(row.group) groups.rows.push(row.group)
+}
+ 
 const removeUser = async (id: number) => {
   try {
     const { data, error } = await useFetch<User>(`/users/${id}`, {
@@ -447,14 +477,58 @@ const setUsers = async () => {
   users.total = rta?.total || 0
 }
 
-const setParent = async (query?: string) => {
+const getGroups = async ({
+  name,
+  limit = 10,
+  offset = 0
+}: {
+  id?: number,
+  name?: string,
+  code?: string,
+  parent?: string,
+  limit?: number,
+  offset?: number
+}) => {
+  try {
+    loadingGroup.value = true;
+    const { data, error } = await useFetch<{ total: number, rows: Group[] }>('/groups',
+      {
+        params: {
+          ...(name != '' && name && {
+            name
+          }),
+          ...(offset && {
+            offset: (offset - 1) * limit
+          }),
+          ...(limit && {
+            limit
+          })
+        }
+      }
+    );
+    if (error.value) {
+      ElNotification({
+        message: 'Error al obtener las marcas intente de nuevo mas tarde'
+      })
+    }
+
+    loadingGroup.value = false;
+    return data.value
+  } catch (error) {
+    loadingGroup.value = false;
+    ElNotification({
+      message: 'Error al obtener las marcas intente de nuevo mas tarde'
+    })
+  }
+}
+
+const setGroup = async (query?: string) => {
   const search = {
     name: query,
-    id: user.id
   }
-  const rta = await getUsers(search);
-  parents.rows = rta?.rows || []
-  parents.total = rta?.total || 0
+  const rta = await getGroups(search);
+  groups.rows = rta?.rows || []
+  groups
 }
 
 watch(filters, useDebounce(async () => {

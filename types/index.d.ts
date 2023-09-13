@@ -5,6 +5,7 @@ declare global {
   interface Base {
     id?: number,
     name?: string,
+    groupId?: number
     createdBy?: User,
     createdAt?: string,
     updatedAt?: string,
@@ -33,6 +34,7 @@ declare global {
     lastName: string,
     phone?: string,
     cardId?: string
+    group?: Group
   }
   interface Category extends Base {
     brands: Brand[],
