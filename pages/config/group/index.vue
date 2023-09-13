@@ -132,7 +132,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor'],
+  roles: ['superuser', 'admin', 'auditor', 'receptor'],
 });
 
 const loadingGroup = ref(false);
@@ -332,7 +332,7 @@ const createGroup = async () => {
     }
     await setGroups()
     ElNotification({
-      title: 'Categoria creada correctamente',
+      title: 'Grupo creado correctamente',
       message: `${data.value?.name}`
     })
     group.id = undefined;
@@ -370,7 +370,7 @@ const patchGroup = async () => {
     }
     await setGroups()
     ElNotification({
-      title: 'Categoria modificada correctamente',
+      title: 'Grupo modificado correctamente',
       message: `${data.value?.name}`
     })
 
@@ -381,7 +381,7 @@ const patchGroup = async () => {
   } catch (error) {
     loadingGroup.value = false;
     ElNotification({
-      title: 'Error al modificar la categoria intente de nuevo mas tarde',
+      title: 'Error al modificar el grupo intente de nuevo mas tarde',
     })
     console.log(error)
   }
@@ -392,8 +392,9 @@ const editGroup = (row: Group) => {
   group.id = row.id;
   group.name = row.name || '';
   group.code = row.code || '';
-  group.parentId = row.parent.id;
+  group.parentId = row.parent?.id;
   group.managerId = row.manager.id;
+  if(row.parent) parents.rows.push(row.parent);
 }
 
 const removeGroup = async (id: number) => {
@@ -405,18 +406,18 @@ const removeGroup = async (id: number) => {
     if (error.value) {
       loadingGroup.value = false;
       ElNotification({
-        message: 'Error al borrar la categoria intente de nuevo mas tarde.'
+        message: 'Error al borrar el grupo intente de nuevo mas tarde.'
       });
       return
     }
 
     ElNotification({
-      message: 'La categoria ha sido borrada.'
+      message: 'El grupo ha sido borrada.'
     })
     await setGroups()
   } catch (error) {
     ElNotification({
-      message: 'Error al borrar la categoria intente de nuevo mas tarde.'
+      message: 'Error al borrar el grupo intente de nuevo mas tarde.'
     })
   }
 }

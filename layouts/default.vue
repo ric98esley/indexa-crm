@@ -196,7 +196,8 @@ const menusA = reactive([
         roles: [
           'superuser',
           'auditor',
-          'admin'
+          'admin',
+          'receptor'
         ],
         items: [
           {

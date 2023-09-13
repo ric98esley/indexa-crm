@@ -177,11 +177,10 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor'],
+  roles: ['superuser', 'admin', 'auditor', 'receptor'],
 });
 
 const loadingUser = ref(false);
-const loadingParent = ref(false);
 
 const filters = reactive({
   limit: 10,
@@ -270,62 +269,6 @@ const getUsers = async ({
     );
     if (error.value) {
       throw new Error('Error al cargar los usuarios')
-    }
-
-    loadingUser.value = false;
-    return data.value
-  } catch (error) {
-    loadingUser.value = false;
-    ElNotification({
-      message: 'Error al obtener las usuario intente de nuevo mas tarde'
-    })
-  }
-}
-const getUser = async ({
-  id,
-  name,
-  code,
-  parent,
-  limit = 10,
-  offset = 0
-}: {
-  id?: number,
-  name?: string,
-  code?: string,
-  parent?: string,
-  limit?: number,
-  offset?: number
-}) => {
-  try {
-    loadingUser.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: User[] }>('/users',
-      {
-        params: {
-          ...(name != '' && !name && id && {
-            id
-          }),
-          ...(name != '' && name && {
-            name
-          }),
-          ...(code != '' && code && {
-            code
-          }),
-          ...(parent != '' && parent && {
-            parent
-          }),
-          ...(offset && {
-            offset: (offset - 1) * limit
-          }),
-          ...(limit && {
-            limit
-          })
-        }
-      }
-    );
-    if (error.value) {
-      ElNotification({
-        message: 'Error al obtener las usuario intente de nuevo mas tarde'
-      })
     }
 
     loadingUser.value = false;
