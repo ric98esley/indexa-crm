@@ -27,14 +27,10 @@ export default defineNuxtConfig({
     '@element-plus/nuxt',
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
-    '@pinia-plugin-persistedstate/nuxt',
     '@nuxtjs/google-fonts',
     'nuxt-icon',
     'nuxt-permissions',
   ],
-  piniaPersistedstate: {
-    storage: 'localStorage',
-  },
   googleFonts: {
     families: {
       Roboto: true,
