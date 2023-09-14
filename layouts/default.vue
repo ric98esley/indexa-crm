@@ -140,6 +140,14 @@ const menusA = reactive([
             ],
             title: 'taquillas',
             path: '/places'
+          },
+          {
+            roles: [
+              'superuser',
+              'auditor',
+            ],
+            title: 'tipos',
+            path: '/places/type'
           }
         ]
       }

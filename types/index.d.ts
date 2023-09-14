@@ -73,7 +73,24 @@ declare global {
     assetId?: number,
     value: string
   }
-  
+  interface Type extends Base {
+
+  }
+  interface Place extends Base {
+    group?: Group;
+    isActive: boolean;
+    code: string;
+    type?: Type;
+    zoneId?: number;
+    zone?: Zone;
+    typeId?: number;
+    managerId?: number;
+    phone: string;
+    rif: string
+    address: string
+  }
+
+  interface Zone extends Base {}
   interface Group extends Base {
     code: string
     parent?: Group
