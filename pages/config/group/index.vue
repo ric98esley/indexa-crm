@@ -33,6 +33,14 @@
             {{ row?.parent?.code }} - {{ row?.parent?.name }}
           </template>
         </el-table-column>
+        <el-table-column label="Receptor">
+          <template #header>
+            <el-input v-model="filters.manager" placeholder="Receptor" clearable />
+          </template>
+          <template #default="{ row }">
+            {{ row.manager?.username }} - {{ row?.manager?.name }} {{ row?.manager?.lastName }}
+          </template>
+        </el-table-column>
         <el-table-column label="Acciones">
           <template #default="props">
             <el-row>
@@ -54,6 +62,7 @@
         :total="groups.total" />
     </el-row>
     <el-container>
+      <!-- crear grupo -->
       <el-dialog v-model="modals.create">
         <template #header>
           <h2>Crear nuevo grupo</h2>
@@ -68,7 +77,7 @@
               <el-input v-model="group.code" placeholder="Ingrese aqui el código"></el-input>
             </el-form-item>
             <el-form-item label="Padre">
-              <el-select class="w-full" v-model="group.parentId" filterable remote
+              <el-select class="w-full" v-model="group.parentId" filterable remote effect="dark"
                 placeholder="Elige un grupo padre" :loading="loadingParent" :remote-method="setParent">
                 <el-option v-for="item in parents.rows" :key="item.id" :label="item.name" :value="item.id!">
                   <span style="float: left">{{ item.name }}</span>
@@ -79,12 +88,25 @@
                   ">{{ item.code }}</span> </el-option>
               </el-select>
             </el-form-item>
+            <el-form-item label="Receptor">
+              <el-select class="w-full" v-model="group.managerId" filterable remote effect="dark"
+                placeholder="Elige un receptor" :loading="loadingUser" :remote-method="setUser">
+                <el-option v-for="item in users.rows" :key="item.id" :label="item.name" :value="item.id!">
+                  <span style="float: left">{{ item.name }} {{ item.lastName }}</span>
+                  <span style="
+                      float: right;
+                      color: var(--el-text-color-secondary);
+                      font-size: 13px;
+                  ">{{ item.username }}</span> </el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item>
               <el-button type="primary" :disabled="!group.name && !group.code" native-type="submit">Crear</el-button>
             </el-form-item>
           </el-form>
         </template>
       </el-dialog>
+      <!-- editar grupo -->
       <el-dialog v-model="modals.edit">
         <template #header>
           <h2>Editar grupo</h2>
@@ -99,7 +121,7 @@
               <el-input v-model="group.code" placeholder="Ingrese aqui el código"></el-input>
             </el-form-item>
             <el-form-item label="Padre">
-              <el-select class="w-full" v-model="group.parentId" filterable remote
+              <el-select class="w-full" v-model="group.parentId" filterable remote effect="dark"
                 placeholder="Elige un padre" :loading="loadingParent" :remote-method="setParent">
                 <el-option v-for="item in parents.rows" :key="item.id" :label="item.name" :value="item.id!">
                   <span style="float: left">{{ item.name }}</span>
@@ -108,6 +130,18 @@
                       color: var(--el-text-color-secondary);
                       font-size: 13px;
                   ">{{ item.code }}</span> </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="Receptor">
+              <el-select class="w-full" v-model="group.managerId" filterable remote effect="dark"
+                placeholder="Elige un receptor" :loading="loadingUser" :remote-method="setUser">
+                <el-option v-for="item in users.rows" :key="item.id" :label="item.name" :value="item.id!">
+                  <span style="float: left">{{ item.name }} {{ item.lastName }}</span>
+                  <span style="
+                      float: right;
+                      color: var(--el-text-color-secondary);
+                      font-size: 13px;
+                  ">{{ item.username }}</span> </el-option>
               </el-select>
             </el-form-item>
             <el-form-item>
@@ -143,6 +177,7 @@ const filters = reactive({
   limit: 10,
   offset: 0,
   name: '',
+  manager: '',
   code: '',
   parentId: undefined,
   parent: ''
@@ -163,7 +198,7 @@ const parents = reactive<{
   total: 0
 })
 const users = reactive<{
-  rows: Group[],
+  rows: User[],
   total: number
 }>({
   rows: [],
@@ -196,6 +231,7 @@ const group = reactive<{
 const getGroups = async ({
   id,
   name,
+  manager,
   code,
   parent,
   limit = 10,
@@ -203,6 +239,7 @@ const getGroups = async ({
 }: {
   id?: number,
   name?: string,
+  manager?: string,
   code?: string,
   parent?: string,
   limit?: number,
@@ -224,6 +261,9 @@ const getGroups = async ({
           }),
           ...(parent != '' && parent && {
             parent
+          }),
+          ...(manager != '' && manager && {
+            manager
           }),
           ...(offset && {
             offset: (offset - 1) * limit
@@ -250,37 +290,23 @@ const getGroups = async ({
   }
 }
 const getUser = async ({
-  id,
-  name,
-  code,
-  parent,
+  search,
   limit = 10,
   offset = 0
 }: {
-  id?: number,
-  name?: string,
-  code?: string,
-  parent?: string,
+  search?: string,
   limit?: number,
   offset?: number
 }) => {
   try {
-    loadingGroup.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Group[] }>('/groups',
+    loadingUser.value = true;
+    const { data, error } = await useFetch<{ total: number, rows: User[] }>('/users',
       {
         params: {
-          ...(name != '' && !name && id && {
-            id
+          ...(search != '' && search && {
+            search
           }),
-          ...(name != '' && name && {
-            name
-          }),
-          ...(code != '' && code && {
-            code
-          }),
-          ...(parent != '' && parent && {
-            parent
-          }),
+          role: 'receptor',
           ...(offset && {
             offset: (offset - 1) * limit
           }),
@@ -291,17 +317,15 @@ const getUser = async ({
       }
     );
     if (error.value) {
-      ElNotification({
-        message: 'Error al obtener las marcas intente de nuevo mas tarde'
-      })
+      throw new Error()
     }
 
-    loadingGroup.value = false;
+    loadingUser.value = false;
     return data.value
   } catch (error) {
     loadingGroup.value = false;
     ElNotification({
-      message: 'Error al obtener las marcas intente de nuevo mas tarde'
+      title: 'Error al obtener las marcas intente de nuevo mas tarde'
     })
   }
 }
@@ -393,8 +417,15 @@ const editGroup = (row: Group) => {
   group.name = row.name || '';
   group.code = row.code || '';
   group.parentId = row.parent?.id;
-  group.managerId = row.manager.id;
-  if(row.parent) parents.rows.push(row.parent);
+  group.managerId = row.manager?.id;
+  if(row.parent) {
+    parents.rows = []
+    parents.rows.push(row.parent)
+  };
+  if(row.manager) {
+    users.rows = []
+    users.rows.push(row.manager)
+  }
 }
 
 const removeGroup = async (id: number) => {
@@ -428,13 +459,22 @@ const setGroups = async () => {
     code: filters.code,
     limit: filters.limit,
     offset: filters.offset,
-    parent: filters.parent
+    parent: filters.parent,
+    manager: filters.manager
   }
   const rta = await getGroups(query);
   groups.rows = rta?.rows || []
   groups.total = rta?.total || 0
 }
 
+const setUser = async (query?: string) => {
+  const search = {
+    search: query
+  }
+  const rta = await getUser(search);
+  users.rows = rta?.rows || []
+  users.total = rta?.total || 0
+}
 const setParent = async (query?: string) => {
   const search = {
     name: query,
@@ -452,7 +492,6 @@ watch(filters, useDebounce(async () => {
 
 watch(() => modals.edit, async () => {
   if (modals.edit) {
-    await setParent()
   } else {
     group.id = undefined;
     group.code = '';

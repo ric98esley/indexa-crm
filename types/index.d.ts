@@ -77,7 +77,7 @@ declare global {
   interface Group extends Base {
     code: string
     parent?: Group
-    manager: User
+    manager?: User
     parentId: number
     managerId: number
   }

@@ -121,6 +121,31 @@ const menusA = reactive([
     ],
   },
   {
+    title: 'Taquillas',
+    icon: 'ep:school',
+    roles: [
+      'superuser',
+      'auditor',
+      'receptor'
+    ],
+    groups: [
+      {
+        title: 'Ver y crear taquillas',
+        items: [
+          {
+            roles: [
+              'superuser',
+              'auditor',
+              'receptor'
+            ],
+            title: 'taquillas',
+            path: '/places'
+          }
+        ]
+      }
+    ],
+  },
+  {
     title: 'Configuración',
     icon: 'ep:setting',
     roles: [

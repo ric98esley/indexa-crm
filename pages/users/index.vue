@@ -438,7 +438,7 @@ const editUser = (row: User) => {
 
   if(row.group) groups.rows.push(row.group)
 }
- 
+
 const removeUser = async (id: number) => {
   try {
     const { data, error } = await useFetch<User>(`/users/${id}`, {
