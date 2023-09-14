@@ -11,9 +11,6 @@ export const useAuthStore = defineStore('auth', {
     token: null,
     user: null,
   }),
-  persist: {
-    storage: persistedState.localStorage,
-  },
   // optional getters
   getters: {
     // getters receive the state as first parameter
