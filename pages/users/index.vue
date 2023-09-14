@@ -85,7 +85,7 @@
               <el-input v-model="user.name" placeholder="Ingrese el nombre"></el-input>
             </el-form-item>
             <el-form-item label="Apellido">
-              <el-input v-model="user.lastName" placeholder="Ingrese el nombre"></el-input>
+              <el-input v-model="user.lastName" placeholder="Ingrese el apellido"></el-input>
             </el-form-item>
             <el-form-item label="Cedula o RIF">
               <el-input v-model="user.cardId" placeholder="Ingrese la cedula"></el-input>
@@ -146,7 +146,7 @@
               <el-input v-model="user.name" placeholder="Ingrese el nombre"></el-input>
             </el-form-item>
             <el-form-item label="Apellido">
-              <el-input v-model="user.lastName" placeholder="Ingrese el nombre"></el-input>
+              <el-input v-model="user.lastName" placeholder="Ingrese el apellido"></el-input>
             </el-form-item>
             <el-form-item label="Cedula o RIF">
               <el-input v-model="user.cardId" placeholder="Ingrese la cedula"></el-input>
