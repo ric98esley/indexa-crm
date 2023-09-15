@@ -85,7 +85,7 @@ const menusA = reactive([
           },
           {
             title: 'Recibir',
-            path: '#',
+            path: '/assets/get',
             roles: [
               'superuser',
               'auditor',
