@@ -1,4 +1,4 @@
-export { NewAsset, Invoice, User, Category, Brand, Model, State}
+export { NewAsset, Invoice, User, Category, Brand, Model, State }
 
 declare global {
 
@@ -14,8 +14,13 @@ declare global {
   interface NewAsset {
     serial?: string,
     modelId?: number[],
-    stateId?: number,
-    customFields: Specification[]
+    depositId?: number,
+    customFields: {
+      name: string
+      typeId: number,
+      assetId?: number,
+      value: string
+    }[]
   }
 
   interface Invoice {
@@ -25,7 +30,7 @@ declare global {
     total?: string,
     invoiceDate?: string,
   }
-  interface User extends Base  {
+  interface User extends Base {
     username: string,
     email: string,
     role: string,
@@ -65,10 +70,10 @@ declare global {
     assignment?: any
   }
 
-  interface Provider extends Base{
+  interface Provider extends Base {
     rif: string
   }
-  interface Specification extends Base{
+  interface Specification extends Base {
     typeId: number,
     assetId?: number,
     value: string
@@ -91,7 +96,7 @@ declare global {
     address: string
   }
 
-  interface Zone extends Base {}
+  interface Zone extends Base { }
   interface Group extends Base {
     code: string
     parent?: Group

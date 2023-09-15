@@ -6,7 +6,7 @@
     <el-col :sm="24" :md="24" :lg="8">
       <el-card>
         <el-form label-position="top" label-width="auto" autocomplete="off" ref="ruleFormRef" :model="asset"
-          :rules="rules" status-icon>
+          :rules="rules" deposits-icon>
           <el-form-item label="Serial">
             <el-input placeholder="Serial" v-model="asset.serial">
             </el-input>
@@ -18,10 +18,10 @@
               :on-change="(value) => console.log(value)">
             </el-cascader>
           </el-form-item>
-          <el-form-item label="Estatus del activo">
-            <el-select v-model="asset.stateId" class="select-success" placeholder="Selecciona un estado" label="Estado"
+          <el-form-item label="Depositos del activo">
+            <el-select v-model="asset.depositId" class="select-success" placeholder="Selecciona un deposito" label="Deposito"
               style="width: 100%" filterable>
-              <el-option v-for="option in status" :key="option.id" :value="option.id!"
+              <el-option v-for="option in response.deposits" :key="option.id" :value="option.id!"
                 :label="`${option.id} - ${option.name}`">
                 {{ option.id }} - {{ option.name }}
               </el-option>
@@ -32,8 +32,8 @@
           </el-form-item>
           <el-row justify="space-between" align="middle">
             <el-form-item>
-              <el-button type="primary" :disabled="!asset.serial || !asset.modelId || !asset.stateId" @click="addAsset()"
-                native-type="submit">Agregar</el-button>
+              <el-button type="primary" :disabled="!asset.serial || !asset.modelId || !asset.depositId"
+                @click="addAsset()" native-type="submit">Agregar</el-button>
             </el-form-item>
             <el-form-item>
               <el-button link plain @click="modals.invoice = true">Facturar</el-button>
@@ -54,6 +54,9 @@
             </template>
           </el-table-column>
           <el-table-column label="Serial" prop="serial">
+            <template #default="{ row }">
+              <el-input v-model="row.serial"></el-input>
+            </template>
           </el-table-column>
           <el-table-column label="Modelo">
             <template type="text" #default="{ row }">
@@ -65,16 +68,16 @@
           </el-table-column>
           <el-table-column label="Estado">
             <template type="text" #default="{ row }">
-              <el-select v-model="row.stateId" class="select-success" placeholder="Selecciona un estado" label="Estados"
-                style="width: 100%" name="assetState" filterable>
-                <el-option v-for="option in status" :key="option.id" :value="option.id!"
+              <el-select v-model="row.depositId" class="select-success" placeholder="Selecciona un estado" label="Estados"
+                style="width: 100%" name="assetDeposit" filterable>
+                <el-option v-for="option in deposits" :key="option.id" :value="option.id!"
                   :label="`${option.id} - ${option.name}`">
                   {{ option.id }} - {{ option.name }}
                 </el-option>
               </el-select>
             </template>
           </el-table-column>
-          <el-table-column label="Acciones" header-align="right">
+          <el-table-column  header-align="right" width="80">
             <template #default="{ row }">
               <div class="text-right">
                 <el-tooltip content="Eliminar" :open-delay="300" placement="top" class="text-right">
@@ -99,14 +102,12 @@
               <el-input v-model="toAdd.invoice.code" type="text" clearable></el-input>
             </el-form-item>
             <el-form-item label="Provedor">
-              <el-autocomplete type="text" clearable :fetch-suggestions="searchProvider" placeholder="Buscar Provedor"
-                @select="handleSelectProvider" v-model="provider.name" class="w-full">
-                <template #default="{ item }">
-                  <div class="value">
-                    <b>{{ item.name }}</b>, <span class="link">{{ item.rif }}</span>
-                  </div>
-                </template>
-              </el-autocomplete>
+              <el-select class="w-full" v-model="toAdd.invoice.providerId" filterable remote effect="dark"
+                placeholder="Elige un responsable" :loading="loadingProvider" :remote-method="setProvider">
+                <el-option v-for="item in response.providers" :key="item.id" :label="`${item.name}`" :value="item.id!">
+                  <span style="float: left">{{ item.name }}</span>
+                </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item label="Total de la factura">
               <el-input type="number" v-model="toAdd.invoice.total">
@@ -122,6 +123,12 @@
         <el-tab-pane label="Factura antigua" name="factura-antigua">
           <el-form label-position="top">
             <el-form-item label="Buscar factura">
+              <el-select class="w-full" v-model="toAdd.invoice.providerId" filterable remote effect="dark"
+                placeholder="Elige un responsable" :loading="loadingProvider" :remote-method="setProvider">
+                <el-option v-for="item in response.providers" :key="item.id" :label="`${item.name}`" :value="item.id!">
+                  <span style="float: left">{{ item.name }}</span>
+                </el-option>
+              </el-select>
               <el-autocomplete type="text" clearable :fetch-suggestions="searchInvoice" placeholder="Codigo de la factura"
                 @select="handleSelectInvoice" v-model="toAdd.invoice.code" class="w-full">
                 <template #default="{ item }">
@@ -177,10 +184,13 @@ definePageMeta({
 const ruleFormRef = ref<FormInstance>();
 const activeName = ref('factura-nueva');
 
+const loadingProvider = ref(false);
+
+
 const asset = reactive<NewAsset>({
   serial: undefined,
   modelId: undefined,
-  stateId: undefined,
+  depositId: undefined,
   customFields: []
 });
 const provider = reactive<Provider>({
@@ -196,14 +206,16 @@ const modals = reactive({
 
 const response = reactive<{
   models: Model[],
-  status: State[]
+  deposits: Deposit[]
   categories: any[]
+  providers: Provider[]
 }>({
   categories: [],
   models: [],
-  status: []
+  deposits: [],
+  providers: []
 })
-const status = reactive<State[]>([]);
+const deposits = reactive<Deposit[]>([]);
 
 const toAdd = reactive<{
   assets: NewAsset[],
@@ -285,9 +297,15 @@ const getCategories = async () => {
   }
 }
 
-const getStatus = async () => {
+const getDeposit = async ({ name }: { name?: string }) => {
   try {
-    const { data } = await useFetch<State[]>('/assets/status');
+    const { data } = await useFetch<{ total: number, rows: Deposit[] }>('/assets/deposits', {
+      params: {
+        ...(name != '' && name && {
+          name
+        })
+      }
+    });
     return data.value;
   } catch (error) {
     console.log(error);
@@ -343,19 +361,19 @@ const addProvider = async () => {
     });
   }
 }
-const searchProvider = async (queryString: string, cb: (arg: any) => void) => {
+const searchProvider = async ({ name }: { name?: string }) => {
   try {
     let toSend = {
       params: {
-        ...(queryString && queryString.length > 0 && { name: queryString }),
+        ...(name && name.length > 0 && { name }),
       },
     };
 
-    const { data, error } = await useFetch<{ count: number, rows: Provider[] }>(
+    const { data, error } = await useFetch<{ total: number, rows: Provider[] }>(
       '/invoices/providers',
       toSend
     );
-    cb(data.value?.rows);
+    return data.value
   } catch (error) {
     console.log(error);
   }
@@ -363,7 +381,7 @@ const searchProvider = async (queryString: string, cb: (arg: any) => void) => {
 
 const addAsset = () => {
   const newAsset = { ...asset };
-  if (!newAsset.serial || !newAsset.modelId || !newAsset.stateId) return;
+  if (!newAsset.serial || !newAsset.modelId || !newAsset.depositId) return;
   const newCustomFields = newAsset.customFields.filter(field => field.value !== '');
   newAsset.customFields = JSON.parse(JSON.stringify(newCustomFields.length > 0 ? newCustomFields : []));
 
@@ -439,7 +457,6 @@ const addAssets = async () => {
       }
     }
 
-
     toAdd.invoice = {
       id: undefined,
       code: undefined,
@@ -456,7 +473,7 @@ const addAssets = async () => {
   }
 }
 
-watch(() => asset.modelId,async () => {
+watch(() => asset.modelId, async () => {
   if (!asset.modelId) return []
   const foundCategory = response.categories.find((elemento) => {
     return elemento.value == asset.modelId![0]
@@ -467,13 +484,29 @@ watch(() => asset.modelId,async () => {
     ...(field),
     value: ''
   }));
-  asset.customFields = toReturn;  
+  asset.customFields = toReturn;
 });
+
+const setProvider = async (query?: string) => {
+  const search = {
+    name: query,
+  }
+  const rta = await searchProvider(search);
+  response.providers = rta?.rows || []
+}
+const setDeposit = async (query?: string) => {
+  const search = {
+    name: query,
+  }
+  const rta = await getDeposit(search);
+  response.deposits = rta?.rows || []
+}
+
+
 
 
 onMounted(async () => {
   await getCategories()
-  let statusApi = await getStatus() || [];
-  status.push(...statusApi);
+  await setDeposit()
 });
 </script>
