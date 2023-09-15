@@ -25,7 +25,7 @@
             <el-input v-model="filters.code" placeholder="Código" clearable />
           </template>
         </el-table-column>
-        <el-table-column label="Padre" prop="group.name">
+        <el-table-column label="Grupo" prop="group.name">
           <template #header>
             <el-input v-model="filters.group" placeholder="Grupo" clearable />
           </template>
@@ -45,7 +45,7 @@
               <el-button type="primary" circle>
                 <Icon name="ep:view" />
               </el-button>
-              <el-button type="danger" circle @click="removePlace(props.row.id)">
+              <el-button type="danger" circle @click="removePlace(props.row.id)" v-role="['superuser', 'auditor']">
                 <Icon name="ep:delete" />
               </el-button>
             </el-row>
@@ -80,30 +80,49 @@
               <el-input v-model="place.name" placeholder="Ingrese el nombre"></el-input>
             </el-form-item>
             <el-form-item label="Zona">
-              <el-input v-model="place.zoneId" placeholder="Ingrese la zona"></el-input>
+              <el-select class="w-full" v-model="place.zoneId" filterable remote placeholder="Elige una zona"
+                :loading="loadingZone" :remote-method="setZone">
+                <el-option v-for="item in zones.rows" :key="item.id" :label="item.name" :value="item.id!">
+                  <span style="float: left">{{ item.name }}</span>
+                </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item label="Teléfono">
               <el-input v-model="place.phone" placeholder="Ingrese el teléfono"></el-input>
             </el-form-item>
-            <el-form-item label="Tipo">
-              <el-select class="w-full" v-model="place.typeId" filterable placeholder="Elige un tipo">
-                <el-option v-for="item in roles" :key="item.label" :label="item.label" :value="item.value!"></el-option>
+            <el-form-item label="Tipo de taquilla">
+              <el-select class="w-full" v-model="place.typeId" filterable remote placeholder="Elige un tipo"
+                :loading="loadingType" :remote-method="setTypes">
+                <el-option v-for="item in types.rows" :key="item.id" :label="item.name" :value="item.id!">
+                  <span style="float: left">{{ item.name }}</span>
+                </el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="Grupo">
               <el-select class="w-full" v-model="place.groupId" filterable remote placeholder="Elige un grupo"
                 :loading="loadingGroup" :remote-method="setGroup">
-                <el-option v-for="item in groups.rows" :key="item.id" :label="item.name" :value="item.id!">
-                  <span style="float: left">{{ item.name }}</span>
+                <el-option v-for="item in groups.rows" :key="item.id" :label="`${item.code} - ${item.name}`"
+                  :value="item.id!">
+                  <span style="float: left">{{ item.code }}</span>
                   <span style="
                       float: right;
                       color: var(--el-text-color-secondary);
                       font-size: 13px;
-                  ">{{ item.code }}</span> </el-option>
+                  ">{{ item.name }}</span> </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="Telefono">
-              <el-input v-model="place.managerId" placeholder="Responsable"></el-input>
+            <el-form-item label="Responsable">
+              <el-select class="w-full" v-model="place.managerId" filterable remote effect="dark"
+                placeholder="Elige un responsable" :loading="loadingUser" :remote-method="setUser">
+                <el-option v-for="item in users.rows" :key="item.id"
+                  :label="`${item.username} - ${item.name} ${item.lastName} - ${item.cardId}`" :value="item.id!">
+                  <span style="float: left">{{ item.name }} {{ item.lastName }}</span>
+                  <span style="
+                      float: right;
+                      color: var(--el-text-color-secondary);
+                      font-size: 13px;
+                  ">{{ item.username }}</span> </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item label="RIF">
               <el-input v-model="place.rif" placeholder="RIF"></el-input>
@@ -112,7 +131,7 @@
               <el-input v-model="place.address" placeholder="Dirección"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!place.name && !place.code && !place.zoneId && !place.typeId"
+              <el-button :loading="loadingPlace" type="primary" :disabled="!place.name && !place.code && !place.zoneId && !place.typeId"
                 native-type="submit">Crear</el-button>
             </el-form-item>
           </el-form>
@@ -140,35 +159,60 @@
             <el-form-item label="Nombre">
               <el-input v-model="place.name" placeholder="Ingrese el nombre"></el-input>
             </el-form-item>
-            <el-form-item label="Apellido">
-              <el-input v-model="place.zoneId" placeholder="Ingrese el nombre"></el-input>
+            <el-form-item label="Zona">
+              <el-select class="w-full" v-model="place.zoneId" filterable remote placeholder="Elige una zona"
+                :loading="loadingZone" :remote-method="setZone">
+                <el-option v-for="item in zones.rows" :key="item.id" :label="item.name" :value="item.id!">
+                  <span style="float: left">{{ item.name }}</span>
+                </el-option>
+              </el-select>
             </el-form-item>
-            <el-form-item label="Telefono">
-              <el-input v-model="place.phone" placeholder="Ingrese el telefono"></el-input>
+            <el-form-item label="Teléfono">
+              <el-input v-model="place.phone" placeholder="Ingrese el teléfono"></el-input>
             </el-form-item>
-            <el-form-item label="Rol">
-              <el-select class="w-full" v-model="place.typeId" filterable placeholder="Elige un rol">
-                <el-option v-for="item in roles" :key="item.label" :label="item.label" :value="item.value!"></el-option>
+            <el-form-item label="Tipo de taquilla">
+              <el-select class="w-full" v-model="place.typeId" filterable remote placeholder="Elige un tipo"
+                :loading="loadingType" :remote-method="setTypes">
+                <el-option v-for="item in types.rows" :key="item.id" :label="item.name" :value="item.id!">
+                  <span style="float: left">{{ item.name }}</span>
+                </el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="Grupo">
               <el-select class="w-full" v-model="place.groupId" filterable remote placeholder="Elige un grupo"
                 :loading="loadingGroup" :remote-method="setGroup">
-                <el-option v-for="item in groups.rows" :key="item.id" :label="item.name" :value="item.id!">
-                  <span style="float: left">{{ item.name }}</span>
+                <el-option v-for="item in groups.rows" :key="item.id" :label="`${item.code} - ${item.name}`"
+                  :value="item.id!">
+                  <span style="float: left">{{ item.code }}</span>
                   <span style="
                       float: right;
                       color: var(--el-text-color-secondary);
                       font-size: 13px;
-                  ">{{ item.code }}</span> </el-option>
+                  ">{{ item.name }}</span> </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="Telefono">
-              <el-input v-model="place.phone" placeholder="Ingrese la contraseña"></el-input>
+            <el-form-item label="Responsable">
+              <el-select class="w-full" v-model="place.managerId" filterable remote effect="dark"
+                placeholder="Elige un responsable" :loading="loadingUser" :remote-method="setUser">
+                <el-option v-for="item in users.rows" :key="item.id"
+                  :label="`${item.username} - ${item.name} ${item.lastName} - ${item.cardId}`" :value="item.id!">
+                  <span style="float: left">{{ item.name }} {{ item.lastName }}</span>
+                  <span style="
+                      float: right;
+                      color: var(--el-text-color-secondary);
+                      font-size: 13px;
+                  ">{{ item.username }}</span> </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="RIF">
+              <el-input v-model="place.rif" placeholder="RIF"></el-input>
+            </el-form-item>
+            <el-form-item label="Dirección">
+              <el-input v-model="place.address" placeholder="Dirección"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!place.name && !place.code && !place.zoneId && !place.typeId"
-              native-type="submit">Editar</el-button>
+              <el-button :loading="loadingPlace"  type="primary" :disabled="!place.name && !place.code && !place.zoneId && !place.typeId"
+                native-type="submit">Editar</el-button>
             </el-form-item>
           </el-form>
         </template>
@@ -196,6 +240,9 @@ definePageMeta({
 
 const loadingPlace = ref(false);
 const loadingGroup = ref(false);
+const loadingZone = ref(false);
+const loadingType = ref(false);
+const loadingUser = ref(false);
 
 const filters = reactive({
   limit: 10,
@@ -222,6 +269,27 @@ const groups = reactive<{
   rows: [],
   total: 0
 })
+const zones = reactive<{
+  rows: Zone[],
+  total: number
+}>({
+  rows: [],
+  total: 0
+})
+const types = reactive<{
+  rows: Type[],
+  total: number
+}>({
+  rows: [],
+  total: 0
+})
+const users = reactive<{
+  rows: User[],
+  total: number
+}>({
+  rows: [],
+  total: 0
+})
 
 const modals = reactive({
   details: false,
@@ -229,14 +297,6 @@ const modals = reactive({
   create: false,
   menu: false
 });
-
-const roles = [
-  { label: "Taquilla", value: "taquilla" },
-  { label: "Técnico", value: "tecnico" },
-  { label: "Auditor", value: "auditor" },
-  { label: "Receptor", value: "receptor" },
-  { label: "Asistente", value: "asistente" },
-];
 
 
 const place = reactive<Place>({
@@ -321,7 +381,7 @@ const createPlace = async () => {
     }
     await setPlaces()
     ElNotification({
-      title: 'Usuario creada correctamente',
+      title: 'Taquilla creada correctamente',
       message: `${data.value?.name}`
     })
     place.id = undefined;
@@ -342,7 +402,7 @@ const updatePlaceStatus = async ({ active, placeId }: { active: string | number 
     let toSend = {
       isActive: active,
     };
-    const { data, error } = await useFetch<Place>(`/places/${placeId}`,
+    const { data, error } = await useFetch<Place>(`/locations/${placeId}`,
       {
         method: 'PATCH',
         body: toSend
@@ -354,10 +414,13 @@ const updatePlaceStatus = async ({ active, placeId }: { active: string | number 
     }
     await setPlaces()
     ElNotification({
-      title: 'Usuario modificada correctamente',
+      title: 'Taquilla modificada correctamente',
       message: `${data.value?.name}`
     })
   } catch (error) {
+    ElNotification({
+      title: 'Taquilla modificada correctamente',
+    })
   }
 }
 
@@ -368,7 +431,7 @@ const patchPlace = async () => {
     const body = useFilterObject(place);
     delete body.id
 
-    const { data, error } = await useFetch<Place>(`/places/${place.id}`,
+    const { data, error } = await useFetch<Place>(`/locations/${place.id}`,
       {
         method: 'PATCH',
         body
@@ -382,7 +445,7 @@ const patchPlace = async () => {
     }
     await setPlaces()
     ElNotification({
-      title: 'Usuario modificada correctamente',
+      title: 'Taquilla modificada correctamente',
       message: `${data.value?.name}`
     })
 
@@ -405,33 +468,51 @@ const editPlace = (row: Place) => {
   place.id = row.id;
   place.name = row.name || '';
   place.phone = row.phone || '';
+  place.rif = row.rif || '';
+  place.address = row.address || '';
+  place.code = row.code || '';
   place.groupId = row.group?.id;
+  place.zoneId = row.zone?.id;
+  place.managerId = row.manager?.id;
+  place.typeId = row.type?.id;
   place.isActive = row.isActive;
 
-  if (row.group) groups.rows.push(row.group)
+  if (row.group) {
+    groups.rows = []
+    groups.rows.push(row.group)
+  }
+  if (row.zone) {
+    zones.rows = []
+    zones.rows.push(row.zone)
+  }
+  if (row.manager) {
+    users.rows = []
+    users.rows.push(row.manager)
+  }
+  if (row.type) {
+    types.rows = []
+    types.rows.push(row.type)
+  }
 }
 
 const removePlace = async (id: number) => {
   try {
-    const { data, error } = await useFetch<Place>(`/places/${id}`, {
+    const { data, error } = await useFetch<Place>(`/locations/${id}`, {
       method: 'delete'
     })
 
     if (error.value) {
-      loadingPlace.value = false;
-      ElNotification({
-        message: 'Error al borrar el taquilla intente de nuevo mas tarde.'
-      });
-      return
+      throw new Error()
     }
 
     ElNotification({
-      message: 'El taquilla ha sido borrada.'
+      message: 'la taquilla ha sido borrada.'
     })
     await setPlaces()
   } catch (error) {
+    loadingPlace.value = false;
     ElNotification({
-      message: 'Error al borrar el taquilla intente de nuevo mas tarde.'
+      message: 'Error al borrar la taquilla intente de nuevo mas tarde.'
     })
   }
 }
@@ -446,6 +527,62 @@ const setPlaces = async () => {
   const rta = await getPlaces(query);
   places.rows = rta?.rows || []
   places.total = rta?.total || 0
+}
+
+const getZones = async ({ name }: {
+  name?: string
+}) => {
+  try {
+    loadingZone.value = true;
+    const { data, error } = await useFetch<{ total: number, rows: Zone[] }>('/locations/zones',
+      {
+        params: {
+          ...(name != '' && name && {
+            name
+          })
+        }
+      }
+    );
+    if (error.value) {
+      throw new Error()
+    }
+
+    loadingZone.value = false;
+    return data.value
+  } catch (error) {
+    loadingZone.value = false;
+    ElNotification({
+      message: 'Error al obtener las zonas intente de nuevo mas tarde'
+    })
+  }
+}
+
+const getTypes = async ({ name }: {
+  name?: string
+}) => {
+  try {
+    loadingType.value = true;
+    const { data, error } = await useFetch<{ total: number, rows: Type[] }>('/locations/types',
+      {
+        params: {
+          ...(name != '' && name && {
+            name
+          }),
+        }
+      }
+    );
+    if (error.value) {
+      throw new Error()
+    }
+
+    loadingType.value = false;
+    return data.value
+  } catch (error) {
+    loadingType.value = false;
+    ElNotification({
+      message: 'Error al obtener los tipos intente de nuevo mas tarde'
+    })
+  }
 }
 
 const getGroups = async ({
@@ -493,6 +630,47 @@ const getGroups = async ({
   }
 }
 
+const getUser = async ({
+  search,
+  limit = 10,
+  offset = 0
+}: {
+  search?: string,
+  limit?: number,
+  offset?: number
+}) => {
+  try {
+    loadingUser.value = true;
+    const { data, error } = await useFetch<{ total: number, rows: User[] }>('/users',
+      {
+        params: {
+          ...(search != '' && search && {
+            search
+          }),
+          ...(offset && {
+            offset: (offset - 1) * limit
+          }),
+          ...(limit && {
+            limit
+          })
+        }
+      }
+    );
+    if (error.value) {
+      throw new Error()
+    }
+
+    loadingUser.value = false;
+    return data.value
+  } catch (error) {
+    loadingGroup.value = false;
+    ElNotification({
+      title: 'Error al obtener las marcas intente de nuevo mas tarde'
+    })
+  }
+}
+
+
 const setGroup = async (query?: string) => {
   const search = {
     name: query,
@@ -500,6 +678,31 @@ const setGroup = async (query?: string) => {
   const rta = await getGroups(search);
   groups.rows = rta?.rows || []
   groups
+}
+const setZone = async (query?: string) => {
+  const search = {
+    name: query,
+  }
+  const rta = await getZones(search);
+  zones.rows = rta?.rows || []
+  zones.total = rta?.total || 0
+}
+const setTypes = async (query?: string) => {
+  const search = {
+    name: query,
+  }
+  const rta = await getTypes(search);
+  types.rows = rta?.rows || []
+  types.total = rta?.total || 0
+}
+
+const setUser = async (query?: string) => {
+  const search = {
+    search: query
+  }
+  const rta = await getUser(search);
+  users.rows = rta?.rows || []
+  users.total = rta?.total || 0
 }
 
 watch(filters, useDebounce(async () => {

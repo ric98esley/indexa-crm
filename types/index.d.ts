@@ -85,6 +85,7 @@ declare global {
     zone?: Zone;
     typeId?: number;
     managerId?: number;
+    manager?: User;
     phone: string;
     rif: string
     address: string
