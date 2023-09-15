@@ -1,7 +1,7 @@
 <template>
   <el-container direction="vertical" class="p-3">
     <el-row :span="24" :gutter="12">
-      <el-table :data="response.rows" stripe v-loading="loadingType">
+      <el-table :data="response.rows" stripe v-loading="loadingZone">
         <el-table-column type="expand" width="50">
           <template #default="props">
             <el-row :span="24" :gutter="24">
@@ -23,13 +23,13 @@
         <el-table-column label="Acciones">
           <template #default="props">
             <el-row>
-              <el-button type="info" circle @click="editType(props.row)">
+              <el-button type="info" circle @click="editZone(props.row)">
                 <Icon name="ep:edit" />
               </el-button>
               <el-button type="primary" circle>
                 <Icon name="ep:view" />
               </el-button>
-              <el-button type="danger" circle @click="removeType(props.row.id)" v-role="['superuser', 'auditor']">
+              <el-button type="danger" circle @click="removeZone(props.row.id)" v-role="['superuser', 'auditor']">
                 <Icon name="ep:delete" />
               </el-button>
             </el-row>
@@ -46,13 +46,13 @@
           <h2>Crear nueva tipo</h2>
         </template>
         <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="type"
-            @submit.prevent="createType()">
+          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="zone"
+            @submit.prevent="createZone()">
             <el-form-item label="Nombre">
-              <el-input v-model="type.name" placeholder="Ingrese aqui el nombre"></el-input>
+              <el-input v-model="zone.name" placeholder="Ingrese aqui el nombre"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!type.name" native-type="submit">Crear</el-button>
+              <el-button type="primary" :disabled="!zone.name" native-type="submit">Crear</el-button>
             </el-form-item>
           </el-form>
         </template>
@@ -62,13 +62,13 @@
           <h2>Editar tipo</h2>
         </template>
         <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="type"
-            @submit.prevent="patchType()">
+          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="zone"
+            @submit.prevent="patchZone()">
             <el-form-item label="Nombre">
-              <el-input v-model="type.name" placeholder="Ingrese aqui el nombre"></el-input>
+              <el-input v-model="zone.name" placeholder="Ingrese aqui el nombre"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!type.name" native-type="submit">Editar</el-button>
+              <el-button type="primary" :disabled="!zone.name" native-type="submit">Editar</el-button>
             </el-form-item>
           </el-form>
         </template>
@@ -92,7 +92,7 @@ definePageMeta({
   roles: ['superuser', 'admin', 'auditor'],
 });
 
-const loadingType = ref(false);
+const loadingZone = ref(false);
 
 const filters = reactive({
   limit: 10,
@@ -101,7 +101,7 @@ const filters = reactive({
 });
 
 const response = reactive<{
-  rows: Type[],
+  rows: Zone[],
   total: number
 }>({
   rows: [],
@@ -116,7 +116,7 @@ const modals = reactive({
 });
 
 
-const type = reactive<{
+const zone = reactive<{
   id?: number,
   name: string
 }>({
@@ -125,10 +125,10 @@ const type = reactive<{
 });
 
 
-const getTypes = async () => {
+const getZones = async () => {
   try {
-    loadingType.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Type[] }>('/locations/types',
+    loadingZone.value = true;
+    const { data, error } = await useFetch<{ total: number, rows: Zone[] }>('/locations/zones',
       {
         params: {
           ...(filters.name != '' && filters.name && {
@@ -147,29 +147,29 @@ const getTypes = async () => {
       throw new Error()
     }
 
-    loadingType.value = false;
+    loadingZone.value = false;
     return data.value
   } catch (error) {
-    loadingType.value = false;
+    loadingZone.value = false;
     ElNotification({
-      message: 'Error al obtener los tipos intente de nuevo mas tarde'
+      message: 'Error al obtener las zonas intente de nuevo mas tarde'
     })
   }
 }
 
-const createType = async () => {
+const createZone = async () => {
   try {
-    loadingType.value = true;
+    loadingZone.value = true;
 
-    const { data, error } = await useFetch<Type>('/locations/types',
+    const { data, error } = await useFetch<Zone>('/locations/zones',
       {
         method: 'post',
         body: {
-          name: type.name,
+          name: zone.name,
         }
       },
     )
-    loadingType.value = false;
+    loadingZone.value = false;
 
     if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
       ElNotification({
@@ -178,69 +178,69 @@ const createType = async () => {
       })
       return
     }
-    await setTypes()
+    await setZones()
     ElNotification({
-      title: 'Tipo creada correctamente',
+      title: 'Zona creada correctamente',
       message: `${data.value?.name}`
     })
-    type.id = undefined;
-    type.name = '';
+    zone.id = undefined;
+    zone.name = '';
     return data.value
   } catch (error) {
-    loadingType.value = false;
+    loadingZone.value = false;
     ElNotification({
-      title: 'Error al crear tipos intente de nuevo mas tarde',
+      title: 'Error al crear zona intente de nuevo mas tarde',
     })
   }
 }
 
-const patchType = async () => {
+const patchZone = async () => {
   try {
-    loadingType.value = true;
+    loadingZone.value = true;
 
     const body = {
-      name: type.name,
+      name: zone.name,
     }
 
-    const { data, error } = await useFetch<Type>(`/locations/types/${type.id}`,
+    const { data, error } = await useFetch<Zone>(`/locations/zones/${zone.id}`,
       {
         method: 'PATCH',
         body
       }
     );
-    loadingType.value = false;
+    loadingZone.value = false;
 
 
     if (error.value) {
-      throw error
+      throw new Error()
     }
-    await setTypes()
+    await setZones()
     ElNotification({
-      title: 'Tipo modificada correctamente',
+      title: 'Zona modificada correctamente',
       message: `${data.value?.name}`
     })
 
-    type.id = undefined;
-    type.name = '';
+    zone.id = undefined;
+    zone.name = '';
     return data.value
   } catch (error) {
-    loadingType.value = false;
+    loadingZone.value = false;
     ElNotification({
-      title: 'Error al modificar la Tipo intente de nuevo mas tarde',
+      title: 'Error al modificar la zona intente de nuevo mas tarde',
     })
     console.log(error)
   }
 }
 
-const editType = (row: Type) => {
+const editZone = (row: Zone) => {
   modals.edit = true;
-  type.id = row.id;
-  type.name = row.name || '';
+  zone.id = row.id;
+  zone.name = row.name || '';
 }
 
-const removeType = async (id: number) => {
+const removeZone = async (id: number) => {
   try {
-    const { data, error } = await useFetch<Type>(`/locations/types/${id}`, {
+    const { data, error } = await useFetch<Zone>(`/locations/zones/${id}`, {
       method: 'delete'
     })
 
@@ -249,29 +249,38 @@ const removeType = async (id: number) => {
     }
 
     ElNotification({
-      message: 'La Tipo ha sido borrada.'
+      message: 'La zona ha sido borrada.'
     })
-    await setTypes()
+    await setZones()
   } catch (error) {
-    loadingType.value = false;
+    loadingZone.value = false;
     ElNotification({
-      message: 'Error al borrar la Tipo intente de nuevo mas tarde.'
+      message: 'Error al borrar la zona intente de nuevo mas tarde.'
     })
   }
 }
 
-const setTypes = async () => {
-  const rta = await getTypes();
+const setZones = async () => {
+  const rta = await getZones();
   response.rows = rta?.rows || []
   response.total = rta?.total || 0
 }
 
 watch(filters, useDebounce(async () => {
-  await setTypes()
+  await setZones()
 }, 500)
 )
 
+
+watch(() => modals.edit, async () => {
+  if (modals.edit) {
+  } else {
+    zone.id = undefined;
+    zone.name = '';
+  }
+})
+
 onMounted(async () => {
-  await setTypes();
+  await setZones();
 });
 </script>

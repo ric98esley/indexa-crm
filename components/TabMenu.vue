@@ -48,9 +48,9 @@ const props = defineProps({
         <template #title>
           {{ group.title }}
         </template>
-        <el-menu-item :index="`${indexMenu}-${indexGroup}`" v-for="menu in group.items" :route="menu.path"
-          v-role="menu.roles">
-          {{ menu.title }}
+        <el-menu-item :index="`${indexMenu}-${indexGroup}-${indexItem}`" v-for="(Item, indexItem) in group.items" :route="Item.path"
+          v-role="Item.roles">
+          {{ Item.title }}
         </el-menu-item>
       </el-menu-item-group>
       <el-sub-menu v-if="menu.submenus" v-for="(submenu, indexSubmenu) in menu.submenus"

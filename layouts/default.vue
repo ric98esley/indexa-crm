@@ -138,7 +138,7 @@ const menusA = reactive([
               'auditor',
               'receptor'
             ],
-            title: 'taquillas',
+            title: 'Taquillas',
             path: '/places'
           },
           {
@@ -146,8 +146,16 @@ const menusA = reactive([
               'superuser',
               'auditor',
             ],
-            title: 'tipos',
+            title: 'Tipos',
             path: '/places/type'
+          },
+          {
+            roles: [
+              'superuser',
+              'auditor',
+            ],
+            title: 'Zonas',
+            path: '/places/zone'
           }
         ]
       }
