@@ -1,6 +1,6 @@
 <template>
   <el-container direction="vertical">
-    <el-row :span="24">
+    <!-- <el-row :span="24">
       <el-card class="w-full m-2">
         <template #header>
           Buscar activos
@@ -14,14 +14,14 @@
           </el-col>
         </el-row>
       </el-card>
-    </el-row>
+    </el-row> -->
 
-    <el-table :data="response.assets" v-loading="loading">
+    <el-table :data="response.assets" v-loading="loading" :row-class-name="assetstatus">
       <el-table-column type="index" width="50" />
       <el-table-column type="expand" width="50">
         <template #default="props">
-          <el-table :data="props.row.customFields" :border="true">
-            <el-table-column label="Campo" prop="name"></el-table-column>
+          <el-table :data="props.row.specifications" :border="true">
+            <el-table-column label="Campo" prop="type.name"></el-table-column>
             <el-table-column label="Valor" prop="value"></el-table-column>
           </el-table>
         </template>
@@ -105,6 +105,23 @@ const filters = reactive({
   deposit: ''
 })
 
+const assetstatus = ({
+  row,
+  rowIndex,
+}: {
+  row: Asset,
+  rowIndex: number
+}) => {
+  if (row.deposit && row.deposit.state === 'archivado') {
+    return 'danger-row'
+  } else if (row.deposit && row.deposit.state === 'pendiente') {
+    return 'warning-row'
+  } else if (row.deposit && row.enabled === false) {
+    return 'success-row'
+  }
+  return ''
+}
+
 
 const getAssets = async () => {
   try {
@@ -155,3 +172,15 @@ onMounted(async () => {
 })
 
 </script>
+
+<style>
+.el-table .warning-row {
+  --el-table-tr-bg-color: var(--el-color-warning-light-5);
+}
+.el-table .success-row {
+  --el-table-tr-bg-color: var(--el-color-success-light-5);
+}
+.el-table .danger-row {
+  --el-table-tr-bg-color: var(--el-color-danger-light-5);
+}
+</style>

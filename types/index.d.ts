@@ -1,4 +1,4 @@
-export { NewAsset, Invoice, User, Category, Brand, Model, State }
+export { NewAsset, Invoice, User, Category, Brand, Model, Deposit }
 
 declare global {
 
@@ -65,9 +65,10 @@ declare global {
     countChecking?: number,
     notes?: string,
     invoiceId?: number,
-    state?: State,
+    deposit?: Deposit,
     model?: Model,
     assignment?: any
+    enabled: boolean
   }
 
   interface Provider extends Base {
