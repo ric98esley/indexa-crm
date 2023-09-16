@@ -121,7 +121,7 @@ const menusA = reactive([
     ],
   },
   {
-    title: 'Taquillas',
+    title: 'Agencias',
     icon: 'ep:school',
     roles: [
       'superuser',
@@ -130,7 +130,7 @@ const menusA = reactive([
     ],
     groups: [
       {
-        title: 'Ver y crear taquillas',
+        title: 'Ver y crear agencias',
         items: [
           {
             roles: [
@@ -138,7 +138,7 @@ const menusA = reactive([
               'auditor',
               'receptor'
             ],
-            title: 'Taquillas',
+            title: 'Agencias',
             path: '/places'
           },
           {

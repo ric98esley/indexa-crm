@@ -59,7 +59,7 @@
     <el-container>
       <el-dialog v-model="modals.create">
         <template #header>
-          <h2>Crear nuevo taquilla</h2>
+          <h2>Crear nuevo agencia</h2>
         </template>
         <template #default>
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="place"
@@ -67,7 +67,7 @@
             <el-row :gutter="20">
               <el-col :span="18">
                 <el-form-item label="Código">
-                  <el-input v-model="place.code" placeholder="Ingrese el código de la taquilla"></el-input>
+                  <el-input v-model="place.code" placeholder="Ingrese el código de la agencia"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="4">
@@ -90,7 +90,7 @@
             <el-form-item label="Teléfono">
               <el-input v-model="place.phone" placeholder="Ingrese el teléfono"></el-input>
             </el-form-item>
-            <el-form-item label="Tipo de taquilla">
+            <el-form-item label="Tipo de agencia">
               <el-select class="w-full" v-model="place.typeId" filterable remote placeholder="Elige un tipo"
                 :loading="loadingType" :remote-method="setTypes">
                 <el-option v-for="item in types.rows" :key="item.id" :label="item.name" :value="item.id!">
@@ -139,7 +139,7 @@
       </el-dialog>
       <el-dialog v-model="modals.edit">
         <template #header>
-          <h2>Editar taquilla</h2>
+          <h2>Editar agencia</h2>
         </template>
         <template #default>
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="place"
@@ -147,7 +147,7 @@
             <el-row :gutter="20">
               <el-col :span="18">
                 <el-form-item label="Código">
-                  <el-input v-model="place.code" placeholder="Ingrese el código de la taquilla"></el-input>
+                  <el-input v-model="place.code" placeholder="Ingrese el código de la agencia"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="4">
@@ -170,7 +170,7 @@
             <el-form-item label="Teléfono">
               <el-input v-model="place.phone" placeholder="Ingrese el teléfono"></el-input>
             </el-form-item>
-            <el-form-item label="Tipo de taquilla">
+            <el-form-item label="Tipo de agencia">
               <el-select class="w-full" v-model="place.typeId" filterable remote placeholder="Elige un tipo"
                 :loading="loadingType" :remote-method="setTypes">
                 <el-option v-for="item in types.rows" :key="item.id" :label="item.name" :value="item.id!">
@@ -355,7 +355,7 @@ const getPlaces = async ({
       }
     );
     if (error.value) {
-      throw new Error('Error al cargar los taquillas')
+      throw new Error('Error al cargar los agencias')
     }
 
     loadingPlace.value = false;
@@ -363,7 +363,7 @@ const getPlaces = async ({
   } catch (error) {
     loadingPlace.value = false;
     ElNotification({
-      message: 'Error al obtener las taquilla intente de nuevo mas tarde'
+      message: 'Error al obtener las agencia intente de nuevo mas tarde'
     })
   }
 }
@@ -384,14 +384,14 @@ const createPlace = async () => {
 
     if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
       ElNotification({
-        title: 'Error al crear taquilla intente de nuevo mas tarde',
+        title: 'Error al crear agencia intente de nuevo mas tarde',
         message: error.value?.data.message.message,
       })
       return
     }
     await setPlaces()
     ElNotification({
-      title: 'Taquilla creada correctamente',
+      title: 'Agencia creada correctamente',
       message: `${data.value?.name}`
     })
     place.id = undefined;
@@ -402,7 +402,7 @@ const createPlace = async () => {
   } catch (error) {
     loadingPlace.value = false;
     ElNotification({
-      title: 'Error al crear taquilla intente de nuevo mas tarde',
+      title: 'Error al crear agencia intente de nuevo mas tarde',
     })
   }
 }
@@ -424,12 +424,12 @@ const updatePlaceStatus = async ({ active, placeId }: { active: string | number 
     }
     await setPlaces()
     ElNotification({
-      title: 'Taquilla modificada correctamente',
+      title: 'Agencia modificada correctamente',
       message: `${data.value?.name}`
     })
   } catch (error) {
     ElNotification({
-      title: 'Taquilla modificada correctamente',
+      title: 'Agencia modificada correctamente',
     })
   }
 }
@@ -455,7 +455,7 @@ const patchPlace = async () => {
     }
     await setPlaces()
     ElNotification({
-      title: 'Taquilla modificada correctamente',
+      title: 'Agencia modificada correctamente',
       message: `${data.value?.name}`
     })
 
@@ -467,7 +467,7 @@ const patchPlace = async () => {
   } catch (error) {
     loadingPlace.value = false;
     ElNotification({
-      title: 'Error al modificar el taquilla intente de nuevo mas tarde',
+      title: 'Error al modificar el agencia intente de nuevo mas tarde',
     })
     console.log(error)
   }
@@ -516,13 +516,13 @@ const removePlace = async (id: number) => {
     }
 
     ElNotification({
-      message: 'la taquilla ha sido borrada.'
+      message: 'la agencia ha sido borrada.'
     })
     await setPlaces()
   } catch (error) {
     loadingPlace.value = false;
     ElNotification({
-      message: 'Error al borrar la taquilla intente de nuevo mas tarde.'
+      message: 'Error al borrar la agencia intente de nuevo mas tarde.'
     })
   }
 }

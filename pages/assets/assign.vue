@@ -63,7 +63,7 @@
               </template>
               <template #extra>
                 <el-button @click="modals.assign = true">Elige la agencia</el-button>
-                <el-button type="primary" v-if="assignments.place" :disabled="assetsCount == 0">Asignar</el-button>
+                <el-button type="primary" v-if="assignments.place" :disabled="assetsCount == 0" @click="checkout()">Asignar</el-button>
               </template>
               <template v-if="assignments.place">
 
@@ -98,7 +98,7 @@
                   <template #label>
                     <div class="cell-item">
                       <Icon name="ep:school" />
-                      Taquilla
+                      Agencia
                     </div>
                   </template>
                   {{ assignments.place?.name }}
@@ -177,9 +177,9 @@
                   ">{{ item.name }}</span> </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="Taquilla" v-if="assignments.groupId">
+            <el-form-item label="Agencia" v-if="assignments.groupId">
               <el-select class="w-full" v-model="assignments.place" filterable remote effect="dark"
-                placeholder="Elige una taquilla" :loading="loadingPlace" :remote-method="setPlaces"
+                placeholder="Elige una agencia" :loading="loadingPlace" :remote-method="setPlaces"
                 @change="(value) => console.log(value)">
                 <el-option v-for="item in places.rows" :key="item.id"
                   :label="`${item.code} - ${item.name} -  ${item.group?.code}`" :value="item">
@@ -199,6 +199,7 @@
 </template>
 
 <script lang="ts" setup>
+
 definePageMeta({
   middleware: [
     'nuxt-permissions'
@@ -333,7 +334,6 @@ const deleteAssignment = (row: Asset) => {
 }
 
 const getPlaces = async ({
-  id,
   search,
   groupId,
 }: {
@@ -357,7 +357,7 @@ const getPlaces = async ({
       }
     );
     if (error.value) {
-      throw new Error('Error al cargar los taquillas')
+      throw new Error('Error al cargar los agencias')
     }
 
     loadingPlace.value = false;
@@ -365,7 +365,7 @@ const getPlaces = async ({
   } catch (error) {
     loadingPlace.value = false;
     ElNotification({
-      message: 'Error al obtener las taquilla intente de nuevo mas tarde'
+      message: 'Error al obtener las agencia intente de nuevo mas tarde'
     })
   }
 }
@@ -445,9 +445,33 @@ const setPlaces = async (search: string) => {
   places.total = rta?.total || 0
 }
 
-watch(() => assignments.place, () => {
+const checkout = async () => {
+  try {
+    const { data, error } = await useFetch(
+      '/orders/checkout',
+      {
+        method: 'post',
+        body: {
+          targets: assetsId.value,
+          locationId: assignments.place!.id
+        }
+      }
+    );
 
-})
+    if(error.value) {
+      throw new Error()
+    }
+    ElNotification({
+      message: "Activos asignado correctamente",
+    });
+    await getAssets();
+  } catch (error) {
+    ElNotification({
+      message: "Vuelve a intentarlo mas tarde",
+    });
+    console.log(error);
+  }
+}
 
 watch(filters, useDebounce(async () => {
   await getAssets()
