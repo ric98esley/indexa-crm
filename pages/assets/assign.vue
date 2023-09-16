@@ -301,6 +301,7 @@ const getAssets = async () => {
             brand: filters.brand
           }),
           enabled: true,
+          status: 'desplegable',
           ...(filters.offset && {
             offset: (filters.offset - 1) * filters.limit
           }),

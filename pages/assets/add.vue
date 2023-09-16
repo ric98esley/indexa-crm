@@ -129,7 +129,7 @@
                   <span style="float: left">{{ item.name }}</span>
                 </el-option>
               </el-select>
-              <el-autocomplete type="text" clearable :fetch-suggestions="searchInvoice" placeholder="Codigo de la factura"
+              <el-autocomplete type="text" clearable :fetch-suggestions="searchInvoice" placeholder="Código de la factura"
                 @select="handleSelectInvoice" v-model="toAdd.invoice.code" class="w-full">
                 <template #default="{ item }">
                   <div class="value">
@@ -205,13 +205,11 @@ const modals = reactive({
 
 
 const response = reactive<{
-  models: Model[],
   deposits: Deposit[]
   categories: any[]
   providers: Provider[]
 }>({
   categories: [],
-  models: [],
   deposits: [],
   providers: []
 })
@@ -239,7 +237,7 @@ const rules = reactive<FormRules<NewAsset>>({
     },
     {
       min: 3,
-      message: 'Minimo 3 caracteres',
+      message: 'Mínimo 3 caracteres',
       trigger: 'blur'
     },
   ]
@@ -437,7 +435,6 @@ const addAssets = async () => {
       }
     });
 
-    console.log(error)
 
     if (data.value) {
       for (const asset of data.value.created) {
