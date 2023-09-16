@@ -2,7 +2,7 @@
   <el-col :gutter="20">
     <el-row :span="24" class="p-4">
       <el-card class="w-full">
-        <el-table :data="response.assets" v-loading="loading" :row-class-name="assetstatus">
+        <el-table :data="response.assets" v-loading="loadingAssets" :row-class-name="assetStatus">
           <el-table-column type="index" width="50" />
           <el-table-column type="expand" width="50">
             <template #default="props">
@@ -22,9 +22,9 @@
               <el-input v-model="filters.deposit" placeholder="Estado" clearable />
             </template>
           </el-table-column>
-          <el-table-column label="Categoria" prop="model.category.name">
+          <el-table-column label="Categoría" prop="model.category.name">
             <template #header>
-              <el-input v-model="filters.category" placeholder="Categoria" clearable />
+              <el-input v-model="filters.category" placeholder="Categoría" clearable />
             </template>
           </el-table-column>
           <el-table-column label="Marca" prop="model.brand.name">
@@ -40,7 +40,7 @@
           <el-table-column label="Acciones">
             <template #default="{ row }">
               <el-row>
-                <el-button type="primary" circle @click="addAssignment(row)">
+                <el-button type="primary" circle @click="addAssignment(row)" :disabled="assetsId.includes(row.id)">
                   <Icon name="ep:plus" />
                 </el-button>
               </el-row>
@@ -48,7 +48,7 @@
           </el-table-column>
         </el-table>
         <el-pagination class="m-4" v-model:current-page="filters.offset" v-model:page-size="filters.limit"
-          :page-sizes="[5, 10]" :background="true" layout="total, sizes, prev, pager, next, jumper"
+          :page-sizes="[2, 5, 10]" :background="true" layout="total, sizes, prev, pager, next, jumper"
           :total="response.total" />
       </el-card>
 
@@ -56,75 +56,145 @@
     <el-row :span="24" class="p-4">
       <el-card class="w-full">
         <template #header>
-          <el-row >
-            <el-descriptions class="margin-top w-full" :title="`Datos de la asignacion - activos ${ assetsId.values.length }`" :column="3" border>
-              <template #extra>
-                <el-button type="primary">Asignar</el-button>
+          <el-row>
+            <el-descriptions class="margin-top w-full" :column="3" border>
+              <template #title>
+                Datos de la asignación - activos {{ assetsCount }}
               </template>
-              <el-descriptions-item>
-                <template #label>
-                  <div class="cell-item">
-                    <Icon name="ep:user"/>
-                    Responsable
-                  </div>
-                </template>
-                Jhonatan
-              </el-descriptions-item>
-              <el-descriptions-item>
-                <template #label>
-                  <div class="cell-item">
-                    <Icon name="mdi-light:eye"/>
-                    Codigo
-                  </div>
-                </template>
-                EX100
-              </el-descriptions-item>
-              <el-descriptions-item>
-                <template #label>
-                  <div class="cell-item">
-                    <Icon name="ep:phone"/>
-                    Telefono
-                  </div>
-                </template>
-                18100000000
-              </el-descriptions-item>
-              <el-descriptions-item>
-                <template #label>
-                  <div class="cell-item">
-                    <Icon name="ep:school"/>
-                    Taquilla
-                  </div>
-                </template>
-                El cacho
-              </el-descriptions-item>
-              <el-descriptions-item>
-                <template #label>
-                  <div class="cell-item">
-                    <Icon name="ep:connection"/>
-                    Grupo
-                  </div>
-                </template>
-                PROPIAS
-              </el-descriptions-item>
-              <el-descriptions-item>
-                <template #label>
-                  <div class="cell-item">
-                    <Icon name="ep:place"/>
-                    Dirección
-                  </div>
-                </template>
-                Al lado de mis vecinos
-              </el-descriptions-item>
+              <template #extra>
+                <el-button @click="modals.assign = true">Elige la agencia</el-button>
+                <el-button type="primary" v-if="assignments.place" :disabled="assetsCount == 0">Asignar</el-button>
+              </template>
+              <template v-if="assignments.place">
+
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">
+                      <Icon name="ep:user" />
+                      Responsable
+                    </div>
+                  </template>
+                  {{ assignments.place?.manager?.name }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">
+                      <Icon name="mdi-light:eye" />
+                      Código
+                    </div>
+                  </template>
+                  {{ assignments.place?.code }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">
+                      <Icon name="ep:phone" />
+                      Teléfono
+                    </div>
+                  </template>
+                  {{ assignments.place?.phone }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">
+                      <Icon name="ep:school" />
+                      Taquilla
+                    </div>
+                  </template>
+                  {{ assignments.place?.name }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">
+                      <Icon name="ep:connection" />
+                      Grupo
+                    </div>
+                  </template>
+                  {{ assignments.place?.group?.code }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">
+                      <Icon name="ep:place" />
+                      Dirección
+                    </div>
+                  </template>
+                  {{ assignments.place?.address }}
+                </el-descriptions-item>
+              </template>
             </el-descriptions>
           </el-row>
         </template>
         <template #default>
           <el-table :data="assignments.assets">
-            <el-table-column prop="serial" label="Serial"></el-table-column>
+            <el-table-column type="index" width="50" />
+            <el-table-column type="expand" width="50">
+              <template #default="props">
+                <el-table :data="props.row.specifications" :border="true">
+                  <el-table-column label="Campo" prop="type.name"></el-table-column>
+                  <el-table-column label="Valor" prop="value"></el-table-column>
+                </el-table>
+              </template>
+            </el-table-column>
+            <el-table-column label="Serial" prop="serial">
+            </el-table-column>
+            <el-table-column label="Estado" prop="deposit.name">
+            </el-table-column>
+            <el-table-column label="Categoría" prop="model.category.name">
+            </el-table-column>
+            <el-table-column label="Marca" prop="model.brand.name">
+            </el-table-column>
+            <el-table-column label="Modelo" prop="model.name">
+            </el-table-column>
+            <el-table-column>
+              <template #default="{ row }">
+                <el-button type="danger" circle @click="deleteAssignment(row)" v-role="['superuser', 'auditor']">
+                  <Icon name="ep:delete" />
+                </el-button>
+              </template>
+            </el-table-column>
           </el-table>
         </template>
       </el-card>
     </el-row>
+    <el-container>
+      <el-dialog v-model="modals.assign">
+        <template #header>
+          <h2>Buscar </h2>
+        </template>
+        <template #default>
+          <el-form label-width="120px">
+            <el-form-item label="Grupo">
+              <el-select class="w-full" v-model="assignments.groupId" filterable remote placeholder="Elige un grupo"
+                :loading="loadingGroup" :remote-method="setGroup">
+                <el-option v-for="item in groups.rows" :key="item.id" :label="`${item.code} - ${item.name}`"
+                  :value="item.id!">
+                  <span style="float: left">{{ item.code }}</span>
+                  <span style="
+                      float: right;
+                      color: var(--el-text-color-secondary);
+                      font-size: 13px;
+                  ">{{ item.name }}</span> </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="Taquilla" v-if="assignments.groupId">
+              <el-select class="w-full" v-model="assignments.place" filterable remote effect="dark"
+                placeholder="Elige una taquilla" :loading="loadingPlace" :remote-method="setPlaces"
+                @change="(value) => console.log(value)">
+                <el-option v-for="item in places.rows" :key="item.id"
+                  :label="`${item.code} - ${item.name} -  ${item.group?.code}`" :value="item">
+                  <span style="float: left">{{ item.code }} {{ item.name }}</span>
+                  <span style="
+                      float: right;
+                      color: var(--el-text-color-secondary);
+                      font-size: 13px;
+                  ">{{ item.group?.code }}</span> </el-option>
+              </el-select>
+            </el-form-item>
+          </el-form>
+        </template>
+      </el-dialog>
+    </el-container>
   </el-col>
 </template>
 
@@ -136,6 +206,11 @@ definePageMeta({
   roles: ['superuser', 'admin', 'tecnico', 'receptor'],
 })
 
+const loadingAssets = ref(true)
+const loadingPlace = ref(false);
+const loadingGroup = ref(false);
+
+
 const response = reactive<{
   assets: Asset[],
   total: number
@@ -144,20 +219,40 @@ const response = reactive<{
   total: 0
 });
 
-const assignments = reactive<{
-  assets: Asset[]
+const places = reactive<{
+  rows: Place[],
+  total: number
 }>({
-  assets: []
+  rows: [],
+  total: 0
+});
+
+const groups = reactive<{
+  rows: Group[],
+  total: number
+}>({
+  rows: [],
+  total: 0
+})
+
+const assignments = reactive<{
+  assets: Asset[],
+  place?: Place,
+  locationId?: number,
+  groupId?: number
+}>({
+  assets: [],
+  place: undefined,
+  locationId: undefined
 })
 
 const modals = reactive({
-  edit: false
+  edit: false,
+  assign: false
 })
 
-const loading = ref(true)
-
 const filters = reactive({
-  limit: 5,
+  limit: 2,
   offset: 0,
   serial: '',
   category: '',
@@ -166,7 +261,7 @@ const filters = reactive({
   deposit: ''
 })
 
-const assetstatus = ({
+const assetStatus = ({
   row,
   rowIndex,
 }: {
@@ -183,10 +278,9 @@ const assetstatus = ({
   return ''
 }
 
-
 const getAssets = async () => {
   try {
-    loading.value = true;
+    loadingAssets.value = true;
     const { data, pending, error } = await useFetch<{ assets: Asset[], total: number }>('/assets',
       {
         params: {
@@ -217,11 +311,11 @@ const getAssets = async () => {
     );
     response.assets = data.value?.assets || [];
     response.total = data.value?.total || 0;
-    loading.value = false;
+    loadingAssets.value = false;
 
     return { data, error, pending }
   } catch (error) {
-    loading.value = false;
+    loadingAssets.value = false;
   }
 }
 
@@ -231,10 +325,128 @@ const addAssignment = (row: Asset) => {
   assignments.assets.push(row);
 }
 
+const deleteAssignment = (row: Asset) => {
+  const index = assignments.assets.indexOf(row);
+  if (index !== -1) {
+    assignments.assets.splice(index, 1);
+  }
+}
+
+const getPlaces = async ({
+  id,
+  search,
+  groupId,
+}: {
+  id?: number,
+  search?: string,
+  groupId?: number
+}) => {
+  try {
+    loadingPlace.value = true;
+    const { data, error } = await useFetch<{ total: number, rows: Place[] }>('/locations',
+      {
+        params: {
+
+          ...(search != '' && search && {
+            search
+          }),
+          ...(groupId && {
+            groupId
+          }),
+        }
+      }
+    );
+    if (error.value) {
+      throw new Error('Error al cargar los taquillas')
+    }
+
+    loadingPlace.value = false;
+    return data.value
+  } catch (error) {
+    loadingPlace.value = false;
+    ElNotification({
+      message: 'Error al obtener las taquilla intente de nuevo mas tarde'
+    })
+  }
+}
+
+const getGroups = async ({
+  name,
+  limit = 10,
+  offset = 0
+}: {
+  id?: number,
+  name?: string,
+  code?: string,
+  parent?: string,
+  limit?: number,
+  offset?: number
+}) => {
+  try {
+    loadingGroup.value = true;
+    const { data, error } = await useFetch<{ total: number, rows: Group[] }>('/groups',
+      {
+        params: {
+          ...(name != '' && name && {
+            name
+          }),
+          ...(offset && {
+            offset: (offset - 1) * limit
+          }),
+          ...(limit && {
+            limit
+          })
+        }
+      }
+    );
+    if (error.value) {
+      ElNotification({
+        message: 'Error al obtener las marcas intente de nuevo mas tarde'
+      })
+    }
+
+    loadingGroup.value = false;
+    return data.value
+  } catch (error) {
+    loadingGroup.value = false;
+    ElNotification({
+      message: 'Error al obtener las marcas intente de nuevo mas tarde'
+    })
+  }
+}
+
 const assetsId = computed(() => {
   return assignments.assets.map((asset) => {
     return asset.id;
   });
+})
+
+const assetsCount = computed(() => {
+  return assignments.assets.length
+})
+
+
+const setGroup = async (query?: string) => {
+  const search = {
+    name: query,
+  }
+  const rta = await getGroups(search);
+  groups.rows = rta?.rows || []
+  groups
+}
+
+const setPlaces = async (search: string) => {
+  const query = {
+    search,
+    groupId: assignments.groupId
+  }
+  const rta = await getPlaces(query);
+  places.rows = rta?.rows || []
+  places.total = rta?.total || 0
+}
+
+watch(() => assignments.place, () => {
+
 })
 
 watch(filters, useDebounce(async () => {

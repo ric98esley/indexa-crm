@@ -20,7 +20,7 @@
             <el-input v-model="filters.name" placeholder="Nombre" clearable />
           </template>
         </el-table-column>
-        <el-table-column label="Codigo" prop="code">
+        <el-table-column label="Código" prop="code">
           <template #header>
             <el-input v-model="filters.code" placeholder="Código" clearable />
           </template>
@@ -66,7 +66,7 @@
             @submit.prevent="createPlace()">
             <el-row :gutter="20">
               <el-col :span="18">
-                <el-form-item label="Codigo">
+                <el-form-item label="Código">
                   <el-input v-model="place.code" placeholder="Ingrese el código de la taquilla"></el-input>
                 </el-form-item>
               </el-col>
@@ -146,7 +146,7 @@
             @submit.prevent="patchPlace()">
             <el-row :gutter="20">
               <el-col :span="18">
-                <el-form-item label="Codigo">
+                <el-form-item label="Código">
                   <el-input v-model="place.code" placeholder="Ingrese el código de la taquilla"></el-input>
                 </el-form-item>
               </el-col>
@@ -316,11 +316,15 @@ const place = reactive<Place>({
 const getPlaces = async ({
   id,
   name,
+  code,
+  group,
   limit = 10,
   offset = 0
 }: {
   id?: number,
   name?: string,
+  code?: string,
+  group?: string,
   limit?: number,
   offset?: number
 }) => {
@@ -334,6 +338,12 @@ const getPlaces = async ({
           }),
           ...(name != '' && name && {
             name
+          }),
+          ...(code != '' && code && {
+            code
+          }),
+          ...(group != '' && group && {
+            group
           }),
           ...(offset && {
             offset: (offset - 1) * limit
@@ -517,18 +527,6 @@ const removePlace = async (id: number) => {
   }
 }
 
-const setPlaces = async () => {
-  const query = {
-    name: filters.name,
-    limit: filters.limit,
-    offset: filters.offset,
-    parent: filters.name
-  }
-  const rta = await getPlaces(query);
-  places.rows = rta?.rows || []
-  places.total = rta?.total || 0
-}
-
 const getZones = async ({ name }: {
   name?: string
 }) => {
@@ -668,6 +666,21 @@ const getUser = async ({
       title: 'Error al obtener las marcas intente de nuevo mas tarde'
     })
   }
+}
+
+
+const setPlaces = async () => {
+  const query = {
+    name: filters.name,
+    code: filters.code,
+    group: filters.group,
+    limit: filters.limit,
+    offset: filters.offset,
+    parent: filters.name
+  }
+  const rta = await getPlaces(query);
+  places.rows = rta?.rows || []
+  places.total = rta?.total || 0
 }
 
 
