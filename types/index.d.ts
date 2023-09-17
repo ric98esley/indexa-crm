@@ -97,6 +97,28 @@ declare global {
     address: string
   }
 
+  interface Assignments extends Omit<Base, 'name'> {
+    assignmentType: string;
+    isCurrent: boolean;
+    checkingAt: string;
+    checkoutAt: string;
+    target: Asset;
+    user?: User;
+    location?: Place;
+    asset?: Asset,
+  }
+
+  interface Order extends Omit<Base, 'name'> {
+    type: string;
+    assignmentType: string;
+    delivered: boolean;
+    closed: boolean;
+    user?: User;
+    location?: Place;
+    asset?: Asset,
+    assignments: Assignments[]
+  }
+
   interface Zone extends Base { }
   interface Group extends Base {
     code: string
