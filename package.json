@@ -22,7 +22,6 @@
     "@nuxtjs/google-fonts": "^3.0.1",
     "@pinia/nuxt": "^0.4.11",
     "dotenv": "^16.3.1",
-    "nuxt-permissions": "^0.2.4",
-    "pinia": "^2.1.6"
+    "nuxt-permissions": "^0.2.4"
   }
 }

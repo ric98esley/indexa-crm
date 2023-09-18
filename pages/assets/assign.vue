@@ -448,7 +448,7 @@ const setPlaces = async (search: string) => {
 
 const checkout = async () => {
   try {
-    const { data, error } = await useFetch(
+    const { data, error } = await useFetch<Order>(
       '/orders/checkout',
       {
         method: 'post',
@@ -465,6 +465,9 @@ const checkout = async () => {
     ElNotification({
       message: "Activos asignado correctamente",
     });
+
+    if(data.value && data.value.id) window.open(`/assigments/print/${data.value.id}`);
+
     await getAssets();
   } catch (error) {
     ElNotification({
