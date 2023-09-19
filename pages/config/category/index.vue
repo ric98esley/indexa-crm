@@ -4,10 +4,18 @@
       <el-col :span="24">
         <el-table :data="response.categories" stripe v-loading="loadingCategory">
           <el-table-column type="expand" width="50">
-            <template #default="props">
-              <el-table :data="props.row.customFields" :border="true">
-                <el-table-column label="Campos personalizados" prop="name"></el-table-column>
-              </el-table>
+            <template #default="{ row }">
+              <el-row>
+                <el-col :span="12">
+                  Descripción:
+                  {{ row.description }}
+                </el-col>
+                <el-col :span="12">
+                  <el-table :data="row.customFields" :border="true">
+                    <el-table-column label="Campos personalizados" prop="name"></el-table-column>
+                  </el-table>
+                </el-col>
+              </el-row>
             </template>
           </el-table-column>
           <el-table-column type="index" width="50" />
@@ -16,6 +24,12 @@
               <el-input :debounce="2000" v-model="filters.name" placeholder="Nombre" clearable />
             </template>
           </el-table-column>
+          <el-table-column>
+            <template #default="{ row }">
+              {{ row.type == 'asset' ? 'Activo' : 'Consumible' }}
+            </template>
+          </el-table-column>
+
           <el-table-column label="Cantidad de marcas">
             <template #default="props">
               {{ props.row.brands.length }}
@@ -45,19 +59,25 @@
     <el-container>
       <el-dialog v-model="modals.edit">
         <template #header>
-          <h2>Editar la categoria</h2>
+          <h2>Editar la categoría</h2>
         </template>
         <template #default>
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon
             @submit.prevent="patchCategory()">
             <el-form-item label="Nombre">
-              <el-input v-model="category.name" placeholder="Ingrese aqui el nombre"></el-input>
+              <el-input v-model="category.name" placeholder="Ingrese aquí el nombre"></el-input>
             </el-form-item>
-            <el-form-item>
+            <el-form-item label="Campos personalizados">
               <el-select class="w-full" v-model="category.customFields" multiple filterable reserve-keyword
-                placeholder="Porfavor escoge un campo personalizado" :loading="loadingCustomFields"
+                placeholder="Por favor escoge un campo personalizado" :loading="loadingCustomFields"
                 @remove-tag="removeField">
                 <el-option v-for="item in specification.rows" :key="item.id" :label="item.name" :value="item.id!" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="Tipo">
+              <el-select class="w-full" v-model="category.type">
+                <el-option v-for="item in categoryType" :key="item.label" :label="item.label"
+                  :value="item.value!"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item>
@@ -68,18 +88,24 @@
       </el-dialog>
       <el-dialog v-model="modals.create">
         <template #header>
-          <h2>Crear nueva categoria</h2>
+          <h2>Crear nueva categoría</h2>
         </template>
         <template #default>
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="category"
             @submit.prevent="createCategory()">
             <el-form-item label="Nombre">
-              <el-input v-model="category.name" placeholder="Ingrese aqui el nombre"></el-input>
+              <el-input v-model="category.name" placeholder="Ingrese aquí el nombre"></el-input>
             </el-form-item>
             <el-form-item>
               <el-select class="w-full" v-model="category.customFields" multiple filterable reserve-keyword
-                placeholder="Porfavor escoge una categoria" :loading="loadingCustomFields">
+                placeholder="Por favor escoge una categoría" :loading="loadingCustomFields">
                 <el-option v-for="item in specification.rows" :key="item.id" :label="item.name" :value="item.id!" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="Tipo">
+              <el-select class="w-full" v-model="category.type">
+                <el-option v-for="item in categoryType" :key="item.label" :label="item.label"
+                  :value="item.value!"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item>
@@ -100,7 +126,6 @@
 </template>
 
 <script setup lang="ts">
-
 definePageMeta({
   middleware: [
     'nuxt-permissions'
@@ -110,6 +135,12 @@ definePageMeta({
 
 const loadingCategory = ref(false);
 const loadingCustomFields = ref(false);
+
+const categoryType = [
+  { label: "Activo", value: "asset" },
+  { label: "Consumible", value: "consumable" },
+];
+
 
 const filters = reactive({
   limit: 10,
@@ -142,12 +173,14 @@ const category = reactive<{
   id?: number,
   name: string,
   customFields: number[],
-  removeFields: number[]
+  removeFields: number[],
+  type: string
 }>({
   id: undefined,
   name: '',
   customFields: [],
-  removeFields: []
+  removeFields: [],
+  type: ''
 });
 
 const getSpecification = async () => {
@@ -257,7 +290,8 @@ const patchCategory = async () => {
       }),
       removeFields: category.removeFields?.map((field) => {
         return { typeId: field }
-      })
+      }),
+      type: category.type
     }
 
     const { data, error } = await useFetch<Category>(`/assets/categories/${category.id}`,
@@ -299,6 +333,7 @@ const editCategory = (row: Category) => {
   category.id = row.id;
   category.name = row.name || '';
   category.customFields = fields;
+  category.type = row.type;
 }
 const removeField = (field: number) => {
   category.removeFields?.push(field)
@@ -347,9 +382,11 @@ watch(filters, useDebounce(async () => {
 )
 
 watch(() => modals.edit, async () => {
-  console.log(category.removeFields)
-  category.removeFields = []
-  category.name = ''
+  if (modals.edit == false) {
+    category.removeFields = [];
+    category.name = '';
+    category.type = ''
+  }
 })
 
 onMounted(async () => {

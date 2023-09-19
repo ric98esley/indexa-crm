@@ -318,7 +318,7 @@ const removeAsset = async (id: number) => {
       message: data.value?.message
     })
     await getAssets()
-  } catch (error: {message: string}) {
+  } catch (error) {
     console.log(error)
     loading.value = false;
     ElNotification({

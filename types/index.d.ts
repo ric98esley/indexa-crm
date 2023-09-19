@@ -43,6 +43,8 @@ declare global {
   }
   interface Category extends Base {
     brands: Brand[],
+    description: string,
+    type: string,
     customFields?: Specification[]
   }
 
