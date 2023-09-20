@@ -121,6 +121,40 @@ const menusA = reactive([
     ],
   },
   {
+    title: 'Consumibles',
+    icon: 'ep:brush',
+    roles: [
+      'superuser',
+      'auditor',
+      'receptor'
+    ],
+    groups: [
+      {
+        title: 'Ver y crear',
+        items: [
+          {
+            roles: [
+              'superuser',
+              'auditor',
+              'receptor'
+            ],
+            title: 'Inventario',
+            path: '/consumables'
+          },
+          {
+            roles: [
+              'superuser',
+              'auditor',
+              'receptor'
+            ],
+            title: 'Productos',
+            path: '/consumables/products'
+          }
+        ]
+      }
+    ],
+  },
+  {
     title: 'Agencias',
     icon: 'ep:school',
     roles: [
