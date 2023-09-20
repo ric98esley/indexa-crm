@@ -1,7 +1,7 @@
 <template>
   <el-container direction="vertical" class="p-3">
     <el-row :span="24" :gutter="12">
-      <el-table :data="response.rows" stripe v-loading="loadingType">
+      <el-table :data="response.rows" stripe v-loading="loadingProduct">
         <el-table-column type="expand" width="50">
           <template #default="props">
             <el-row :span="24" :gutter="24">
@@ -20,16 +20,28 @@
             <el-input :debounce="2000" v-model="filters.name" placeholder="Nombre" clearable />
           </template>
         </el-table-column>
-        <el-table-column label="Acciones">
+        <el-table-column label="Categoría" prop="category.name">
+          <template #header>
+            <el-input :debounce="2000" v-model="filters.category" placeholder="Categoría" clearable />
+          </template>
+        </el-table-column>
+        <el-table-column label="Precio" prop="price">
+        </el-table-column>
+        <el-table-column label="Deposito" prop="deposit.name">
+          <template #header>
+            <el-input :debounce="2000" v-model="filters.deposit" placeholder="Deposito" clearable />
+          </template>
+        </el-table-column>
+        <el-table-column>
           <template #default="props">
             <el-row>
-              <el-button type="info" circle @click="editType(props.row)">
+              <el-button type="info" circle @click="editProduct(props.row)">
                 <Icon name="ep:edit" />
               </el-button>
               <el-button type="primary" circle>
                 <Icon name="ep:view" />
               </el-button>
-              <el-button type="danger" circle @click="removeType(props.row.id)" v-role="['superuser', 'auditor']">
+              <el-button type="danger" circle @click="removeProduct(props.row.id)" v-role="['superuser', 'auditor']">
                 <Icon name="ep:delete" />
               </el-button>
             </el-row>
@@ -47,7 +59,7 @@
         </template>
         <template #default>
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="type"
-            @submit.prevent="createType()">
+            @submit.prevent="createProduct()">
             <el-form-item label="Nombre">
               <el-input v-model="type.name" placeholder="Ingrese aqui el nombre"></el-input>
             </el-form-item>
@@ -63,7 +75,7 @@
         </template>
         <template #default>
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="type"
-            @submit.prevent="patchType()">
+            @submit.prevent="patchProduct()">
             <el-form-item label="Nombre">
               <el-input v-model="type.name" placeholder="Ingrese aqui el nombre"></el-input>
             </el-form-item>
@@ -92,16 +104,18 @@ definePageMeta({
   roles: ['superuser', 'admin', 'auditor'],
 });
 
-const loadingType = ref(false);
+const loadingProduct = ref(false);
 
 const filters = reactive({
   limit: 10,
   offset: 0,
-  name: ''
+  name: '',
+  category: '',
+  deposit: ''
 });
 
 const response = reactive<{
-  rows: Type[],
+  rows: Product[],
   total: number
 }>({
   rows: [],
@@ -125,20 +139,24 @@ const type = reactive<{
 });
 
 
-const getTypes = async () => {
+const getProducts = async () => {
   try {
-    loadingType.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Type[] }>('/locations/types',
+    loadingProduct.value = true;
+    const { data, error } = await useFetch<{ total: number, rows: Product[] }>('/consumables/products',
       {
         params: {
           ...(filters.name != '' && filters.name && {
-            name: filters.name
+            search: filters.name
           }),
           ...(filters.offset && {
             offset: (filters.offset - 1) * filters.limit
           }),
           ...(filters.limit && {
-            limit: filters.limit
+            limit: filters.limit,
+          }),
+          ...(filters.category
+            && {
+            category: filters.category,
           })
         }
       }
@@ -147,21 +165,21 @@ const getTypes = async () => {
       throw new Error()
     }
 
-    loadingType.value = false;
+    loadingProduct.value = false;
     return data.value
   } catch (error) {
-    loadingType.value = false;
+    loadingProduct.value = false;
     ElNotification({
       message: 'Error al obtener los tipos intente de nuevo mas tarde'
     })
   }
 }
 
-const createType = async () => {
+const createProduct = async () => {
   try {
-    loadingType.value = true;
+    loadingProduct.value = true;
 
-    const { data, error } = await useFetch<Type>('/locations/types',
+    const { data, error } = await useFetch<Product>('/locations/types',
       {
         method: 'post',
         body: {
@@ -169,7 +187,7 @@ const createType = async () => {
         }
       },
     )
-    loadingType.value = false;
+    loadingProduct.value = false;
 
     if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
       ElNotification({
@@ -178,7 +196,7 @@ const createType = async () => {
       })
       return
     }
-    await setTypes()
+    await setProducts()
     ElNotification({
       title: 'Tipo creada correctamente',
       message: `${data.value?.name}`
@@ -187,34 +205,34 @@ const createType = async () => {
     type.name = '';
     return data.value
   } catch (error) {
-    loadingType.value = false;
+    loadingProduct.value = false;
     ElNotification({
       title: 'Error al crear tipos intente de nuevo mas tarde',
     })
   }
 }
 
-const patchType = async () => {
+const patchProduct = async () => {
   try {
-    loadingType.value = true;
+    loadingProduct.value = true;
 
     const body = {
       name: type.name,
     }
 
-    const { data, error } = await useFetch<Type>(`/locations/types/${type.id}`,
+    const { data, error } = await useFetch<Product>(`/locations/types/${type.id}`,
       {
         method: 'PATCH',
         body
       }
     );
-    loadingType.value = false;
+    loadingProduct.value = false;
 
 
     if (error.value) {
       throw error
     }
-    await setTypes()
+    await setProducts()
     ElNotification({
       title: 'Tipo modificada correctamente',
       message: `${data.value?.name}`
@@ -224,7 +242,7 @@ const patchType = async () => {
     type.name = '';
     return data.value
   } catch (error) {
-    loadingType.value = false;
+    loadingProduct.value = false;
     ElNotification({
       title: 'Error al modificar la Tipo intente de nuevo mas tarde',
     })
@@ -232,15 +250,15 @@ const patchType = async () => {
   }
 }
 
-const editType = (row: Type) => {
+const editProduct = (row: Product) => {
   modals.edit = true;
   type.id = row.id;
   type.name = row.name || '';
 }
 
-const removeType = async (id: number) => {
+const removeProduct = async (id: number) => {
   try {
-    const { data, error } = await useFetch<Type>(`/locations/types/${id}`, {
+    const { data, error } = await useFetch<Product>(`/locations/types/${id}`, {
       method: 'delete'
     })
 
@@ -251,27 +269,27 @@ const removeType = async (id: number) => {
     ElNotification({
       message: 'La Tipo ha sido borrada.'
     })
-    await setTypes()
+    await setProducts()
   } catch (error) {
-    loadingType.value = false;
+    loadingProduct.value = false;
     ElNotification({
       message: 'Error al borrar la Tipo intente de nuevo mas tarde.'
     })
   }
 }
 
-const setTypes = async () => {
-  const rta = await getTypes();
+const setProducts = async () => {
+  const rta = await getProducts();
   response.rows = rta?.rows || []
   response.total = rta?.total || 0
 }
 
 watch(filters, useDebounce(async () => {
-  await setTypes()
+  await setProducts()
 }, 500)
 )
 
 onMounted(async () => {
-  await setTypes();
+  await setProducts();
 });
 </script>

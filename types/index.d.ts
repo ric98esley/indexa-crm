@@ -129,4 +129,15 @@ declare global {
     parentId: number
     managerId: number
   }
+  interface Product extends Base {
+    price: string,
+    min: number,
+    description: string,
+    category: Category,
+  }
+
+  interface Consumable extends Base {
+    quantity: string,
+    product: Product,
+  }
 }
