@@ -49,7 +49,7 @@
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="type"
             @submit.prevent="createType()">
             <el-form-item label="Nombre">
-              <el-input v-model="type.name" placeholder="Ingrese aqui el nombre"></el-input>
+              <el-input v-model="type.name" placeholder="Ingrese aquí el nombre"></el-input>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" :disabled="!type.name" native-type="submit">Crear</el-button>
@@ -65,7 +65,7 @@
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="type"
             @submit.prevent="patchType()">
             <el-form-item label="Nombre">
-              <el-input v-model="type.name" placeholder="Ingrese aqui el nombre"></el-input>
+              <el-input v-model="type.name" placeholder="Ingrese aquí el nombre"></el-input>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" :disabled="!type.name" native-type="submit">Editar</el-button>

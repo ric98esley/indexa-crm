@@ -18,9 +18,9 @@
               :on-change="(value) => console.log(value)">
             </el-cascader>
           </el-form-item>
-          <el-form-item label="Depositos del activo">
-            <el-select v-model="asset.depositId" class="select-success" placeholder="Selecciona un deposito" label="Deposito"
-              style="width: 100%" filterable>
+          <el-form-item label="Almacén del activo">
+            <el-select v-model="asset.depositId" class="select-success" placeholder="Selecciona un deposito"
+              label="Deposito" style="width: 100%" filterable>
               <el-option v-for="option in response.deposits" :key="option.id" :value="option.id!"
                 :label="`${option.id} - ${option.name}`">
                 {{ option.id }} - {{ option.name }}
@@ -77,7 +77,7 @@
               </el-select>
             </template>
           </el-table-column>
-          <el-table-column  header-align="right" width="80">
+          <el-table-column header-align="right" width="80">
             <template #default="{ row }">
               <div class="text-right">
                 <el-tooltip content="Eliminar" :open-delay="300" placement="top" class="text-right">
@@ -101,7 +101,7 @@
             <el-form-item label="Numero de factura">
               <el-input v-model="toAdd.invoice.code" type="text" clearable></el-input>
             </el-form-item>
-            <el-form-item label="Provedor">
+            <el-form-item label="Proveedor">
               <el-select class="w-full" v-model="toAdd.invoice.providerId" filterable remote effect="dark"
                 placeholder="Elige un responsable" :loading="loadingProvider" :remote-method="setProvider">
                 <el-option v-for="item in response.providers" :key="item.id" :label="`${item.name}`" :value="item.id!">
@@ -114,7 +114,7 @@
               </el-input>
             </el-form-item>
             <el-form-item label="Fecha de la factura">
-              <el-date-picker v-model="toAdd.invoice.invoiceDate" type="date" placeholder="Elige la fecha de facturacion"
+              <el-date-picker v-model="toAdd.invoice.invoiceDate" type="date" placeholder="Elige la fecha de facturación"
                 style="width: 100%;"></el-date-picker>
             </el-form-item>
 
@@ -263,6 +263,9 @@ const handleSelectInvoice = (item: Invoice) => {
 const getCategories = async () => {
   try {
     const { data } = await useFetch<{ count: number, rows: Category[] }>('/assets/categories', {
+      query: {
+        type: 'asset'
+      }
     });
 
     const categoriesOptions = data.value?.rows.map((row) => {
@@ -336,15 +339,11 @@ const addProvider = async () => {
 
 
     if (error.value) {
-      return ElNotification({
-        title: 'Poveedor no creado',
-        message: `${error.value.data.message.message}`,
-        type: 'error'
-      });
+      throw new Error('proveedor no creado')
     }
     if (data.value)
       ElNotification({
-        title: 'Poveedor creado',
+        title: 'Proveedor creado',
         message: `nombre: ${data.value.name}`,
         type: 'success',
       });
@@ -353,7 +352,7 @@ const addProvider = async () => {
 
   } catch (error) {
     ElNotification({
-      title: 'Poveedor no creado',
+      title: 'Proveedor no creado',
       message: ``,
       type: 'error',
     });

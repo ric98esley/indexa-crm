@@ -67,7 +67,7 @@
             <el-form-item label="Nombre">
               <el-input v-model="category.name" placeholder="Ingrese aquí el nombre"></el-input>
             </el-form-item>
-            <el-form-item label="Campos personalizados">
+            <el-form-item label="Campos personalizados" v-if="category.type === 'asset'">
               <el-select class="w-full" v-model="category.customFields" multiple filterable reserve-keyword
                 placeholder="Por favor escoge un campo personalizado" :loading="loadingCustomFields"
                 @remove-tag="removeField">
@@ -79,6 +79,9 @@
                 <el-option v-for="item in categoryType" :key="item.label" :label="item.label"
                   :value="item.value!"></el-option>
               </el-select>
+            </el-form-item>
+            <el-form-item label="Descripción">
+              <el-input v-model="category.description" type="textarea"></el-input>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" :disabled="!category.name" native-type="submit">Editar</el-button>
@@ -96,9 +99,9 @@
             <el-form-item label="Nombre">
               <el-input v-model="category.name" placeholder="Ingrese aquí el nombre"></el-input>
             </el-form-item>
-            <el-form-item>
+            <el-form-item label="Especificaciones"  v-if="category.type === 'asset'">
               <el-select class="w-full" v-model="category.customFields" multiple filterable reserve-keyword
-                placeholder="Por favor escoge una categoría" :loading="loadingCustomFields">
+                placeholder="Por favor escoge características" :loading="loadingCustomFields">
                 <el-option v-for="item in specification.rows" :key="item.id" :label="item.name" :value="item.id!" />
               </el-select>
             </el-form-item>
@@ -107,6 +110,9 @@
                 <el-option v-for="item in categoryType" :key="item.label" :label="item.label"
                   :value="item.value!"></el-option>
               </el-select>
+            </el-form-item>
+            <el-form-item label="Descripción">
+              <el-input v-model="category.description" type="textarea"></el-input>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" :disabled="!category.name" native-type="submit">Crear</el-button>
@@ -172,12 +178,14 @@ const modals = reactive({
 const category = reactive<{
   id?: number,
   name: string,
+  description: string
   customFields: number[],
   removeFields: number[],
   type: string
 }>({
   id: undefined,
   name: '',
+  description: '',
   customFields: [],
   removeFields: [],
   type: ''
@@ -223,7 +231,7 @@ const getCategories = async () => {
     );
     if (error.value) {
       ElNotification({
-        message: 'Error al obtener las categorias intente de nuevo mas tarde'
+        message: 'Error al obtener las categorías intente de nuevo mas tarde'
       })
     }
 
@@ -232,7 +240,7 @@ const getCategories = async () => {
   } catch (error) {
     loadingCategory.value = false;
     ElNotification({
-      message: 'Error al obtener las categorias intente de nuevo mas tarde'
+      message: 'Error al obtener las categorías intente de nuevo mas tarde'
     })
   }
 }
@@ -248,7 +256,13 @@ const createCategory = async () => {
           name: category.name,
           customFields: category.customFields?.map((field) => {
             return { typeId: field }
-          })
+          }),
+          ...(category.description !== '' && {
+            description: category.description
+          }),
+          ...(category.type !== '' && {
+            type: category.type
+          }),
         }
       },
     )
@@ -256,14 +270,14 @@ const createCategory = async () => {
 
     if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
       ElNotification({
-        title: 'Error al crear categorias intente de nuevo mas tarde',
+        title: 'Error al crear categorías intente de nuevo mas tarde',
         message: error.value?.data.message.message,
       })
       return
     }
     await setCategories()
     ElNotification({
-      title: 'Categoria creada correctamente',
+      title: 'Categoría creada correctamente',
       message: `${data.value?.name}`
     })
     category.id = undefined;
@@ -274,7 +288,7 @@ const createCategory = async () => {
   } catch (error) {
     loadingCategory.value = false;
     ElNotification({
-      title: 'Error al crear categorias intente de nuevo mas tarde',
+      title: 'Error al crear categorías intente de nuevo mas tarde',
     })
   }
 }
@@ -291,7 +305,8 @@ const patchCategory = async () => {
       removeFields: category.removeFields?.map((field) => {
         return { typeId: field }
       }),
-      type: category.type
+      type: category.type,
+      description: category.description
     }
 
     const { data, error } = await useFetch<Category>(`/assets/categories/${category.id}`,
@@ -308,7 +323,7 @@ const patchCategory = async () => {
     }
     await setCategories()
     ElNotification({
-      title: 'Categoria modificada correctamente',
+      title: 'Categoría modificada correctamente',
       message: `${data.value?.name}`
     })
 
@@ -320,7 +335,7 @@ const patchCategory = async () => {
   } catch (error) {
     loadingCategory.value = false;
     ElNotification({
-      title: 'Error al modificar la categoria intente de nuevo mas tarde',
+      title: 'Error al modificar la categoría intente de nuevo mas tarde',
     })
     console.log(error)
   }
@@ -334,6 +349,7 @@ const editCategory = (row: Category) => {
   category.name = row.name || '';
   category.customFields = fields;
   category.type = row.type;
+  category.description = row.description;
 }
 const removeField = (field: number) => {
   category.removeFields?.push(field)
@@ -348,18 +364,18 @@ const removeCategory = async (id: number) => {
     if (error.value) {
       loadingCategory.value = false;
       ElNotification({
-        message: 'Error al borrar la categoria intente de nuevo mas tarde.'
+        message: 'Error al borrar la categoría intente de nuevo mas tarde.'
       });
       return
     }
 
     ElNotification({
-      message: 'La categoria ha sido borrada.'
+      message: 'La categoría ha sido borrada.'
     })
     await setCategories()
   } catch (error) {
     ElNotification({
-      message: 'Error al borrar la categoria intente de nuevo mas tarde.'
+      message: 'Error al borrar la categoría intente de nuevo mas tarde.'
     })
   }
 }
@@ -385,7 +401,8 @@ watch(() => modals.edit, async () => {
   if (modals.edit == false) {
     category.removeFields = [];
     category.name = '';
-    category.type = ''
+    category.type = '';
+    category.description = '';
   }
 })
 
