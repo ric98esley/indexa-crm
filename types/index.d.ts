@@ -131,6 +131,7 @@ declare global {
   }
   interface Product extends Base {
     price: string,
+    code: string,
     min: number,
     description: string,
     category: Category,

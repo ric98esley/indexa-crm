@@ -1,7 +1,7 @@
 <template>
   <el-container direction="vertical" class="p-3">
     <el-row :span="24" :gutter="12">
-      <el-table :data="response.rows" stripe v-loading="loadingProduct">
+      <el-table :data="response.rows" stripe v-loading="loadingInventory">
         <el-table-column type="expand" width="50">
           <template #default="props">
             <el-row :span="24" :gutter="24">
@@ -41,14 +41,11 @@
         <el-table-column>
           <template #default="props">
             <el-row>
-              <el-button type="info" circle @click="">
-                <Icon name="ep:edit" />
-              </el-button>
               <el-button type="primary" circle>
-                <Icon name="ep:view" />
+                <Icon name="ep:plus" />
               </el-button>
               <el-button type="danger" circle @click="" v-role="['superuser', 'auditor']">
-                <Icon name="ep:delete" />
+                <Icon name="ep:semi-select" />
               </el-button>
             </el-row>
           </template>
@@ -61,39 +58,56 @@
     <el-container>
       <el-dialog v-model="modals.create">
         <template #header>
-          <h2>Crear nueva tipo</h2>
+          <el-row justify="space-between">
+            <h2>Crear nueva tipo</h2>
+            <el-switch v-model="productSwitch" active-text="Nuevo" inactive-text="Existente" />
+          </el-row>
         </template>
         <template #default>
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="type"
-            @submit.prevent="createProduct()">
-            <el-form-item label="Código">
-              <el-input v-model="product.code" placeholder="Ingrese aquí el código"></el-input>
-            </el-form-item>
-            <el-form-item label="Nombre">
-              <el-input v-model="product.name" placeholder="Ingrese aquí el nombre"></el-input>
-            </el-form-item>
-            <el-form-item label="Unidad de medida">
-              <el-input v-model="product.unit" placeholder="Metros, Litros , Unidades"></el-input>
-            </el-form-item>
-            <el-form-item label="Unidad de precio">
-              <el-input v-model="product.price" placeholder="Ingrese el precio"></el-input>
-            </el-form-item>
-            <el-form-item label="Description">
-              <el-input v-model="product.description" placeholder="Ingrese aquí la descripción"
-                type="textarea"></el-input>
-            </el-form-item>
-            <el-form-item label="Categoría del producto">
-              <el-select v-model="product.categoryId" class="select-success" placeholder="Selecciona un deposito"
-                label="Deposito" style="width: 100%" filterable>
-                <el-option v-for="option in response.categories" :key="option.id" :value="option.id!"
-                  :label="`${option.name}`">
-                  {{ option.name }}
+            @submit.prevent="createInventory()">
+            <el-form-item v-if="!productSwitch" label="Categoría del producto">
+              <el-select v-model="warehouse.productId" class="select-success" placeholder="Selecciona un producto"
+                label="Deposito" style="width: 100%" filterable remote :remote-method="setProducts" clearable>
+                <el-option v-for="option in products.rows" :key="option.id" :value="option.id!"
+                  :label="`${option.code} - ${option.name}`">
+                  {{ option.code }} - {{ option.name }}
                 </el-option>
               </el-select>
             </el-form-item>
+            <el-col v-if="productSwitch">
+              <el-form-item label="Código">
+                <el-input v-model="product.code" placeholder="Ingrese aquí el código"></el-input>
+              </el-form-item>
+              <el-form-item label="Nombre">
+                <el-input v-model="product.name" placeholder="Ingrese aquí el nombre"></el-input>
+              </el-form-item>
+              <el-form-item label="Categoría del producto">
+                <el-select v-model="product.categoryId" class="select-success" placeholder="Selecciona un deposito"
+                  label="Deposito" style="width: 100%" filterable clearable>
+                  <el-option v-for="option in response.categories" :key="option.id" :value="option.id!"
+                    :label="`${option.name}`">
+                    {{ option.name }}
+                  </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="Unidad de medida">
+                <el-input v-model="product.unit" placeholder="Metros, Litros , Unidades"></el-input>
+              </el-form-item>
+              <el-form-item label="Precio">
+                <el-input v-model="product.price" placeholder="Ingrese el precio"></el-input>
+              </el-form-item>
+              <el-form-item label="Descripción">
+                <el-input v-model="product.description" placeholder="Ingrese aquí la descripción"
+                  type="textarea"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-form-item label="Cantidad">
+              <el-input v-model="warehouse.quantity" placeholder="10" type="number"></el-input>
+            </el-form-item>
             <el-form-item label="Almacén del producto">
-              <el-select v-model="product.depositId" class="select-success" placeholder="Selecciona un deposito"
-                label="Deposito" style="width: 100%" filterable>
+              <el-select v-model="warehouse.depositId" class="select-success" placeholder="Selecciona un deposito"
+                label="Deposito" style="width: 100%" filterable clearable>
                 <el-option v-for="option in response.deposits" :key="option.id" :value="option.id!"
                   :label="`${option.id} - ${option.name}`">
                   {{ option.id }} - {{ option.name }}
@@ -101,7 +115,9 @@
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!type.name" native-type="submit">Crear</el-button>
+              <el-button type="primary"
+                :disabled="!((warehouse.productId && warehouse.depositId) || (product.code && product.categoryId))"
+                native-type="submit">Crear</el-button>
             </el-form-item>
           </el-form>
         </template>
@@ -141,7 +157,9 @@ definePageMeta({
   roles: ['superuser', 'admin', 'auditor'],
 });
 
+const loadingInventory = ref(false);
 const loadingProduct = ref(false);
+const productSwitch = ref(false);
 
 const filters = reactive({
   limit: 10,
@@ -170,13 +188,6 @@ const products = reactive<{
   rows: [],
   total: 0
 })
-const category = reactive<{
-  rows: Category[],
-  total: number
-}>({
-  rows: [],
-  total: 0
-})
 
 const modals = reactive({
   details: false,
@@ -199,7 +210,6 @@ const product = reactive<{
   description: string,
   unit: string,
   price: string,
-  depositId?: number,
   categoryId?: number,
 }>({
   name: '',
@@ -208,8 +218,17 @@ const product = reactive<{
   unit: '',
   price: '',
   categoryId: undefined,
-  depositId: undefined
 });
+
+const warehouse = reactive<{
+  depositId?: number,
+  quantity: number,
+  productId?: number,
+}>({
+  depositId: undefined,
+  quantity: 1,
+  productId: undefined
+})
 
 
 const getDeposit = async ({ name }: { name?: string }) => {
@@ -227,9 +246,9 @@ const getDeposit = async ({ name }: { name?: string }) => {
   }
 }
 
-const getProducts = async () => {
+const getInventory = async () => {
   try {
-    loadingProduct.value = true;
+    loadingInventory.value = true;
     const { data, error } = await useFetch<{ total: number, rows: Consumable[] }>('/consumables',
       {
         params: {
@@ -255,6 +274,34 @@ const getProducts = async () => {
       throw new Error()
     }
 
+    loadingInventory.value = false;
+    return data.value
+  } catch (error) {
+    loadingInventory.value = false;
+    ElNotification({
+      message: 'Error al obtener los tipos intente de nuevo mas tarde'
+    })
+  }
+}
+
+const getProducts = async (search?: string) => {
+  try {
+    loadingProduct.value = true;
+    const { data, error } = await useFetch<{ total: number, rows: Product[] }>('/consumables/products',
+      {
+        params: {
+          ...(search && search != '' && {
+            search
+          }),
+          limit: 10,
+          offset: 0
+        }
+      }
+    );
+    if (error.value) {
+      throw new Error()
+    }
+
     loadingProduct.value = false;
     return data.value
   } catch (error) {
@@ -264,6 +311,7 @@ const getProducts = async () => {
     })
   }
 }
+
 
 const getCategories = async () => {
   try {
@@ -279,20 +327,33 @@ const getCategories = async () => {
   }
 }
 
-const createProduct = async () => {
+const createInventory = async () => {
   try {
-    loadingProduct.value = true;
+    loadingInventory.value = true;
 
-    const { data, error } = await useFetch<Product>('/locations/types',
+    const { data, error } = await useFetch<Product>('/consumables',
       {
         method: 'post',
         body: {
-          name: product.name,
-          code: product.code,
+          ...(productSwitch.value && {
+            product: {
+              code: product.code,
+              name: product.name,
+              description: product.description,
+              unit: product.unit,
+              price: product.price,
+              categoryId: product.categoryId,
+            }
+          }),
+          ...(!productSwitch.value && {
+            productId: warehouse.productId
+          }),
+          quantity: warehouse.quantity,
+          depositId: warehouse.depositId,
         }
       },
     )
-    loadingProduct.value = false;
+    loadingInventory.value = false;
 
     if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
       ElNotification({
@@ -301,7 +362,7 @@ const createProduct = async () => {
       })
       return
     }
-    await setProducts()
+    await setInventory()
     ElNotification({
       title: 'Tipo creada correctamente',
       message: `${data.value?.name}`
@@ -310,7 +371,7 @@ const createProduct = async () => {
     type.name = '';
     return data.value
   } catch (error) {
-    loadingProduct.value = false;
+    loadingInventory.value = false;
     ElNotification({
       title: 'Error al crear tipos intente de nuevo mas tarde',
     })
@@ -319,7 +380,7 @@ const createProduct = async () => {
 
 const patchProduct = async () => {
   try {
-    loadingProduct.value = true;
+    loadingInventory.value = true;
 
     const body = {
       name: type.name,
@@ -331,13 +392,13 @@ const patchProduct = async () => {
         body
       }
     );
-    loadingProduct.value = false;
+    loadingInventory.value = false;
 
 
     if (error.value) {
       throw error
     }
-    await setProducts()
+    await setInventory()
     ElNotification({
       title: 'Tipo modificada correctamente',
       message: `${data.value?.name}`
@@ -347,7 +408,7 @@ const patchProduct = async () => {
     type.name = '';
     return data.value
   } catch (error) {
-    loadingProduct.value = false;
+    loadingInventory.value = false;
     ElNotification({
       title: 'Error al modificar la Tipo intente de nuevo mas tarde',
     })
@@ -374,19 +435,24 @@ const removeProduct = async (id: number) => {
     ElNotification({
       message: 'La Tipo ha sido borrada.'
     })
-    await setProducts()
+    await setInventory()
   } catch (error) {
-    loadingProduct.value = false;
+    loadingInventory.value = false;
     ElNotification({
       message: 'Error al borrar la Tipo intente de nuevo mas tarde.'
     })
   }
 }
 
-const setProducts = async () => {
-  const rta = await getProducts();
+const setInventory = async () => {
+  const rta = await getInventory();
   response.rows = rta?.rows || []
   response.total = rta?.total || 0
+}
+
+const setProducts = async (query?: string) => {
+  const rta = await getProducts(query);
+  products.rows = rta?.rows || []
 }
 
 const setDeposit = async (query?: string) => {
@@ -398,13 +464,13 @@ const setDeposit = async (query?: string) => {
 }
 
 watch(filters, useDebounce(async () => {
-  await setProducts()
+  await setInventory()
 }, 500)
 )
 
 onMounted(async () => {
   await getCategories();
-  await setProducts();
+  await setInventory();
   await setDeposit();
 });
 </script>
