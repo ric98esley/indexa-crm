@@ -41,10 +41,10 @@
         <el-table-column>
           <template #default="props">
             <el-row>
-              <el-button type="primary" circle>
+              <el-button type="primary" circle @click="editProduct(props.row)">
                 <Icon name="ep:plus" />
               </el-button>
-              <el-button type="danger" circle @click="" v-role="['superuser', 'auditor']">
+              <el-button type="danger" circle @click="">
                 <Icon name="ep:semi-select" />
               </el-button>
             </el-row>
@@ -64,8 +64,8 @@
           </el-row>
         </template>
         <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="type"
-            @submit.prevent="createInventory()">
+          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="warehouse"
+            @submit.prevent="createInventory()" :rules="rules" ref="ruleFormRef">
             <el-form-item v-if="!productSwitch" label="Categoría del producto">
               <el-select v-model="warehouse.productId" class="select-success" placeholder="Selecciona un producto"
                 label="Deposito" style="width: 100%" filterable remote :remote-method="setProducts" clearable>
@@ -102,8 +102,8 @@
                   type="textarea"></el-input>
               </el-form-item>
             </el-col>
-            <el-form-item label="Cantidad">
-              <el-input v-model="warehouse.quantity" placeholder="10" type="number"></el-input>
+            <el-form-item label="Cantidad" prop="quantity">
+              <el-input v-model="warehouse.quantity" placeholder="10"></el-input>
             </el-form-item>
             <el-form-item label="Almacén del producto">
               <el-select v-model="warehouse.depositId" class="select-success" placeholder="Selecciona un deposito"
@@ -122,18 +122,21 @@
           </el-form>
         </template>
       </el-dialog>
-      <el-dialog v-model="modals.edit">
+      <el-dialog v-model="modals.add">
         <template #header>
           <h2>Editar tipo</h2>
         </template>
         <template #default>
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="type"
-            @submit.prevent="patchProduct()">
+            @submit.prevent="addProducts()">
+            <el-form-item label="Cantidad">
+              <el-input v-model="movement.quantity" placeholder="Ingrese aquí el nombre"></el-input>
+            </el-form-item>
             <el-form-item label="Nombre">
-              <el-input v-model="type.name" placeholder="Ingrese aquí el nombre"></el-input>
+              <el-input v-model="movement.notes" placeholder="Ingrese aquí el nombre"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!type.name" native-type="submit">Editar</el-button>
+              <el-button type="primary" :disabled="!movement.quantity" native-type="submit">Editar</el-button>
             </el-form-item>
           </el-form>
         </template>
@@ -150,12 +153,16 @@
 </template>
 
 <script setup lang="ts">
+import { FormInstance, FormRules } from 'element-plus';
+
 definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor'],
+  roles: ['superuser', 'admin', 'auditor', 'receptor'],
 });
+
+const ruleFormRef = ref<FormInstance>()
 
 const loadingInventory = ref(false);
 const loadingProduct = ref(false);
@@ -191,18 +198,22 @@ const products = reactive<{
 
 const modals = reactive({
   details: false,
-  edit: false,
+  add: false,
   create: false,
-  menu: false
+  sub: false
 });
 
 
-const type = reactive<{
+const movement = reactive<{
   id?: number,
-  name: string
+  quantity: string,
+  inTransit: boolean,
+  notes: string
 }>({
   id: undefined,
-  name: ''
+  quantity: '',
+	inTransit: false,
+	notes: ''
 });
 const product = reactive<{
   name: string,
@@ -222,13 +233,21 @@ const product = reactive<{
 
 const warehouse = reactive<{
   depositId?: number,
-  quantity: number,
+  quantity: string,
   productId?: number,
 }>({
   depositId: undefined,
-  quantity: 1,
+  quantity: '',
   productId: undefined
 })
+const rules = reactive<FormRules<{
+  quantity: string,
+}>>({
+  quantity: [
+    { pattern: /^\d+(\.[0-9][0-9]?)?(\/\d+?)?$/ , trigger: 'blur', message:"Debes introducir un numero Entero o Racional" },
+  ],
+})
+
 
 
 const getDeposit = async ({ name }: { name?: string }) => {
@@ -367,8 +386,6 @@ const createInventory = async () => {
       title: 'Tipo creada correctamente',
       message: `${data.value?.name}`
     })
-    type.id = undefined;
-    type.name = '';
     return data.value
   } catch (error) {
     loadingInventory.value = false;
@@ -378,15 +395,17 @@ const createInventory = async () => {
   }
 }
 
-const patchProduct = async () => {
+const addProducts = async () => {
   try {
     loadingInventory.value = true;
 
     const body = {
-      name: type.name,
+      quantity: movement.quantity,
+      notes: movement.notes,
+      inTransit: movement.inTransit,
     }
 
-    const { data, error } = await useFetch<Product>(`/locations/types/${type.id}`,
+    const { data, error } = await useFetch<Product>(`/consumables/${movement.id}/add`,
       {
         method: 'PATCH',
         body
@@ -404,8 +423,6 @@ const patchProduct = async () => {
       message: `${data.value?.name}`
     })
 
-    type.id = undefined;
-    type.name = '';
     return data.value
   } catch (error) {
     loadingInventory.value = false;
@@ -416,10 +433,9 @@ const patchProduct = async () => {
   }
 }
 
-const editProduct = (row: Product) => {
-  modals.edit = true;
-  type.id = row.id;
-  type.name = row.name || '';
+const editProduct = (row: Consumable) => {
+  modals.add = true;
+  movement.id = row.id
 }
 
 const removeProduct = async (id: number) => {
