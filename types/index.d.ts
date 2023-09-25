@@ -132,7 +132,6 @@ declare global {
   interface Product extends Base {
     price: string,
     code: string,
-    min: number,
     description: string,
     category: Category,
   }
@@ -140,5 +139,12 @@ declare global {
   interface Consumable extends Base {
     quantity: string,
     product: Product,
+    min: number,
+  }
+  
+  interface ConsumableHistory extends Base {
+    quantity: string,
+    type: string,
+    warehouse: Consumable
   }
 }

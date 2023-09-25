@@ -343,8 +343,8 @@ watch(filters, useDebounce(async () => {
 
 onMounted(async () => {
   await setDeposit()
-  await getCategories()
   await getAssets();
+  await getCategories()
 })
 
 </script>

@@ -41,10 +41,10 @@
         <el-table-column>
           <template #default="props">
             <el-row>
-              <el-button type="primary" circle @click="editProduct(props.row)">
+              <el-button type="primary" circle @click="editProduct(props.row, 'add')">
                 <Icon name="ep:plus" />
               </el-button>
-              <el-button type="danger" circle @click="">
+              <el-button type="danger" circle @click="editProduct(props.row, 'sub')">
                 <Icon name="ep:semi-select" />
               </el-button>
             </el-row>
@@ -65,7 +65,7 @@
         </template>
         <template #default>
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="warehouse"
-            @submit.prevent="createInventory()" :rules="rules" ref="ruleFormRef">
+            @submit.prevent="createInventory()" :rules="rules" ref="createFormRef">
             <el-form-item v-if="!productSwitch" label="Categoría del producto">
               <el-select v-model="warehouse.productId" class="select-success" placeholder="Selecciona un producto"
                 label="Deposito" style="width: 100%" filterable remote :remote-method="setProducts" clearable>
@@ -105,6 +105,9 @@
             <el-form-item label="Cantidad" prop="quantity">
               <el-input v-model="warehouse.quantity" placeholder="10"></el-input>
             </el-form-item>
+            <el-form-item label="Mínimo" prop="quantity">
+              <el-input v-model="warehouse.min" placeholder="10"></el-input>
+            </el-form-item>
             <el-form-item label="Almacén del producto">
               <el-select v-model="warehouse.depositId" class="select-success" placeholder="Selecciona un deposito"
                 label="Deposito" style="width: 100%" filterable clearable>
@@ -124,19 +127,38 @@
       </el-dialog>
       <el-dialog v-model="modals.add">
         <template #header>
-          <h2>Editar tipo</h2>
+          <h2>Agregar al inventario</h2>
         </template>
         <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="type"
-            @submit.prevent="addProducts()">
-            <el-form-item label="Cantidad">
-              <el-input v-model="movement.quantity" placeholder="Ingrese aquí el nombre"></el-input>
+          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="movement"
+            @submit.prevent="addProducts()" :rules="rules" ref="addFormRef">
+            <el-form-item label="Cantidad" prop="quantity">
+              <el-input v-model="movement.quantity" placeholder="Ingrese aquí la cantidad"></el-input>
             </el-form-item>
-            <el-form-item label="Nombre">
-              <el-input v-model="movement.notes" placeholder="Ingrese aquí el nombre"></el-input>
+            <el-form-item label="Nota">
+              <el-input v-model="movement.notes" placeholder="Ingrese aquí la nota"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :disabled="!movement.quantity" native-type="submit">Editar</el-button>
+              <el-button type="primary" :disabled="!movement.quantity" native-type="submit">Agregar</el-button>
+            </el-form-item>
+          </el-form>
+        </template>
+      </el-dialog>
+      <el-dialog v-model="modals.sub">
+        <template #header>
+          <h2>Remover del inventario</h2>
+        </template>
+        <template #default>
+          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="movement"
+            @submit.prevent="subProducts()" :rules="rules" ref="subFormRef">
+            <el-form-item label="Cantidad" prop="quantity">
+              <el-input v-model="movement.quantity" placeholder="Ingrese aquí la cantidad"></el-input>
+            </el-form-item>
+            <el-form-item label="Nota">
+              <el-input v-model="movement.notes" placeholder="Ingrese aquí la nota"></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" :disabled="!movement.quantity" native-type="submit">Remover</el-button>
             </el-form-item>
           </el-form>
         </template>
@@ -162,7 +184,9 @@ definePageMeta({
   roles: ['superuser', 'admin', 'auditor', 'receptor'],
 });
 
-const ruleFormRef = ref<FormInstance>()
+const createFormRef = ref<FormInstance>()
+const addFormRef = ref<FormInstance>()
+const subFormRef = ref<FormInstance>()
 
 const loadingInventory = ref(false);
 const loadingProduct = ref(false);
@@ -212,8 +236,8 @@ const movement = reactive<{
 }>({
   id: undefined,
   quantity: '',
-	inTransit: false,
-	notes: ''
+  inTransit: false,
+  notes: ''
 });
 const product = reactive<{
   name: string,
@@ -235,16 +259,18 @@ const warehouse = reactive<{
   depositId?: number,
   quantity: string,
   productId?: number,
+  min: number
 }>({
   depositId: undefined,
   quantity: '',
-  productId: undefined
+  productId: undefined,
+  min: 0
 })
 const rules = reactive<FormRules<{
   quantity: string,
 }>>({
   quantity: [
-    { pattern: /^\d+(\.[0-9][0-9]?)?(\/\d+?)?$/ , trigger: 'blur', message:"Debes introducir un numero Entero o Racional" },
+    { pattern: /^\d+(\.[0-9][0-9]?)?(\/\d+?)?$/, trigger: 'blur', message: "Debes introducir un numero Entero o Racional" },
   ],
 })
 
@@ -367,6 +393,7 @@ const createInventory = async () => {
           ...(!productSwitch.value && {
             productId: warehouse.productId
           }),
+          min: warehouse.min,
           quantity: warehouse.quantity,
           depositId: warehouse.depositId,
         }
@@ -419,45 +446,61 @@ const addProducts = async () => {
     }
     await setInventory()
     ElNotification({
-      title: 'Tipo modificada correctamente',
-      message: `${data.value?.name}`
+      title: 'Producto agregado correctamente',
+    })
+
+    movement.quantity = '';
+    movement.id = undefined;
+    movement.notes = '';
+    return data.value
+  } catch (error) {
+    loadingInventory.value = false;
+    ElNotification({
+      title: 'Error al añadir los productos intente de nuevo mas tarde',
+    })
+  }
+}
+const subProducts = async () => {
+  try {
+    loadingInventory.value = true;
+
+    const body = {
+      quantity: movement.quantity,
+      notes: movement.notes,
+      inTransit: movement.inTransit,
+    }
+
+    const { data, error } = await useFetch<Product>(`/consumables/${movement.id}/sub`,
+      {
+        method: 'PATCH',
+        body
+      }
+    );
+    loadingInventory.value = false;
+
+
+    if (error.value) {
+      throw error
+    }
+    await setInventory()
+    ElNotification({
+      title: 'Producto removido correctamente',
     })
 
     return data.value
   } catch (error) {
     loadingInventory.value = false;
     ElNotification({
-      title: 'Error al modificar la Tipo intente de nuevo mas tarde',
+      title: 'Error al consumir los productos intente de nuevo mas tarde',
+      message: 'Verifica la cantidad que deseas consumir exista en el inventario'
     })
-    console.log(error)
   }
 }
 
-const editProduct = (row: Consumable) => {
-  modals.add = true;
+const editProduct = (row: Consumable, type: string) => {
+  if (type == 'add') modals.add = true;
+  if (type == 'sub') modals.sub = true;
   movement.id = row.id
-}
-
-const removeProduct = async (id: number) => {
-  try {
-    const { data, error } = await useFetch<Product>(`/locations/types/${id}`, {
-      method: 'delete'
-    })
-
-    if (error.value) {
-      throw new Error()
-    }
-
-    ElNotification({
-      message: 'La Tipo ha sido borrada.'
-    })
-    await setInventory()
-  } catch (error) {
-    loadingInventory.value = false;
-    ElNotification({
-      message: 'Error al borrar la Tipo intente de nuevo mas tarde.'
-    })
-  }
 }
 
 const setInventory = async () => {
@@ -479,14 +522,41 @@ const setDeposit = async (query?: string) => {
   response.deposits = rta?.rows || []
 }
 
+const productStatus = ({
+  row,
+  rowIndex,
+}: {
+  row: Consumable,
+  rowIndex: number
+}) => {
+  if (row.min && row.min > Number(row.quantity)) {
+    return 'danger-row'
+  }
+  return ''
+}
+
 watch(filters, useDebounce(async () => {
   await setInventory()
 }, 500)
 )
 
 onMounted(async () => {
-  await getCategories();
   await setInventory();
+  await getCategories();
   await setDeposit();
 });
 </script>
+
+<style>
+.el-table .warning-row {
+  --el-table-tr-bg-color: var(--el-color-warning-light-5);
+}
+
+.el-table .success-row {
+  --el-table-tr-bg-color: var(--el-color-success-light-5);
+}
+
+.el-table .danger-row {
+  --el-table-tr-bg-color: var(--el-color-danger-light-5);
+}
+</style>

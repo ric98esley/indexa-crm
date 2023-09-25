@@ -1,6 +1,7 @@
 <script setup lang="ts" >
 import { FormInstance, FormRules } from 'element-plus';
 import { useAuthStore } from '@/stores/authStore'
+import { title } from 'process';
 const auth = useAuthStore();
 
 const formUser = ref<FormInstance>()
@@ -8,12 +9,6 @@ const formUser = ref<FormInstance>()
 interface UserForm {
   username: string,
   password: string
-}
-
-interface User {
-  name: string,
-  lastName: string,
-  email: string,
 }
 
 const rules = reactive<FormRules<UserForm>>({
@@ -25,7 +20,7 @@ const rules = reactive<FormRules<UserForm>>({
     },
     {
       min: 4,
-      message: "El usuario debe de ser minimo de 4 letras",
+      message: "El usuario debe de ser mínimo de 4 letras",
       trigger: "blur"
     }
   ],
@@ -33,7 +28,7 @@ const rules = reactive<FormRules<UserForm>>({
     { required: true, message: "Contraseña requerida", trigger: "blur" },
     {
       min: 5,
-      message: "Minimo 5 caracteres",
+      message: "Mínimo 5 caracteres",
       trigger: "blur"
     }
   ]
@@ -54,34 +49,35 @@ const login = async (formEl: FormInstance | undefined) => {
     if (!valid) return;
   })
 
-  const options = {
-    method: 'post',
-    body: {
-      user: userCredencials.username,
-      password: userCredencials.password,
-    }
-  }
   loading.value = true;
 
   try {
-    const { data, pending, error } = await useIndexa('/login', options);
-    watch(pending, (newPending) => {
-      if (!error.value) {
-        const token = data.value.token;
-        const user = data.value.user;
-
-        const userRoles = useRoles()
-
-        userRoles.value = [user.role]  //
-
-        auth.setAuthState(token, user);
+    const { data, pending, error } = await useFetch<{ token: string, user: User }>('/login', {
+      method: 'post',
+      body: {
+        user: userCredencials.username,
+        password: userCredencials.password,
       }
-      loading.value = newPending;
-      navigateTo('/');
     });
+    if (error.value) {
+      throw new Error('Usuario o contraseña incorrecto');
+    }
+    const token = data.value?.token;
+    const user = data.value?.user;
 
+    const userRoles = useRoles()
+
+    userRoles.value = [user!.role]  //
+
+    auth.setAuthState(token, user);
+    loading.value = false;
+    navigateTo('/');
   } catch (error) {
-    loading.value = true;
+    ElNotification({
+      title: 'Ha ocurrido un error',
+      message: error?.message || ''
+    })
+    loading.value = false;
   }
 }
 </script>
@@ -100,14 +96,14 @@ const login = async (formEl: FormInstance | undefined) => {
           </el-input>
         </el-form-item>
         <el-form-item prop="password">
-          <el-input v-model="userCredencials.password" placeholder="Contraseña" type="password">
+          <el-input v-model="userCredencials.password" placeholder="Contraseña" type="password" show-password>
             <template #prepend>
               <Icon name="carbon:password"></Icon>
             </template></el-input>
         </el-form-item>
         <el-form-item>
           <el-button :loading="loading" class="login-button" type="primary" native-type="submit" block>Iniciar
-            seccion</el-button>
+            sección</el-button>
         </el-form-item>
       </el-form>
     </el-card>

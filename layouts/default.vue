@@ -149,6 +149,15 @@ const menusA = reactive([
             ],
             title: 'Productos',
             path: '/consumables/products'
+          },
+          {
+            roles: [
+              'superuser',
+              'auditor',
+              'receptor'
+            ],
+            title: 'Historial',
+            path: '/consumables/history'
           }
         ]
       }
