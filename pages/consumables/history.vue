@@ -216,7 +216,6 @@ const getExcelHistory = async () => {
     link.click();
     document.body.removeChild(link);
 
-    return data.value
   } catch (error) {
     console.log(error)
     ElNotification({
