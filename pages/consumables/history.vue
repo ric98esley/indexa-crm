@@ -201,11 +201,16 @@ const getExcelHistory = async () => {
       throw new Error()
     }
 
+    let date = new Date();
+    const day = date.getDay()
+    const month = date.getMonth()
+    const year = date.getFullYear()
+
     // Create a temporary link element to trigger the file download
     const url = window.URL.createObjectURL(new Blob([file.value]));
     const link = document.createElement("a");
     link.href = url
-    link.setAttribute("download", 'filename.xlsx');
+    link.setAttribute("download", `${day}-${month}-${year}-historial.xlsx`);
     document.body.appendChild(link);
 
     link.click();
