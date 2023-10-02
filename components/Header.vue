@@ -7,8 +7,6 @@ const user = defineProps({
     default: () =>{}
   },
 })
-
-
 </script>
 
 <template>

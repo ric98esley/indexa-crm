@@ -11,7 +11,4 @@ const props = defineProps({
   margin: String
 })
 
-
-
-
 </script>

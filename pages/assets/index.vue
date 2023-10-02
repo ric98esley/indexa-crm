@@ -1,6 +1,5 @@
 <template>
   <el-col>
-
     <el-container direction="vertical">
       <el-table :data="response.assets" v-loading="loading" :row-class-name="assetStatus">
         <el-table-column type="index" width="50" />
@@ -15,6 +14,9 @@
         <el-table-column label="Serial" prop="serial">
           <template #header>
             <el-input v-model="filters.serial" placeholder="Serial" clearable />
+          </template>
+          <template #default="{ row }">
+            <Copy :text="row.serial" />
           </template>
         </el-table-column>
         <el-table-column label="Estado" prop="deposit.name">
