@@ -43,7 +43,7 @@
                 <Icon name="ep:edit" />
               </el-button>
               <el-button type="primary" circle>
-                <Icon name="ep:view" />
+                <Icon name="ep:view" @click="viewDetails(props.row.id)"/>
               </el-button>
               <el-button type="danger" circle @click="removePlace(props.row.id)" v-role="['superuser', 'auditor']">
                 <Icon name="ep:delete" />
@@ -312,6 +312,10 @@ const place = reactive<Place>({
   phone: '',
   address: '',
 });
+
+const viewDetails = async (id: number) => {
+  await navigateTo(`/places/${id}`)
+}
 
 const getPlaces = async ({
   id,

@@ -1,6 +1,6 @@
 <template>
   <el-container class="layout-container-demo h-screen">
-    <el-aside width="14rem">
+    <el-aside width="14rem" class="max-lg:hidden">
       <Logo width="w-32" margin="m-0" />
       <div>
         <el-scrollbar max-height="90vh">
@@ -9,7 +9,10 @@
       </div>
     </el-aside>
     <el-container>
-      <el-header style="text-align: right; font-size: 12px" class="relative bg-cyan-800 text-slate-300">
+      <el-header class="flex md:justify-between lg:justify-end items-center text-sm relative bg-cyan-800 text-slate-300">
+        <div class="lg:hidden w-12">
+          <Icon name="ep:menu" size="24px"/>
+        </div>
         <Header :name="user.name" :logout="() => auth.reset()" />
       </el-header>
       <ClientOnly>

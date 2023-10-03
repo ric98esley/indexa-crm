@@ -13,7 +13,7 @@ const user = defineProps({
     <div class="toolbar">
       <el-dropdown>
         <div class="mr-2 mt-0.5 text-slate-300">
-          <Icon name="ep:setting" class="mr-2" />
+          <Icon name="ep:setting" class="mr-2" size="18px" />
           <span>{{ user.name }}</span>
         </div>
         <template #dropdown>
