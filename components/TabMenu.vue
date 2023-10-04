@@ -35,7 +35,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <el-menu :router="true" :collapse="props.collapse">
+  <el-menu :router="false" :collapse="props.collapse">
     <el-sub-menu v-for="(menu, indexMenu) in props.menus" :index="`${indexMenu}`" v-role="menu.roles">
       <template #title>
         <el-icon>
@@ -48,9 +48,12 @@ const props = defineProps({
         <template #title>
           {{ group.title }}
         </template>
-        <el-menu-item :index="`${indexMenu}-${indexGroup}-${indexItem}`" v-for="(Item, indexItem) in group.items" :route="Item.path"
+        <el-menu-item :index="`${indexMenu}-${indexGroup}-${indexItem}`" v-for="(Item, indexItem) in group.items"
           v-role="Item.roles">
-          {{ Item.title }}
+          <NuxtLink :to="Item.path">
+            {{ Item.title }}
+          </NuxtLink>
+
         </el-menu-item>
       </el-menu-item-group>
       <el-sub-menu v-if="menu.submenus" v-for="(submenu, indexSubmenu) in menu.submenus"
@@ -58,8 +61,12 @@ const props = defineProps({
         <template #title>
           <Icon :name="submenu.icon" class="mx-1 text-lg" />{{ submenu.title }}
         </template>
-        <el-menu-item v-for="(item, indexItem) in submenu.items " :route="item.path"
-          :index="`sub-${indexMenu}-${indexSubmenu}-${indexItem}`" v-role="item.roles">{{ item.title }}</el-menu-item>
+        <el-menu-item v-for="(item, indexItem) in submenu.items "
+          :index="`sub-${indexMenu}-${indexSubmenu}-${indexItem}`" v-role="item.roles">
+          <NuxtLink :to="item.path">
+            {{ item.title }}
+          </NuxtLink>
+        </el-menu-item>
       </el-sub-menu>
     </el-sub-menu>
   </el-menu>

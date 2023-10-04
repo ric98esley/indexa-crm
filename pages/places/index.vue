@@ -42,8 +42,8 @@
               <el-button type="info" circle @click="editPlace(props.row)">
                 <Icon name="ep:edit" />
               </el-button>
-              <el-button type="primary" circle>
-                <Icon name="ep:view" @click="viewDetails(props.row.id)"/>
+              <el-button type="primary" circle @click="viewDetails(props.row.id)">
+                <Icon name="ep:view" />
               </el-button>
               <el-button type="danger" circle @click="removePlace(props.row.id)" v-role="['superuser', 'auditor']">
                 <Icon name="ep:delete" />
@@ -314,7 +314,7 @@ const place = reactive<Place>({
 });
 
 const viewDetails = async (id: number) => {
-  await navigateTo(`/places/${id}`)
+  await navigateTo(`/places/${id}`);
 }
 
 const getPlaces = async ({
@@ -443,7 +443,7 @@ const patchPlace = async () => {
     loadingPlace.value = true;
 
     const body = useFilterObject(place);
-    delete body.id
+    delete body.id;
 
     const { data, error } = await useFetch<Place>(`/locations/${place.id}`,
       {

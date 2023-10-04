@@ -466,9 +466,22 @@ const checkout = async () => {
       message: "Activos asignado correctamente",
     });
 
-    if(data.value && data.value.id) window.open(`/assigments/print/${data.value.id}`);
-
     await getAssets();
+    return navigateTo(
+    {
+      path: `/assignments/print/${data.value.id}`,
+    },
+    {
+      open: {
+        target: '_blank',
+        windowFeatures: {
+          popup: true,
+          noopener: true,
+          noreferrer: true,
+        }
+      }
+    })
+
   } catch (error) {
     ElNotification({
       message: "Vuelve a intentarlo mas tarde",

@@ -14,7 +14,7 @@
             </template>
             <template #extra>
               <div class="flex items-center">
-                <el-button>Imprimir inventario</el-button>
+                <el-button @click="print()">Imprimir inventario</el-button>
                 <el-button type="primary" class="ml-2">Editar</el-button>
               </div>
             </template>
@@ -158,7 +158,7 @@
           <el-pagination class="m-4" v-model:current-page="filters.offset" v-model:page-size="filters.limit"
             :page-sizes="[10, 20, 50, 100, 200, 300, 400]" :background="true"
             layout="total, sizes, prev, pager, next, jumper" :total="response.assignments.total" />
-          </el-row>
+        </el-row>
       </el-col>
     </el-row>
   </el-container>
@@ -294,6 +294,26 @@ const setPlaceAssignments = async (placeId: number) => {
   const res = await getPlaceAssignments(queries);
   response.assignments.total = res?.value?.total || 0;
   response.assignments.rows = res?.value?.rows || []
+}
+
+const print = () => {
+  return navigateTo(
+    {
+      path: `/places/${route.params.id}/print`,
+      query: {
+        total: response.assignments.total,
+      }
+    },
+    {
+      open: {
+        target: '_blank',
+        windowFeatures: {
+          popup: true,
+          noopener: true,
+          noreferrer: true,
+        }
+      }
+    })
 }
 
 watch(filters, useDebounce(async () => {
