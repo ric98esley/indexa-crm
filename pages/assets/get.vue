@@ -293,7 +293,7 @@ const checking = async () => {
       message: "Activos recibidos correctamente",
     });
 
-    if (data.value && data.value.id) window.open(`/assigments/print/${data.value.id}`);
+    if (data.value && data.value.id) window.open(`/assignments/${data.value.id}/print`);
 
     await getAssets();
   } catch (error) {

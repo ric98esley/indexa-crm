@@ -29,7 +29,7 @@ export const useAuthStore = defineStore('auth', {
     reset() {
       this.token = undefined;
       this.user = undefined;
-      localStorage.removeItem('auth')
+      localStorage.removeItem('auth');
       navigateTo("/login");
     },
 
@@ -53,8 +53,5 @@ export const useAuthStore = defineStore('auth', {
         this.user = auth.user;
       }
     },
-    getNotifications() {
-      console.log('notificaciones')
-    }
   },
 })

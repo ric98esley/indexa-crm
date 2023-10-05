@@ -4,14 +4,27 @@
       <Logo width="w-32" margin="m-0" />
       <div>
         <el-scrollbar max-height="90vh">
-        <TabMenu :menus="menusA" />
-      </el-scrollbar>
+          <TabMenu :menus="menusA" />
+        </el-scrollbar>
       </div>
     </el-aside>
+    <el-drawer v-model="app.$state.tabMenu" direction="ltr" size="100%">
+      <template #header>
+        <Logo width="w-32" margin="m-0" />
+      </template>
+      <el-aside width="max">
+        <div>
+          <el-scrollbar max-height="90vh">
+            <TabMenu :menus="menusA" />
+          </el-scrollbar>
+        </div>
+      </el-aside>
+    </el-drawer>
     <el-container>
-      <el-header class="flex md:justify-between lg:justify-end items-center text-sm relative bg-cyan-800 text-slate-300">
-        <div class="lg:hidden w-12">
-          <Icon name="ep:menu" size="24px"/>
+      <el-header
+        class="flex max-md:justify-between lg:justify-end items-center text-sm relative bg-cyan-800 text-slate-300">
+        <div class="lg:hidden w-12" @click="app.$state.tabMenu = !app.$state.tabMenu">
+          <Icon name="ep:menu" size="24px" />
         </div>
         <Header :name="user.name" :logout="() => auth.reset()" />
       </el-header>
@@ -28,7 +41,9 @@
 
 <script lang="ts" setup>
 import { useAuthStore } from '@/stores/authStore';
+import { useAppStore } from '@/stores/appStore';
 
+const app = useAppStore();
 
 const auth = useAuthStore();
 
@@ -297,10 +312,22 @@ const menusA = reactive([
   }
 ])
 
+const hideTabMenu = (hide: boolean) => {
+  if (hide) {
+    return 'max-lg:hidden'
+  } else {
+    return 'z-50'
+  }
+}
+
 </script>
 
-<style scoped>
+<style scoped >
 .layout-container-demo .el-main {
+  padding: 0;
+}
+
+:deep() .el-drawer .el-drawer__body {
   padding: 0;
 }
 

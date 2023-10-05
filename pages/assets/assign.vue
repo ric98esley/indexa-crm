@@ -469,7 +469,7 @@ const checkout = async () => {
     await getAssets();
     return navigateTo(
     {
-      path: `/assignments/print/${data.value.id}`,
+      path: `/assignments/${data.value.id}/print`,
     },
     {
       open: {

@@ -1,195 +1,217 @@
 <template>
-  <el-container direction="vertical" class="p-3">
-    <el-row :span="24" :gutter="12">
-      <el-table :data="users.rows" stripe v-loading="loadingUser">
-        <el-table-column type="expand" width="50">
-          <template #default="props">
-            <el-row :span="24" :gutter="24">
-              <el-col :span="22" :offset="2">
-                Creado por: {{ props.row.createdBy.name }} {{ props.row.createdBy.lastName }}
-              </el-col>
-              <el-col :span="22" :offset="2">
-                Fecha de creación: {{ new Date(props.row.createdAt).toLocaleString('es-VE') }}
-              </el-col>
-            </el-row>
-          </template>
-        </el-table-column>
-        <el-table-column type="index" width="50" />
-        <el-table-column prop="name" label="Nombre">
+  <el-container class="p-4">
+    <el-row :gutter="10">
+      <el-col :span="24">
+        <el-row>
+          <el-page-header @back="onBack" class="w-full">
+            <template #content>
+              <div class="flex items-center">
+                <span class="text-sm mr-2" style="color: var(--el-text-color-regular)">
+                  Usuario
+                </span>
+              </div>
+            </template>
+            <template #extra>
+              <div class="flex items-center">
+                <el-button type="primary" class="ml-2">Exportar a excel</el-button>
+              </div>
+            </template>
+          </el-page-header>
+        </el-row>
+      </el-col>
+      <el-col :span="24">
+        <el-row>
+          <el-table :data="users.rows" v-loading="loadingUser">
+            <el-table-column type="index" width="50" />
+            <el-table-column type="expand" width="50">
+              <template #default="props">
+                <el-row :span="24" :gutter="24">
+                  <el-col :span="22" :offset="2">
+                    Creado por: {{ props.row.createdBy.name }} {{ props.row.createdBy.lastName }}
+                  </el-col>
+                  <el-col :span="22" :offset="2">
+                    Fecha de creación: {{ new Date(props.row.createdAt).toLocaleString('es-VE') }}
+                  </el-col>
+                </el-row>
+              </template>
+            </el-table-column>
+            <el-table-column prop="name" label="Nombre" :min-width="minWidth">
+              <template #header>
+                <el-input v-model="filters.name" placeholder="Nombre" clearable />
+              </template>
+            </el-table-column>
+            <el-table-column label="Cédula" prop="cardId" :min-width="minWidth">
+              <template #header>
+                <el-input v-model="filters.cardId" placeholder="Cédula" clearable />
+              </template>
+            </el-table-column>
+            <el-table-column label="Rol" prop="role" v-role="['superuser', 'auditor']" :min-width="minWidth">
+              <template #header>
+                <el-input v-model="filters.role" placeholder="Rol" clearable />
+              </template>
+            </el-table-column>
+            <el-table-column label="Grupo" prop="group.name" :min-width="minWidth">
+              <template #header>
+                <el-input v-model="filters.group" placeholder="Grupo" clearable />
+              </template>
+            </el-table-column>
+            <el-table-column label="Activar" :min-width="minWidth">
+              <template #default="{ row }">
+                <el-switch v-model="row.isActive" class="ml-2"
+                  @change="(val) => (updateUserStatus({ active: val || false, userId: row.id }))" />
+              </template>
+            </el-table-column>
+            <el-table-column label="Acciones" :min-width="minWidth * 1.5">
+              <template #default="props">
+                <el-row>
+                  <el-button type="info" circle @click="editUser(props.row)">
+                    <Icon name="ep:edit" />
+                  </el-button>
+                  <el-button type="primary" circle>
+                    <Icon name="ep:view" />
+                  </el-button>
+                  <el-button type="danger" circle @click="removeUser(props.row.id)">
+                    <Icon name="ep:delete" />
+                  </el-button>
+                </el-row>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-pagination class="m-4" v-model:current-page="filters.offset" v-model:page-size="filters.limit"
+            :page-sizes="[10, 20, 50, 100, 200, 300, 400]" :background="true"
+            layout="total, sizes, prev, pager, next, jumper" :total="users.total" />
+        </el-row>
+      </el-col>
+      <el-col>
+        <el-dialog v-model="modals.create">
           <template #header>
-            <el-input v-model="filters.name" placeholder="Nombre" clearable />
+            <h2>Crear nuevo usuario</h2>
           </template>
-        </el-table-column>
-        <el-table-column label="Cedula" prop="cardId">
-          <template #header>
-            <el-input v-model="filters.cardId" placeholder="Cedula" clearable />
-          </template>
-        </el-table-column>
-        <el-table-column label="Rol" prop="role" v-role="['superuser', 'auditor']">
-          <template #header>
-            <el-input v-model="filters.cardId" placeholder="Cedula" clearable />
-          </template>
-        </el-table-column>
-        <el-table-column label="Padre" prop="group.name">
-          <template #header>
-            <el-input v-model="filters.group" placeholder="Grupo" clearable />
-          </template>
-        </el-table-column>
-        <el-table-column label="Activar">
-          <template #default="{ row }">
-            <el-switch v-model="row.isActive" class="ml-2"
-              @change="(val) => (updateUserStatus({ active: val || false, userId: row.id }))" />
-          </template>
-        </el-table-column>
-        <el-table-column label="Acciones">
-          <template #default="props">
-            <el-row>
-              <el-button type="info" circle @click="editUser(props.row)">
-                <Icon name="ep:edit" />
-              </el-button>
-              <el-button type="primary" circle>
-                <Icon name="ep:view" />
-              </el-button>
-              <el-button type="danger" circle @click="removeUser(props.row.id)">
-                <Icon name="ep:delete" />
-              </el-button>
-            </el-row>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-pagination class="m-4" v-model:current-page="filters.offset" v-model:page-size="filters.limit"
-        :page-sizes="[10, 20, 50, 100, 200, 300, 400]" :background="true" layout="total, sizes, prev, pager, next, jumper"
-        :total="users.total" />
-    </el-row>
-    <el-container>
-      <el-dialog v-model="modals.create">
-        <template #header>
-          <h2>Crear nuevo usuario</h2>
-        </template>
-        <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="user"
-            @submit.prevent="createUser()">
-            <el-row :gutter="20">
-              <el-col :span="18">
-                <el-form-item label="Usuario">
-                  <el-input v-model="user.username" placeholder="Ingrese el usuario"></el-input>
-                </el-form-item>
-              </el-col>
-              <el-col :span="4">
-                <el-form-item label="Activar">
-                  <el-switch v-model="user.isActive" class="ml-2" />
-                </el-form-item>
-              </el-col>
-            </el-row>
-            <el-form-item label="Nombre">
-              <el-input v-model="user.name" placeholder="Ingrese el nombre"></el-input>
-            </el-form-item>
-            <el-form-item label="Apellido">
-              <el-input v-model="user.lastName" placeholder="Ingrese el apellido"></el-input>
-            </el-form-item>
-            <el-form-item label="Cedula o RIF">
-              <el-input v-model="user.cardId" placeholder="Ingrese la cedula"></el-input>
-            </el-form-item>
-            <el-form-item label="Correo electronico">
-              <el-input v-model="user.email" placeholder="Ingrese el email"></el-input>
-            </el-form-item>
-            <el-form-item label="Telefono">
-              <el-input v-model="user.phone" placeholder="Ingrese el telefono"></el-input>
-            </el-form-item>
-            <el-form-item label="Rol">
-              <el-select class="w-full" v-model="user.role" filterable placeholder="Elige un rol">
-                <el-option v-for="item in roles" :key="item.label" :label="item.label" :value="item.value!"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="Grupo">
-              <el-select class="w-full" v-model="user.groupId" filterable remote
-                placeholder="Elige un grupo" :loading="loadingGroup" :remote-method="setGroup">
-                <el-option v-for="item in groups.rows" :key="item.id" :label="item.name" :value="item.id!">
-                  <span style="float: left">{{ item.name }}</span>
-                  <span style="
+          <template #default>
+            <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="user"
+              @submit.prevent="createUser()">
+              <el-row :gutter="20">
+                <el-col :span="18">
+                  <el-form-item label="Usuario">
+                    <el-input v-model="user.username" placeholder="Ingrese el usuario"></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="4">
+                  <el-form-item label="Activar">
+                    <el-switch v-model="user.isActive" class="ml-2" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-form-item label="Nombre">
+                <el-input v-model="user.name" placeholder="Ingrese el nombre"></el-input>
+              </el-form-item>
+              <el-form-item label="Apellido">
+                <el-input v-model="user.lastName" placeholder="Ingrese el apellido"></el-input>
+              </el-form-item>
+              <el-form-item label="Cedula o RIF">
+                <el-input v-model="user.cardId" placeholder="Ingrese la cedula"></el-input>
+              </el-form-item>
+              <el-form-item label="Correo electronico">
+                <el-input v-model="user.email" placeholder="Ingrese el email"></el-input>
+              </el-form-item>
+              <el-form-item label="Telefono">
+                <el-input v-model="user.phone" placeholder="Ingrese el telefono"></el-input>
+              </el-form-item>
+              <el-form-item label="Rol">
+                <el-select class="w-full" v-model="user.role" filterable placeholder="Elige un rol">
+                  <el-option v-for="item in roles" :key="item.label" :label="item.label" :value="item.value!"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="Grupo">
+                <el-select class="w-full" v-model="user.groupId" filterable remote placeholder="Elige un grupo"
+                  :loading="loadingGroup" :remote-method="setGroup">
+                  <el-option v-for="item in groups.rows" :key="item.id" :label="item.name" :value="item.id!">
+                    <span style="float: left">{{ item.name }}</span>
+                    <span style="
                       float: right;
                       color: var(--el-text-color-secondary);
                       font-size: 13px;
                   ">{{ item.code }}</span> </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="Contraseña">
-              <el-input v-model="user.password" placeholder="Ingrese la contraseña"></el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :disabled="!user.name && !user.username && !user.password && !user.email"
-                native-type="submit">Crear</el-button>
-            </el-form-item>
-          </el-form>
-        </template>
-      </el-dialog>
-      <el-dialog v-model="modals.edit">
-        <template #header>
-          <h2>Editar usuario</h2>
-        </template>
-        <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="user"
-            @submit.prevent="patchUser()">
-            <el-row :gutter="20">
-              <el-col :span="18">
-                <el-form-item label="Usuario">
-                  <el-input v-model="user.username" placeholder="Ingrese el usuario" disabled ></el-input>
-                </el-form-item>
-              </el-col>
-              <el-col :span="4">
-                <el-form-item label="Activar">
-                  <el-switch v-model="user.isActive" class="ml-2" />
-                </el-form-item>
-              </el-col>
-            </el-row>
-            <el-form-item label="Nombre">
-              <el-input v-model="user.name" placeholder="Ingrese el nombre"></el-input>
-            </el-form-item>
-            <el-form-item label="Apellido">
-              <el-input v-model="user.lastName" placeholder="Ingrese el apellido"></el-input>
-            </el-form-item>
-            <el-form-item label="Cedula o RIF">
-              <el-input v-model="user.cardId" placeholder="Ingrese la cedula"></el-input>
-            </el-form-item>
-            <el-form-item label="Correo electronico">
-              <el-input v-model="user.email" placeholder="Ingrese el email"></el-input>
-            </el-form-item>
-            <el-form-item label="Telefono">
-              <el-input v-model="user.phone" placeholder="Ingrese el telefono"></el-input>
-            </el-form-item>
-            <el-form-item label="Rol">
-              <el-select class="w-full" v-model="user.role" filterable placeholder="Elige un rol">
-                <el-option v-for="item in roles" :key="item.label" :label="item.label" :value="item.value!"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="Grupo">
-              <el-select class="w-full" v-model="user.groupId" filterable remote
-                placeholder="Elige un grupo" :loading="loadingGroup" :remote-method="setGroup">
-                <el-option v-for="item in groups.rows" :key="item.id" :label="item.name" :value="item.id!">
-                  <span style="float: left">{{ item.name }}</span>
-                  <span style="
+                </el-select>
+              </el-form-item>
+              <el-form-item label="Contraseña">
+                <el-input v-model="user.password" placeholder="Ingrese la contraseña"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" :disabled="!user.name && !user.username && !user.password && !user.email"
+                  native-type="submit">Crear</el-button>
+              </el-form-item>
+            </el-form>
+          </template>
+        </el-dialog>
+        <el-dialog v-model="modals.edit">
+          <template #header>
+            <h2>Editar usuario</h2>
+          </template>
+          <template #default>
+            <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="user"
+              @submit.prevent="patchUser()">
+              <el-row :gutter="20">
+                <el-col :span="18">
+                  <el-form-item label="Usuario">
+                    <el-input v-model="user.username" placeholder="Ingrese el usuario" disabled></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="4">
+                  <el-form-item label="Activar">
+                    <el-switch v-model="user.isActive" class="ml-2" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-form-item label="Nombre">
+                <el-input v-model="user.name" placeholder="Ingrese el nombre"></el-input>
+              </el-form-item>
+              <el-form-item label="Apellido">
+                <el-input v-model="user.lastName" placeholder="Ingrese el apellido"></el-input>
+              </el-form-item>
+              <el-form-item label="Cedula o RIF">
+                <el-input v-model="user.cardId" placeholder="Ingrese la cedula"></el-input>
+              </el-form-item>
+              <el-form-item label="Correo electronico">
+                <el-input v-model="user.email" placeholder="Ingrese el email"></el-input>
+              </el-form-item>
+              <el-form-item label="Telefono">
+                <el-input v-model="user.phone" placeholder="Ingrese el telefono"></el-input>
+              </el-form-item>
+              <el-form-item label="Rol">
+                <el-select class="w-full" v-model="user.role" filterable placeholder="Elige un rol">
+                  <el-option v-for="item in roles" :key="item.label" :label="item.label" :value="item.value!"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="Grupo">
+                <el-select class="w-full" v-model="user.groupId" filterable remote placeholder="Elige un grupo"
+                  :loading="loadingGroup" :remote-method="setGroup">
+                  <el-option v-for="item in groups.rows" :key="item.id" :label="item.name" :value="item.id!">
+                    <span style="float: left">{{ item.name }}</span>
+                    <span style="
                       float: right;
                       color: var(--el-text-color-secondary);
                       font-size: 13px;
                   ">{{ item.code }}</span> </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="Contraseña">
-              <el-input v-model="user.password" placeholder="Ingrese la contraseña"></el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" native-type="submit">Editar</el-button>
-            </el-form-item>
-          </el-form>
-        </template>
-      </el-dialog>
-    </el-container>
-    <el-row justify="end" :span="24">
-      <div
-        class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
-        @click="modals.create = true">
-        <Icon name="ep:plus" size="2rem" color="white" />
-      </div>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="Contraseña">
+                <el-input v-model="user.password" placeholder="Ingrese la contraseña"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" native-type="submit">Editar</el-button>
+              </el-form-item>
+            </el-form>
+          </template>
+        </el-dialog>
+      </el-col>
+      <el-col justify="end" :span="24">
+        <div
+          class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
+          @click="modals.create = true">
+          <Icon name="ep:plus" size="2rem" color="white" />
+        </div>
+      </el-col>
     </el-row>
   </el-container>
 </template>
@@ -206,12 +228,15 @@ definePageMeta({
 
 const loadingUser = ref(false);
 const loadingGroup = ref(false);
+const minWidth = ref(120);
+
 
 const filters = reactive({
   limit: 10,
   offset: 0,
   username: '',
   group: '',
+  role: '',
   name: '',
   lastName: '',
   cardId: '',
@@ -436,7 +461,7 @@ const editUser = (row: User) => {
   user.groupId = row.group?.id;
   user.isActive = row.isActive;
 
-  if(row.group) groups.rows.push(row.group)
+  if (row.group) groups.rows.push(row.group)
 }
 
 const removeUser = async (id: number) => {
@@ -520,6 +545,10 @@ const getGroups = async ({
       message: 'Error al obtener las marcas intente de nuevo mas tarde'
     })
   }
+}
+
+const onBack = () => {
+  router.back();
 }
 
 const setGroup = async (query?: string) => {

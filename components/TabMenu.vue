@@ -48,25 +48,25 @@ const props = defineProps({
         <template #title>
           {{ group.title }}
         </template>
-        <el-menu-item :index="`${indexMenu}-${indexGroup}-${indexItem}`" v-for="(Item, indexItem) in group.items"
-          v-role="Item.roles">
-          <NuxtLink :to="Item.path">
+        <NuxtLink :to="Item.path" v-for="(Item, indexItem) in group.items">
+          <el-menu-item :index="`${indexMenu}-${indexGroup}-${indexItem}`" :route="Item.path"
+            v-role="Item.roles">
             {{ Item.title }}
-          </NuxtLink>
+          </el-menu-item>
+        </NuxtLink>
 
-        </el-menu-item>
       </el-menu-item-group>
       <el-sub-menu v-if="menu.submenus" v-for="(submenu, indexSubmenu) in menu.submenus"
         :index="`${indexMenu}-${indexSubmenu}`" v-role="submenu.roles">
         <template #title>
           <Icon :name="submenu.icon" class="mx-1 text-lg" />{{ submenu.title }}
         </template>
-        <el-menu-item v-for="(item, indexItem) in submenu.items "
-          :index="`sub-${indexMenu}-${indexSubmenu}-${indexItem}`" v-role="item.roles">
-          <NuxtLink :to="item.path">
+        <NuxtLink :to="item.path" v-for="(item, indexItem) in submenu.items">
+        <el-menu-item  :index="`sub-${indexMenu}-${indexSubmenu}-${indexItem}`" :route="item.path"
+          v-role="item.roles">
             {{ item.title }}
-          </NuxtLink>
-        </el-menu-item>
+          </el-menu-item>
+        </NuxtLink>
       </el-sub-menu>
     </el-sub-menu>
   </el-menu>

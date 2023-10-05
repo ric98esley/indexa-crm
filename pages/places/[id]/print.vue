@@ -91,7 +91,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor'],
+  roles: ['superuser', 'admin', 'auditor', 'receptor'],
 })
 
 const response = reactive<{
