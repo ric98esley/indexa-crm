@@ -223,6 +223,40 @@ const menusA = reactive([
     ],
   },
   {
+    title: 'Reportes',
+    icon: 'ep:document-copy',
+    roles: [
+      'superuser',
+      'auditor',
+      'receptor'
+    ],
+    groups: [
+      {
+        title: 'Ver',
+        items: [
+          {
+            roles: [
+              'superuser',
+              'auditor',
+              'receptor'
+            ],
+            title: 'Salidas',
+            path: '/assignments?type=checkout'
+          },
+          {
+            roles: [
+              'superuser',
+              'auditor',
+              'receptor'
+            ],
+            title: 'Entradas',
+            path: '/assignments?type=checking'
+          },
+        ]
+      }
+    ],
+  },
+  {
     title: 'Configuración',
     icon: 'ep:setting',
     roles: [
@@ -311,14 +345,6 @@ const menusA = reactive([
     ]
   }
 ])
-
-const hideTabMenu = (hide: boolean) => {
-  if (hide) {
-    return 'max-lg:hidden'
-  } else {
-    return 'z-50'
-  }
-}
 
 </script>
 

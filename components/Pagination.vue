@@ -39,7 +39,7 @@ const limit = computed({
   </div>
   <div class="md:hidden">
     <el-pagination class="m-4" v-model:current-page="offset" v-model:page-size="limit"
-      :page-sizes="[10, 20, 50, 100, 200, 300, 400]" :background="true" layout="total, sizes, prev, next, jumper"
+      :page-sizes="[10, 20, 50, 100, 200, 300, 400]" :background="true" layout="total, sizes, prev, next"
       :total="props.total" />
   </div>
 </template>
