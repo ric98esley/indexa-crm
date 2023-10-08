@@ -71,7 +71,7 @@ const menusA = reactive([
               'receptor'
             ],
             title: 'Todos los activos',
-            path: '/assets'
+            route: { path: '/assets' }
           }
         ]
       }
@@ -87,7 +87,7 @@ const menusA = reactive([
         items: [
           {
             title: 'Agregar',
-            path: '/assets/add',
+            route: { path: '/assets/add' },
             roles: [
               'superuser',
               'auditor',
@@ -95,7 +95,7 @@ const menusA = reactive([
           },
           {
             title: 'Asignar',
-            path: '/assets/assign',
+            route: { path: '/assets/assign' },
             roles: [
               'superuser',
               'auditor',
@@ -103,7 +103,7 @@ const menusA = reactive([
           },
           {
             title: 'Recibir',
-            path: '/assets/get',
+            route: { path: '/assets/get' },
             roles: [
               'superuser',
               'auditor',
@@ -132,7 +132,7 @@ const menusA = reactive([
               'receptor'
             ],
             title: 'Usuarios',
-            path: '/users'
+            route: { path: '/users' }
           }
         ]
       }
@@ -157,7 +157,7 @@ const menusA = reactive([
               'receptor'
             ],
             title: 'Inventario',
-            path: '/consumables'
+            route: { path: '/consumables' }
           },
           {
             roles: [
@@ -166,7 +166,7 @@ const menusA = reactive([
               'receptor'
             ],
             title: 'Productos',
-            path: '/consumables/products'
+            route: { path: '/consumables/products' }
           },
           {
             roles: [
@@ -175,7 +175,7 @@ const menusA = reactive([
               'receptor'
             ],
             title: 'Historial',
-            path: '/consumables/history'
+            route: { path: '/consumables/history' }
           }
         ]
       }
@@ -200,7 +200,7 @@ const menusA = reactive([
               'receptor'
             ],
             title: 'Agencias',
-            path: '/places'
+            route: { path: '/places' }
           },
           {
             roles: [
@@ -208,7 +208,7 @@ const menusA = reactive([
               'auditor',
             ],
             title: 'Tipos',
-            path: '/places/type'
+            route: { path: '/places/type' }
           },
           {
             roles: [
@@ -216,7 +216,7 @@ const menusA = reactive([
               'auditor',
             ],
             title: 'Zonas',
-            path: '/places/zone'
+            route: { path: '/places/zone' }
           }
         ]
       }
@@ -241,7 +241,12 @@ const menusA = reactive([
               'receptor'
             ],
             title: 'Salidas',
-            path: '/assignments?type=checkout'
+            route: {
+              path: '/assignments',
+              query: {
+                type: 'checkout'
+              }
+            }
           },
           {
             roles: [
@@ -250,7 +255,12 @@ const menusA = reactive([
               'receptor'
             ],
             title: 'Entradas',
-            path: '/assignments?type=checking'
+            route: {
+              path: '/assignments',
+              query: {
+                type: 'checking'
+              }
+            }
           },
         ]
       }
@@ -266,7 +276,7 @@ const menusA = reactive([
     ],
     submenus: [
       {
-        title: 'Categorias',
+        title: 'Categorías',
         icon: 'ep:memo',
         roles: [
           'superuser',
@@ -274,12 +284,12 @@ const menusA = reactive([
         ],
         items: [
           {
-            title: 'Ver Categorias',
-            path: '/config/category'
+            title: 'Ver',
+            route: { path: '/config/category' }
           },
           {
             title: 'Campos personalizados',
-            path: '/config/category/specification'
+            route: { path: '/config/category/specification' }
           }
         ]
       },
@@ -293,7 +303,7 @@ const menusA = reactive([
         items: [
           {
             title: 'Ver marcas',
-            path: '/config/brand'
+            route: { path: '/config/brand' }
           }
         ]
       },
@@ -307,12 +317,12 @@ const menusA = reactive([
         items: [
           {
             title: 'Ver modelos',
-            path: '/config/model'
+            route: { path: '/config/model' }
           }
         ]
       },
       {
-        title: 'Depositos',
+        title: 'Depósitos',
         icon: 'ep:house',
         roles: [
           'superuser',
@@ -322,7 +332,7 @@ const menusA = reactive([
         items: [
           {
             title: 'Ver grupos',
-            path: '/config/deposit'
+            route: { path: '/config/deposit' }
           }
         ]
       },
@@ -338,7 +348,7 @@ const menusA = reactive([
         items: [
           {
             title: 'Ver grupos',
-            path: '/config/group'
+            route: { path: '/config/group' }
           }
         ]
       }
