@@ -302,6 +302,7 @@ const print = () => {
       path: `/places/${route.params.id}/print`,
       query: {
         total: response.assignments.total,
+        all: 'false'
       }
     },
     {

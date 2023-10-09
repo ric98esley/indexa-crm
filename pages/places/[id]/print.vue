@@ -54,7 +54,7 @@
           </tr>
           <tr v-for="(assignment, index) in response.rows" v-bind:key="index">
             <td>{{ index + 1 }}</td>
-            <td>{{ new Date(assignment.checkoutAt).toLocaleString() }}</td>
+            <td>{{ new Date(assignment?.createdAt).toLocaleString() }}</td>
             <td>{{ assignment.target?.serial }}</td>
             <td>
               {{ assignment.target.model?.category.name || '' }} -
@@ -110,30 +110,111 @@ const response = reactive<{
   rows: []
 });
 
-const getAssignment = async () => {
+const getAssignment = async (
+  {
+    locationId,
+    type = '',
+    serial = '',
+    deposit = '',
+    category = '',
+    brand = '',
+    all = 'false',
+    model = '',
+    limit = 10,
+    offset = 0,
+    endDate,
+    startDate
+  }: {
+    locationId?: number
+    serial: string,
+    all: string,
+    type: string,
+    deposit: string,
+    category: string,
+    brand: string,
+    model: string,
+    limit: number,
+    offset: number,
+    startDate: string,
+    endDate: string,
+  }
+) => {
   try {
-    const { data: place } = await useFetch<Place>(`/locations/${route.params.id}`);
-    const { data } = await useFetch<{ total: number, rows: Assignments[] }>(`/locations/${route.params.id}/assets`, {
+    const { data: place } = await useFetch<Place>(`/locations/${locationId}`);
+    const { data } = await useFetch<{ total: number, rows: Assignments[] }>(`/locations/${locationId}/assets`, {
       params: {
-        limit: route.query.total
+        ...(type != '' && type && {
+          type
+        }),
+        ...(serial != '' && serial && {
+          serial
+        }),
+        ...(type != '' && type && {
+          type
+        }),
+        ...(model != '' && model && {
+          model
+        }),
+        ...(deposit != '' && deposit && {
+          deposit
+        }),
+        ...(category != '' && category && {
+          category
+        }),
+        ...(brand != '' && brand && {
+          brand
+        }),
+        ...(offset && {
+          offset: (offset - 1) * limit
+        }),
+        ...(limit && {
+          limit
+        }),
+        ...(startDate && endDate && {
+          startDate,
+          endDate
+        }),
+        ...(/^true$/i.test(all) && {
+          all,
+        }),
+        paranoid: true
       }
     });
-
-    response.place = place.value;
-
-    response.rows = data.value?.rows || [];
-    response.total = data.value?.total
+    return { place, data }
   } catch (error) {
     console.log(error);
   }
 }
 
+const setAssignments = async () => {
+  const queries = {
+    locationId: route.params.id,
+    type: route.query.type,
+    serial: route.query.serial,
+    deposit: route.query.deposit,
+    category: route.query.category,
+    brand: route.query.brand,
+    model: route.query.model,
+    limit: route.query.total,
+    startDate: route.query.startDate,
+    endDate: route.query.endDate,
+    all: route.query.all
+  }
+  const res = await getAssignment(queries);
+  if (res) {
+    response.place = res.place.value;
+    response.rows = res.data.value?.rows || [];
+    response.total = res.data.value?.total
+  }
+
+}
+
 onMounted(async () => {
-  await getAssignment()
-  .then(() => {
-    window.print();
-    setTimeout(window.close, 500);
-  });
+  await setAssignments()
+    .then(() => {
+      window.print();
+      setTimeout(window.close, 500);
+    });
 })
 </script>
 

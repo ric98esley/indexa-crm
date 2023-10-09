@@ -147,4 +147,12 @@ declare global {
     type: string,
     warehouse: Consumable
   }
+  interface Count {
+    code?: string,
+    location?: string,
+    locationId?: string,
+    group?: string,
+    groupCode?: string,
+    count?: number
+  }
 }
