@@ -19,9 +19,17 @@
             <Copy :text="row.serial" />
           </template>
         </el-table-column>
-        <el-table-column label="Estado" prop="deposit.name">
+        <el-table-column label="Estado">
           <template #header>
             <el-input v-model="filters.deposit" placeholder="Estado" clearable />
+          </template>
+          <template #default="{ row }">
+            <div v-if="row.assignment">
+              {{ row.assignment?.location?.code }} - {{ row.assignment?.location?.name }}
+            </div>
+            <div v-else>
+              {{ row.deposit.name }}
+            </div>
           </template>
         </el-table-column>
         <el-table-column label="Categoría" prop="model.category.name">
@@ -105,7 +113,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'tecnico', 'receptor'],
+  roles: ['superuser', 'admin', 'tecnico', 'receptor', 'auditor'],
 })
 const loading = ref(true)
 

@@ -108,14 +108,14 @@
               <el-form-item label="Apellido">
                 <el-input v-model="user.lastName" placeholder="Ingrese el apellido"></el-input>
               </el-form-item>
-              <el-form-item label="Cedula o RIF">
-                <el-input v-model="user.cardId" placeholder="Ingrese la cedula"></el-input>
+              <el-form-item label="Cédula o RIF">
+                <el-input v-model="user.cardId" placeholder="Ingrese la cédula"></el-input>
               </el-form-item>
-              <el-form-item label="Correo electronico">
+              <el-form-item label="Correo">
                 <el-input v-model="user.email" placeholder="Ingrese el email"></el-input>
               </el-form-item>
-              <el-form-item label="Telefono">
-                <el-input v-model="user.phone" placeholder="Ingrese el telefono"></el-input>
+              <el-form-item label="Teléfono">
+                <el-input v-model="user.phone" placeholder="Ingrese el teléfono"></el-input>
               </el-form-item>
               <el-form-item label="Rol">
                 <el-select class="w-full" v-model="user.role" filterable placeholder="Elige un rol">
@@ -169,14 +169,14 @@
               <el-form-item label="Apellido">
                 <el-input v-model="user.lastName" placeholder="Ingrese el apellido"></el-input>
               </el-form-item>
-              <el-form-item label="Cedula o RIF">
+              <el-form-item label="Cédula o RIF">
                 <el-input v-model="user.cardId" placeholder="Ingrese la cedula"></el-input>
               </el-form-item>
               <el-form-item label="Correo electronico">
                 <el-input v-model="user.email" placeholder="Ingrese el email"></el-input>
               </el-form-item>
-              <el-form-item label="Telefono">
-                <el-input v-model="user.phone" placeholder="Ingrese el telefono"></el-input>
+              <el-form-item label="Teléfono">
+                <el-input v-model="user.phone" placeholder="Ingrese el teléfono"></el-input>
               </el-form-item>
               <el-form-item label="Rol">
                 <el-select class="w-full" v-model="user.role" filterable placeholder="Elige un rol">
