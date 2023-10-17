@@ -223,6 +223,8 @@ definePageMeta({
   roles: ['superuser', 'admin', 'auditor', 'receptor'],
 });
 
+const router = useRouter();
+
 const loadingUser = ref(false);
 const loadingGroup = ref(false);
 const minWidth = ref(120);
