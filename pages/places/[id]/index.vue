@@ -15,7 +15,7 @@
             <template #extra>
               <div class="flex items-center">
                 <el-button @click="print()">Imprimir inventario</el-button>
-                <el-button type="primary" class="ml-2">Editar</el-button>
+                <!-- <el-button type="primary" class="ml-2">Editar</el-button> -->
               </div>
             </template>
             <el-descriptions :column="3" border>

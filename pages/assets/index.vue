@@ -47,7 +47,7 @@
             <el-input v-model="filters.model" placeholder="Modelo" clearable />
           </template>
         </el-table-column>
-        <el-table-column label="Acciones">
+        <el-table-column label="Acciones" v-role:not="'receptor'">
           <template #default="{ row }">
             <el-row>
               <el-button type="info" circle @click="editAsset(row)">

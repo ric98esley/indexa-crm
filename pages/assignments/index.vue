@@ -206,7 +206,7 @@ const minWidth = ref(100);
 
 
 const endDate = new Date()
-const startDate = new Date(endDate.getTime() - 3600 * 1000 * 24 * 7);
+const startDate = new Date(new Date().getTime() - 3600 * 1000 * 24 * 7);
 
 const defaultDate = [`${startDate.getMonth().toString().padStart(2, "0")}-${startDate.getDate().toString().padStart(2, "0")}-${startDate.getFullYear()}`,
 `${endDate.getMonth().toString().padStart(2, "0")}-${endDate.getDate().toString().padStart(2, "0")}-${endDate.getFullYear()}`]

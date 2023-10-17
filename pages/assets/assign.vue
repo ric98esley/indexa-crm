@@ -467,7 +467,13 @@ const checkout = async () => {
     });
 
     await getAssets();
-    return navigateTo(
+
+    modals.assign = false
+    assignments.assets = [];
+    assignments.place = undefined;
+    assignments.locationId = undefined;
+
+    if (data.value && data.value.id) return navigateTo(
     {
       path: `/assignments/${data.value.id}/print`,
     },

@@ -65,7 +65,7 @@
                         Fecha de creación
                       </div>
                     </template>
-                    {{ new Date(response.asset?.createdAt?.toString()).toLocaleDateString() }}
+                    {{ new Date(response.asset?.createdAt).toLocaleDateString() }}
                   </el-descriptions-item>
                   <el-descriptions-item>
                     <template #label>

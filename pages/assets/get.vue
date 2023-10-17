@@ -293,9 +293,28 @@ const checking = async () => {
       message: "Activos recibidos correctamente",
     });
 
-    if (data.value && data.value.id) window.open(`/assignments/${data.value.id}/print`);
-
     await getAssets();
+
+    assignments.assets = [];
+    assignments.depositId = undefined;
+    assignments.deposit = undefined;
+    modals.get = false
+
+    
+    if (data.value && data.value.id) return navigateTo(
+    {
+      path: `/assignments/${data.value.id}/print`,
+    },
+    {
+      open: {
+        target: '_blank',
+        windowFeatures: {
+          popup: true,
+          noopener: true,
+          noreferrer: true,
+        }
+      }
+    })
   } catch (error) {
     ElNotification({
       message: "Vuelve a intentarlo mas tarde",
@@ -303,6 +322,8 @@ const checking = async () => {
     console.log(error);
   }
 }
+
+
 
 watch(filters, useDebounce(async () => {
   await getAssets()

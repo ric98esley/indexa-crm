@@ -79,11 +79,11 @@ declare global {
   }
   interface Specification extends Base {
     typeId: number,
+    type: Type
     assetId?: number,
     value: string
   }
   interface Type extends Base {
-
   }
   interface Place extends Base {
     group?: Group;

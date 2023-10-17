@@ -82,7 +82,8 @@ const menusA = reactive([
         icon: 'ep:element-plus',
         roles: [
           'superuser',
-          'auditor'
+          'auditor',
+          'receptor'
         ],
         items: [
           {
@@ -99,6 +100,7 @@ const menusA = reactive([
             roles: [
               'superuser',
               'auditor',
+              'receptor'
             ],
           },
           {
@@ -107,6 +109,7 @@ const menusA = reactive([
             roles: [
               'superuser',
               'auditor',
+              'receptor'
             ],
           },
         ]
