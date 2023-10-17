@@ -15,7 +15,7 @@ declare global {
     serial?: string,
     modelId?: number[],
     depositId?: number,
-    customFields: {
+    customFields?: {
       name: string
       typeId: number,
       assetId?: number,
@@ -69,8 +69,9 @@ declare global {
     invoiceId?: number,
     deposit?: Deposit,
     model?: Model,
-    assignment?: any
+    assignment?: Assignments
     enabled: boolean
+    specifications?: Specification[]
   }
 
   interface Provider extends Base {

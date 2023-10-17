@@ -67,9 +67,6 @@
                   <el-button type="info" circle @click="editUser(props.row)">
                     <Icon name="ep:edit" />
                   </el-button>
-                  <el-button type="primary" circle>
-                    <Icon name="ep:view" />
-                  </el-button>
                   <el-button type="danger" circle @click="removeUser(props.row.id)">
                     <Icon name="ep:delete" />
                   </el-button>
@@ -172,7 +169,7 @@
               <el-form-item label="Cédula o RIF">
                 <el-input v-model="user.cardId" placeholder="Ingrese la cedula"></el-input>
               </el-form-item>
-              <el-form-item label="Correo electronico">
+              <el-form-item label="Correo electrónico">
                 <el-input v-model="user.email" placeholder="Ingrese el email"></el-input>
               </el-form-item>
               <el-form-item label="Teléfono">

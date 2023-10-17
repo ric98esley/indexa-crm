@@ -1,7 +1,6 @@
 <script setup lang="ts" >
 import { FormInstance, FormRules } from 'element-plus';
 import { useAuthStore } from '@/stores/authStore'
-import { title } from 'process';
 const auth = useAuthStore();
 
 const formUser = ref<FormInstance>()
@@ -65,13 +64,24 @@ const login = async (formEl: FormInstance | undefined) => {
     const token = data.value?.token;
     const user = data.value?.user;
 
-    const userRoles = useRoles()
+    const userRoles = useRoles();
 
-    userRoles.value = [user!.role]  //
+    userRoles.value = [user!.role];
 
     auth.setAuthState(token, user);
     loading.value = false;
-    navigateTo('/');
+    navigateTo('/',
+      {
+        open: {
+          target: '_self',
+          windowFeatures: {
+            popup: false,
+            noopener: true,
+            noreferrer: true,
+          }
+        }
+      }
+    );
   } catch (error) {
     ElNotification({
       title: 'Ha ocurrido un error',
@@ -85,7 +95,7 @@ const login = async (formEl: FormInstance | undefined) => {
 <template>
   <div class="login">
     <el-card>
-      <Logo width="w-40" margin="m-3" />
+      <Logo width="w-32" margin="m-3" />
       <el-form class="login-form" :model="userCredencials" :rules="rules" ref="formUser" status-icon
         @submit.native.prevent="login(formUser)">
         <el-form-item prop="username">

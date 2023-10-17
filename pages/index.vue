@@ -1,5 +1,5 @@
 <template>
-  <h2>Bienvenidos al sistema de inventario de GANA loterias</h2>
+  <h2>Bienvenidos al sistema de inventario de GANA loterías</h2>
 </template>
 
 <script lang="ts" setup>

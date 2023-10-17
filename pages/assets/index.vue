@@ -4,8 +4,8 @@
       <el-table :data="response.assets" v-loading="loading" :row-class-name="assetStatus">
         <el-table-column type="index" width="50" />
         <el-table-column type="expand" width="50">
-          <template #default="props">
-            <el-table :data="props.row.specifications" :border="true">
+          <template #default="{ row }">
+            <el-table :data="row.specifications" :border="true">
               <el-table-column label="Campo" prop="type.name"></el-table-column>
               <el-table-column label="Valor" prop="value"></el-table-column>
             </el-table>
@@ -53,7 +53,7 @@
               <el-button type="info" circle @click="editAsset(row)">
                 <Icon name="ep:edit" />
               </el-button>
-              <el-button type="primary" circle>
+              <el-button type="primary" circle @click="viewDetails(row.id)">
                 <Icon name="ep:view" />
               </el-button>
               <el-button type="danger" circle @click="removeAsset(row.id)" v-role="['auditor', 'superuser']">
@@ -145,6 +145,9 @@ const request = reactive<{
   }
 });
 
+const viewDetails = async (id: number) => {
+  await navigateTo(`/assets/${id}`);
+}
 
 const filters = reactive({
   limit: 10,

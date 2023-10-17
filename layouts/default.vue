@@ -1,7 +1,7 @@
 <template>
   <el-container class="layout-container-demo h-screen">
     <el-aside width="14rem" class="max-lg:hidden">
-      <Logo width="w-32" margin="m-0" />
+      <Logo width="w-20" margin="m-0" />
       <div>
         <el-scrollbar max-height="90vh">
           <TabMenu :menus="menusA" />
@@ -26,7 +26,7 @@
         <div class="lg:hidden w-12" @click="app.$state.tabMenu = !app.$state.tabMenu">
           <Icon name="ep:menu" size="24px" />
         </div>
-        <Header :name="user.name" :logout="() => auth.reset()" />
+        <Header :name="user.username" :logout="() => auth.reset()" />
       </el-header>
       <ClientOnly>
         <el-main>
