@@ -2,7 +2,7 @@
   <el-col :gutter="20">
     <el-row :span="24" class="p-4">
       <el-card class="w-full">
-        <el-table :data="response.assets" v-loading="loadingAssets" :row-class-name="assetStatus">
+        <el-table :data="response.rows" v-loading="loadingAssets" :row-class-name="assetStatus">
           <el-table-column type="index" width="50" />
           <el-table-column type="expand" width="50">
             <template #default="props">
@@ -213,10 +213,10 @@ const loadingGroup = ref(false);
 
 
 const response = reactive<{
-  assets: Asset[],
+  rows: Asset[],
   total: number
 }>({
-  assets: [],
+  rows: [],
   total: 0
 });
 
@@ -311,7 +311,7 @@ const getAssets = async () => {
         }
       }
     );
-    response.assets = data.value?.assets || [];
+    response.rows = data.value?.assets || [];
     response.total = data.value?.total || 0;
     loadingAssets.value = false;
 
