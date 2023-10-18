@@ -139,7 +139,7 @@ const response = reactive<{
   total: number
 }>({
   deposits:[],
-  assets: [],
+  rows: [],
   total: 0
 });
 
@@ -188,7 +188,7 @@ const assetStatus = ({
 const getAssets = async () => {
   try {
     loadingAssets.value = true;
-    const { data, pending, error } = await useFetch<{ assets: Asset[], total: number }>('/assets',
+    const { data, pending, error } = await useFetch<{ rows: Asset[], total: number }>('/assets',
       {
         params: {
           ...(filters.serial != '' && filters.serial && {
@@ -216,7 +216,7 @@ const getAssets = async () => {
         }
       }
     );
-    response.rows = data.value?.assets || [];
+    response.rows = data.value?.rows || [];
     response.total = data.value?.total || 0;
     loadingAssets.value = false;
 
