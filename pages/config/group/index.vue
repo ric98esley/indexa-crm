@@ -377,7 +377,9 @@ const patchGroup = async () => {
 
     const body = {
       name: group.name,
-      code: group.code
+      code: group.code,
+      parentId: group.parentId,
+      managerId: group.managerId
     }
 
     const { data, error } = await useFetch<Group>(`/groups/${group.id}`,
