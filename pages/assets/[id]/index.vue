@@ -129,7 +129,7 @@
                 {{ row.createdBy.name }} - {{ row.createdBy.lastName }}
               </template>
             </el-table-column>
-            <el-table-column label="Acciones" width="120">
+            <!-- <el-table-column label="Acciones" width="120">
               <template #default="{ row }">
                 <el-row>
                   <el-button type="primary" circle>
@@ -140,7 +140,7 @@
                   </el-button>
                 </el-row>
               </template>
-            </el-table-column>
+            </el-table-column> -->
           </el-table>
           <el-pagination class="m-4" v-model:current-page="filters.offset" v-model:page-size="filters.limit"
             :page-sizes="[10, 20, 50, 100, 200, 300, 400]" :background="true"

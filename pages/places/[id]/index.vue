@@ -171,6 +171,11 @@
                 </el-table>
               </template>
             </el-table-column>
+            <el-table-column label="Tipo" width="80">
+              <template #default="{ row }">
+                {{ row.type == 'checkout' ? 'Salida' : 'Entrada' }}
+              </template>
+            </el-table-column>
             <el-table-column label="Fecha" width="120">
               <template #default="{ row }">
                 {{ new Date(row.createdAt).toLocaleString() }}
@@ -204,7 +209,7 @@
                 <el-input v-model="filters2.model" placeholder="Modelo" clearable />
               </template>
             </el-table-column>
-            <el-table-column label="Acciones">
+            <!-- <el-table-column label="Acciones">
               <template #default="{ row }">
                 <el-row>
                   <el-button type="primary" circle>
@@ -215,7 +220,7 @@
                   </el-button>
                 </el-row>
               </template>
-            </el-table-column>
+            </el-table-column> -->
           </el-table>
           <el-pagination class="m-4" v-model:current-page="filters2.offset" v-model:page-size="filters2.limit"
             :page-sizes="[2, 10, 20, 50, 100, 200, 300, 400]" :background="true"
@@ -353,9 +358,9 @@ const getPlaceAssignments = async ({
         ...(all && {
           all
         }),
-        ...(type != '' && type && {
-          type
-        }),
+        // ...(type != '' && type && {
+        //   type
+        // }),
         ...(offset && {
           offset: (offset - 1) * limit
         }),
