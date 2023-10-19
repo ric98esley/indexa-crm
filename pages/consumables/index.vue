@@ -403,15 +403,14 @@ const createInventory = async () => {
 
     if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
       ElNotification({
-        title: 'Error al crear tipos intente de nuevo mas tarde',
+        title: 'Error al crear intente de nuevo mas tarde',
         message: error.value?.data.message.message,
       })
       return
     }
     await setInventory()
     ElNotification({
-      title: 'Tipo creada correctamente',
-      message: `${data.value?.name}`
+      title: 'Creada correctamente',
     })
     return data.value
   } catch (error) {

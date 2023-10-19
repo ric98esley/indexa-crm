@@ -183,7 +183,7 @@ const deposit = reactive<{
 });
 
 const status = [
-  { label: "Deplegable", value: "deplegable" },
+  { label: "Desplegable", value: "desplegable" },
   { label: "Archivado", value: "archivado" },
   { label: "Pendiente", value: "pendiente" },
 ];
@@ -301,13 +301,13 @@ const createDeposit = async () => {
   try {
     loadingDeposit.value = true;
 
-    const { data, error } = await useFetch<Deposit>('/deposits',
+    const { data, error } = await useFetch<Deposit>('/assets/deposits',
       {
         method: 'post',
         body: {
           name: deposit.name,
           state: deposit.state,
-          groupId: deposit,
+          groupId: deposit.groupId,
         }
       },
     )

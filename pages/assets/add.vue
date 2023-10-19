@@ -400,13 +400,14 @@ const addAssets = async () => {
   try {
     const newAssets = toAdd.assets.map((asset) => {
       const { modelId, customFields, ...rest } = asset;
-      const specifications = customFields.map((field) => ({
+
+      const specifications = customFields?.map((field) => ({
         typeId: field.id,
         value: field.value
-      }))
+      }));
       return {
         modelId: modelId![modelId!.length - 1],
-        specifications,
+        specifications ,
         ...rest
       }
     }
@@ -436,21 +437,26 @@ const addAssets = async () => {
 
 
     if (data.value) {
-      for (const asset of data.value.created) {
-        ElNotification({
-          title: 'Activo creado correctamente',
-          message: `serial: ${asset.serial}`,
-          type: 'success',
-        });
-      };
+      let i = 0;
 
       for (const asset of data.value.errors) {
-        ElNotification({
-          title: 'Activo duplicado',
-          message: `Serial: ${asset.serial}`,
-          type: 'error',
-        });
+        setTimeout(function () {
+          ElMessage({
+            message: `Activo duplicado Serial: ${asset.serial}`,
+            type: 'error',
+          });
+        }, i * 200); // El retraso depende del valor de i
+        i++;
       }
+      for (const asset of data.value.created) {
+        setTimeout(function () {
+          ElMessage({
+            message: `Activo creado correctamente serial: ${asset.serial}`,
+            type: 'success',
+          });
+        }, i * 200);
+        i++;
+      };
     }
 
     toAdd.invoice = {
@@ -460,6 +466,8 @@ const addAssets = async () => {
       total: undefined,
       invoiceDate: undefined,
     }
+
+    modals.invoice = false;
 
     provider.name = '',
       provider.rif = '',
