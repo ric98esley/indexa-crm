@@ -4,7 +4,6 @@
 .nitro
 .cache
 package-lock.json
-yarn.lock
 dist
 
 # Node dependencies

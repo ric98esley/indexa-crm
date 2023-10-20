@@ -10,19 +10,19 @@
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
-    "@element-plus/nuxt": "^1.0.5",
-    "@nuxt/devtools": "latest",
-    "@nuxtjs/tailwindcss": "^6.8.0",
-    "@types/node": "^18",
-    "element-plus": "^2.3.7",
-    "nuxt": "^3.6.5",
-    "nuxt-icon": "^0.4.2",
-    "sass": "^1.63.6"
+    "@element-plus/nuxt": "1.0.5",
+    "@nuxt/devtools": "^1.0.0",
+    "@nuxtjs/tailwindcss": "6.8.0",
+    "@types/node": "18",
+    "element-plus": "2.3.7",
+    "nuxt": "3.6.5",
+    "nuxt-icon": "0.4.2",
+    "sass": "1.63.6"
   },
   "dependencies": {
-    "@nuxtjs/google-fonts": "^3.0.1",
-    "@pinia/nuxt": "^0.4.11",
-    "dotenv": "^16.3.1",
-    "nuxt-permissions": "^0.2.4"
+    "@nuxtjs/google-fonts": "3.0.1",
+    "@pinia/nuxt": "0.4.11",
+    "dotenv": "16.3.1",
+    "nuxt-permissions": "0.2.4"
   }
 }
