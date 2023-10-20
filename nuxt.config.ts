@@ -19,7 +19,7 @@ export default defineNuxtConfig({
   plugins: ['~/plugins/ofetch.ts'],
   runtimeConfig: {
     public: {
-      baseUrl: process.env.BASE_URL,
+      apiUrl: process.env.BASE_URL,
     },
   },
   devtools: { enabled: true },

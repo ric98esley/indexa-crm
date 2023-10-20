@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/authStore';
 export default defineNuxtPlugin(() => {
   const authStore = useAuthStore()
   globalThis.$fetch = ofetch.create({
-    baseURL: useRuntimeConfig().public.baseUrl,
+    baseURL: useRuntimeConfig().public.apiUrl,
     onRequest ({ request, options }) {
       if (authStore.getToken) {
         options.headers = { Authorization: `Bearer ${authStore.getToken}` }
