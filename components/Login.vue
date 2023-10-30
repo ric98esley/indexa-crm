@@ -5,6 +5,10 @@ const auth = useAuthStore();
 
 const formUser = ref<FormInstance>()
 
+const AuthService = useAuth();
+const authService = new AuthService();
+console.log(authService)
+
 interface UserForm {
   username: string,
   password: string
@@ -51,13 +55,8 @@ const login = async (formEl: FormInstance | undefined) => {
   loading.value = true;
 
   try {
-    const { data, pending, error } = await useFetch<{ token: string, user: User }>('/login', {
-      method: 'post',
-      body: {
-        user: userCredencials.username,
-        password: userCredencials.password,
-      }
-    });
+    const { data, pending, error } = await authService.login(userCredencials.username, userCredencials.password)
+
     if (error.value) {
       throw new Error('Usuario o contraseña incorrecto');
     }
@@ -88,6 +87,7 @@ const login = async (formEl: FormInstance | undefined) => {
       message: error?.message || ''
     })
     loading.value = false;
+    console.log(error)
   }
 }
 </script>

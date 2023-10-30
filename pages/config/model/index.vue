@@ -171,7 +171,7 @@ const model = reactive<{
 const getCategories = async (name: string) => {
   try {
     loadingCategories.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Category[] }>('/assets/categories',
+    const { data, error } = await useFetch<{ total: number, rows: Category[] }>('/categories',
       {
         params: {
           ...(name != '' && name && {
@@ -203,7 +203,7 @@ const getCategories = async (name: string) => {
 const getBrands = async (name: string) => {
   try {
     loadingBrands.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Brand[] }>('/assets/brands',
+    const { data, error } = await useFetch<{ total: number, rows: Brand[] }>('/brands',
       {
         params: {
           ...(name != '' && name && {

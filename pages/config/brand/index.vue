@@ -80,7 +80,7 @@
       <div
         class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
         @click="modals.create = true">
-        <Icon name="ep:plus" size="2rem" color="white"/>
+        <Icon name="ep:plus" size="2rem" color="white" />
       </div>
     </el-row>
   </el-container>
@@ -93,6 +93,9 @@ definePageMeta({
   ],
   roles: ['superuser', 'admin', 'auditor'],
 });
+
+const BrandService = useBrands();
+const brandService = new BrandService();
 
 const loadingBrand = ref(false);
 
@@ -134,26 +137,11 @@ const brand = reactive<{
 const getBrands = async () => {
   try {
     loadingBrand.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Brand[] }>('/assets/brands',
-      {
-        params: {
-          ...(filters.name != '' && filters.name && {
-            name: filters.name
-          }),
-          ...(filters.offset && {
-            offset: (filters.offset - 1) * filters.limit
-          }),
-          ...(filters.limit && {
-            limit: filters.limit
-          })
-        }
-      }
-    );
-    if (error.value) {
-      ElNotification({
-        message: 'Error al obtener las marcas intente de nuevo mas tarde'
-      })
-    }
+    const { data } = await brandService.getBrands({
+      name: filters.name,
+      offset: filters.offset,
+      limit: filters.limit,
+    })
 
     loadingBrand.value = false;
     return data.value
@@ -169,32 +157,12 @@ const createBrand = async () => {
   try {
     loadingBrand.value = true;
 
-    const { data, error } = await useFetch<Brand>('/assets/brands',
-      {
-        method: 'post',
-        body: {
-          name: brand.name,
-        }
-      },
-    )
+    const { data } = await brandService.createBrand({ name: brand.name })
+
     loadingBrand.value = false;
 
-    if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
-      ElNotification({
-        title: 'Error al crear marcas intente de nuevo mas tarde',
-        message: error.value?.data.message.message,
-      })
-      return
-    }
-    await setBrands()
-    ElNotification({
-      title: 'Categoria creada correctamente',
-      message: `${data.value?.name}`
-    })
     brand.id = undefined;
     brand.name = '';
-    brand.customFields = [];
-    brand.removeFields = [];
     return data.value
   } catch (error) {
     loadingBrand.value = false;
@@ -210,36 +178,19 @@ const patchBrand = async () => {
 
     const body = {
       name: brand.name,
+      id: brand.id
     }
+    const { data } = await brandService.patchBrand(body);
 
-    const { data, error } = await useFetch<Brand>(`/assets/Brands/${brand.id}`,
-      {
-        method: 'PATCH',
-        body
-      }
-    );
     loadingBrand.value = false;
 
-
-    if (error.value) {
-      throw error
-    }
     await setBrands()
-    ElNotification({
-      title: 'Categoria modificada correctamente',
-      message: `${data.value?.name}`
-    })
 
     brand.id = undefined;
     brand.name = '';
-    brand.customFields = [];
-    brand.removeFields = [];
     return data.value
   } catch (error) {
     loadingBrand.value = false;
-    ElNotification({
-      title: 'Error al modificar la categoria intente de nuevo mas tarde',
-    })
     console.log(error)
   }
 }
@@ -252,26 +203,16 @@ const editBrand = (row: Brand) => {
 
 const removeBrand = async (id: number) => {
   try {
-    const { data, error } = await useFetch<Brand>(`/assets/brands/${id}`, {
-      method: 'delete'
-    })
+    loadingBrand.value = true;
 
-    if (error.value) {
-      loadingBrand.value = false;
-      ElNotification({
-        message: 'Error al borrar la categoria intente de nuevo mas tarde.'
-      });
-      return
-    }
+    const { data } = await brandService.removeBrand(id);
 
-    ElNotification({
-      message: 'La categoria ha sido borrada.'
-    })
-    await setBrands()
+    await setBrands();
+    loadingBrand.value = false;
+
+    return data
   } catch (error) {
-    ElNotification({
-      message: 'Error al borrar la categoria intente de nuevo mas tarde.'
-    })
+    loadingBrand.value = false;
   }
 }
 

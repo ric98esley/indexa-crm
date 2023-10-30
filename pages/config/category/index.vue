@@ -29,12 +29,6 @@
               {{ row.type == 'asset' ? 'Activo' : 'Consumible' }}
             </template>
           </el-table-column>
-
-          <el-table-column label="Cantidad de marcas">
-            <template #default="props">
-              {{ props.row.brands.length }}
-            </template>
-          </el-table-column>
           <el-table-column label="Acciones">
             <template #default="props">
               <el-row>
@@ -214,7 +208,7 @@ const getSpecification = async () => {
 const getCategories = async () => {
   try {
     loadingCategory.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Category[] }>('/assets/categories',
+    const { data, error } = await useFetch<{ total: number, rows: Category[] }>('/categories',
       {
         params: {
           ...(filters.name != '' && filters.name && {
@@ -249,7 +243,7 @@ const createCategory = async () => {
   try {
     loadingCategory.value = true;
 
-    const { data, error } = await useFetch<Category>('/assets/categories',
+    const { data, error } = await useFetch<Category>('/categories',
       {
         method: 'post',
         body: {
@@ -309,7 +303,7 @@ const patchCategory = async () => {
       description: category.description
     }
 
-    const { data, error } = await useFetch<Category>(`/assets/categories/${category.id}`,
+    const { data, error } = await useFetch<Category>(`/categories/${category.id}`,
       {
         method: 'PATCH',
         body
@@ -357,7 +351,7 @@ const removeField = (field: number) => {
 
 const removeCategory = async (id: number) => {
   try {
-    const { data, error } = await useFetch<Category>(`/assets/categories/${id}`, {
+    const { data, error } = await useFetch<Category>(`/categories/${id}`, {
       method: 'delete'
     })
 
