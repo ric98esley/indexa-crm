@@ -93,7 +93,7 @@
             <el-form-item label="Nombre">
               <el-input v-model="category.name" placeholder="Ingrese aquí el nombre"></el-input>
             </el-form-item>
-            <el-form-item label="Especificaciones"  v-if="category.type === 'asset'">
+            <el-form-item label="Especificaciones" v-if="category.type === 'asset'">
               <el-select class="w-full" v-model="category.customFields" multiple filterable reserve-keyword
                 placeholder="Por favor escoge características" :loading="loadingCustomFields">
                 <el-option v-for="item in specification.rows" :key="item.id" :label="item.name" :value="item.id!" />
@@ -133,6 +133,8 @@ definePageMeta({
   roles: ['superuser', 'admin', 'auditor'],
 });
 
+const CategoriesService = useCategories();
+const categoriesService = new CategoriesService()
 const loadingCategory = ref(false);
 const loadingCustomFields = ref(false);
 
@@ -208,34 +210,18 @@ const getSpecification = async () => {
 const getCategories = async () => {
   try {
     loadingCategory.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Category[] }>('/categories',
-      {
-        params: {
-          ...(filters.name != '' && filters.name && {
-            name: filters.name
-          }),
-          ...(filters.offset && {
-            offset: (filters.offset - 1) * filters.limit
-          }),
-          ...(filters.limit && {
-            limit: filters.limit
-          })
-        }
-      }
-    );
-    if (error.value) {
-      ElNotification({
-        message: 'Error al obtener las categorías intente de nuevo mas tarde'
-      })
-    }
+
+    const { data, error } = await categoriesService.getCategories({
+      name: filters.name,
+      offset: filters.offset,
+      limit: filters.limit
+    })
 
     loadingCategory.value = false;
     return data.value
   } catch (error) {
     loadingCategory.value = false;
-    ElNotification({
-      message: 'Error al obtener las categorías intente de nuevo mas tarde'
-    })
+    console.log(error)
   }
 }
 
@@ -243,37 +229,16 @@ const createCategory = async () => {
   try {
     loadingCategory.value = true;
 
-    const { data, error } = await useFetch<Category>('/categories',
-      {
-        method: 'post',
-        body: {
-          name: category.name,
-          customFields: category.customFields?.map((field) => {
-            return { typeId: field }
-          }),
-          ...(category.description !== '' && {
-            description: category.description
-          }),
-          ...(category.type !== '' && {
-            type: category.type
-          }),
-        }
-      },
-    )
+    const { data, error } = await categoriesService.createCategory({
+      name: category.name,
+      customFields: category.customFields,
+      description: category.description,
+      type: category.type
+    })
+
     loadingCategory.value = false;
 
-    if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
-      ElNotification({
-        title: 'Error al crear categorías intente de nuevo mas tarde',
-        message: error.value?.data.message.message,
-      })
-      return
-    }
     await setCategories()
-    ElNotification({
-      title: 'Categoría creada correctamente',
-      message: `${data.value?.name}`
-    })
     category.id = undefined;
     category.name = '';
     category.customFields = [];
@@ -281,9 +246,7 @@ const createCategory = async () => {
     return data.value
   } catch (error) {
     loadingCategory.value = false;
-    ElNotification({
-      title: 'Error al crear categorías intente de nuevo mas tarde',
-    })
+    console.error(error)
   }
 }
 
@@ -292,34 +255,19 @@ const patchCategory = async () => {
     loadingCategory.value = true;
 
     const body = {
+      id: category.id,
       name: category.name,
-      customFields: category.customFields?.map((field) => {
-        return { typeId: field }
-      }),
-      removeFields: category.removeFields?.map((field) => {
-        return { typeId: field }
-      }),
+      customFields: category.customFields,
+      removeFields: category.removeFields,
       type: category.type,
       description: category.description
     }
 
-    const { data, error } = await useFetch<Category>(`/categories/${category.id}`,
-      {
-        method: 'PATCH',
-        body
-      }
-    );
+    const { data }  = await categoriesService.patchCategory(body);
+
     loadingCategory.value = false;
 
-
-    if (error.value) {
-      throw error
-    }
     await setCategories()
-    ElNotification({
-      title: 'Categoría modificada correctamente',
-      message: `${data.value?.name}`
-    })
 
     category.id = undefined;
     category.name = '';
@@ -328,10 +276,7 @@ const patchCategory = async () => {
     return data.value
   } catch (error) {
     loadingCategory.value = false;
-    ElNotification({
-      title: 'Error al modificar la categoría intente de nuevo mas tarde',
-    })
-    console.log(error)
+    console.error(error)
   }
 }
 
@@ -351,26 +296,11 @@ const removeField = (field: number) => {
 
 const removeCategory = async (id: number) => {
   try {
-    const { data, error } = await useFetch<Category>(`/categories/${id}`, {
-      method: 'delete'
-    })
+    const { data, error } = await categoriesService.removeCategory(id)
 
-    if (error.value) {
-      loadingCategory.value = false;
-      ElNotification({
-        message: 'Error al borrar la categoría intente de nuevo mas tarde.'
-      });
-      return
-    }
-
-    ElNotification({
-      message: 'La categoría ha sido borrada.'
-    })
     await setCategories()
   } catch (error) {
-    ElNotification({
-      message: 'Error al borrar la categoría intente de nuevo mas tarde.'
-    })
+    console.error(error)
   }
 }
 
