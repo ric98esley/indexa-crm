@@ -131,7 +131,8 @@
               <el-input v-model="place.address" placeholder="Dirección"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button :loading="loadingPlace" type="primary" :disabled="!place.name && !place.code && !place.zoneId && !place.typeId"
+              <el-button :loading="loadingPlace" type="primary"
+                :disabled="!place.name && !place.code && !place.zoneId && !place.typeId"
                 native-type="submit">Crear</el-button>
             </el-form-item>
           </el-form>
@@ -211,7 +212,8 @@
               <el-input v-model="place.address" placeholder="Dirección"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button :loading="loadingPlace"  type="primary" :disabled="!place.name && !place.code && !place.zoneId && !place.typeId"
+              <el-button :loading="loadingPlace" type="primary"
+                :disabled="!place.name && !place.code && !place.zoneId && !place.typeId"
                 native-type="submit">Editar</el-button>
             </el-form-item>
           </el-form>
@@ -237,6 +239,10 @@ definePageMeta({
   ],
   roles: ['superuser', 'admin', 'auditor', 'receptor'],
 });
+
+const LocationsServices = useLocation();
+const locationsServices = new LocationsServices();
+
 
 const loadingPlace = ref(false);
 const loadingGroup = ref(false);
@@ -317,87 +323,15 @@ const viewDetails = async (id: number) => {
   await navigateTo(`/places/${id}`);
 }
 
-const getPlaces = async ({
-  id,
-  name,
-  code,
-  group,
-  limit = 10,
-  offset = 0
-}: {
-  id?: number,
-  name?: string,
-  code?: string,
-  group?: string,
-  limit?: number,
-  offset?: number
-}) => {
-  try {
-    loadingPlace.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Place[] }>('/locations',
-      {
-        params: {
-          ...(name != '' && !name && id && {
-            id
-          }),
-          ...(name != '' && name && {
-            name
-          }),
-          ...(code != '' && code && {
-            code
-          }),
-          ...(group != '' && group && {
-            group
-          }),
-          ...(offset && {
-            offset: (offset - 1) * limit
-          }),
-          ...(limit && {
-            limit
-          })
-        }
-      }
-    );
-    if (error.value) {
-      throw new Error('Error al cargar los agencias')
-    }
-
-    loadingPlace.value = false;
-    return data.value
-  } catch (error) {
-    loadingPlace.value = false;
-    ElNotification({
-      message: 'Error al obtener las agencia intente de nuevo mas tarde'
-    })
-  }
-}
-
 const createPlace = async () => {
   try {
     loadingPlace.value = true;
 
-    const body = useFilterObject(place);
-
-    const { data, error } = await useFetch<Place>('/locations',
-      {
-        method: 'POST',
-        body
-      },
-    )
+    const { data, error } = locationsServices.createLocation(place);
     loadingPlace.value = false;
 
-    if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
-      ElNotification({
-        title: 'Error al crear agencia intente de nuevo mas tarde',
-        message: error.value?.data.message.message,
-      })
-      return
-    }
     await setPlaces()
-    ElNotification({
-      title: 'Agencia creada correctamente',
-      message: `${data.value?.name}`
-    })
+
     place.id = undefined;
     place.name = '';
     place.phone = '';
@@ -570,6 +504,7 @@ const getTypes = async ({ name }: {
           ...(name != '' && name && {
             name
           }),
+          status: 'asignado'
         }
       }
     );
@@ -674,17 +609,32 @@ const getUser = async ({
 
 
 const setPlaces = async () => {
-  const query = {
-    name: filters.name,
-    code: filters.code,
-    group: filters.group,
-    limit: filters.limit,
-    offset: filters.offset,
-    parent: filters.name
+  try {
+    loadingPlace.value = true;
+
+    const query = {
+      name: filters.name,
+      code: filters.code,
+      group: filters.group,
+      limit: filters.limit,
+      offset: filters.offset,
+      parent: filters.name,
+      status: ['asignado']
+    }
+    const { data, error } = await locationsServices.getLocations(query);
+
+    if (error.value) {
+      throw new Error('Error al cargar los agencias')
+    }
+
+    loadingPlace.value = false;
+    const rta = data.value;
+    places.rows = rta?.rows || []
+    places.total = rta?.total || 0
+  } catch (error) {
+    loadingPlace.value = false;
+    console.error(error);
   }
-  const rta = await getPlaces(query);
-  places.rows = rta?.rows || []
-  places.total = rta?.total || 0
 }
 
 

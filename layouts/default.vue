@@ -335,7 +335,7 @@ const menusA = reactive([
         items: [
           {
             title: 'Ver grupos',
-            route: { path: '/config/deposit' }
+            route: { path: '/config/warehouse' }
           }
         ]
       },

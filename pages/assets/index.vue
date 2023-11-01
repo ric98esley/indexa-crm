@@ -54,7 +54,7 @@
                   {{ row.assignment?.location?.code }} - {{ row.assignment?.location?.name }}
                 </div>
                 <div v-else>
-                  {{ row.deposit.name }}
+                  {{ row.location.name }}
                 </div>
               </template>
             </el-table-column>
@@ -250,7 +250,7 @@ const getAssets = async () => {
 
 const getCategories = async () => {
   try {
-    const { data } = await useFetch<{ count: number, rows: Category[] }>('/assets/categories', {
+    const { data } = await useFetch<{ count: number, rows: Category[] }>('/categories', {
     });
 
     const categoriesOptions = data.value?.rows.map((row) => {

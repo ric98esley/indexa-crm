@@ -190,7 +190,7 @@ const category = reactive<{
 const getSpecification = async () => {
   try {
     loadingCustomFields.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Specification[] }>('/assets/specification');
+    const { data, error } = await useFetch<{ total: number, rows: Specification[] }>('/categories/specifications');
     if (error.value) {
       ElNotification({
         message: 'Error al obtener las campos personalizados intente de nuevo mas tarde'
@@ -260,7 +260,9 @@ const patchCategory = async () => {
       customFields: category.customFields,
       removeFields: category.removeFields,
       type: category.type,
-      description: category.description
+      ...(category.description && {
+        description: category.description
+      })
     }
 
     const { data }  = await categoriesService.patchCategory(body);
@@ -296,7 +298,7 @@ const removeField = (field: number) => {
 
 const removeCategory = async (id: number) => {
   try {
-    const { data, error } = await categoriesService.removeCategory(id)
+    const { data } = await categoriesService.removeCategory(id)
 
     await setCategories()
   } catch (error) {

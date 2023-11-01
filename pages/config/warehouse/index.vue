@@ -1,7 +1,7 @@
 <template>
   <el-container direction="vertical" class="p-3">
     <el-row :span="24" :gutter="12">
-      <el-table :data="deposits.rows" stripe v-loading="loadingDeposit">
+      <el-table :data="warehouse.rows" stripe v-loading="loadingWarehouse">
         <el-table-column type="expand" width="50">
           <template #default="props">
             <el-row :span="24" :gutter="24">
@@ -20,9 +20,9 @@
             <el-input v-model="filters.name" placeholder="Nombre" clearable />
           </template>
         </el-table-column>
-        <el-table-column label="Estatus" prop="state">
+        <el-table-column label="Estatus" prop="type.status">
           <template #header>
-            <el-input v-model="filters.state" placeholder="Estatus" clearable />
+            <el-input v-model="filters.status" placeholder="Estatus" clearable />
           </template>
         </el-table-column>
         <el-table-column label="Grupo" prop="group.name">
@@ -48,7 +48,7 @@
       </el-table>
       <el-pagination class="m-4" v-model:current-page="filters.offset" v-model:page-size="filters.limit"
         :page-sizes="[10, 20, 50, 100, 200, 300, 400]" :background="true" layout="total, sizes, prev, pager, next, jumper"
-        :total="deposits.total" />
+        :total="warehouse.total" />
     </el-row>
     <el-container>
       <el-dialog v-model="modals.create">
@@ -134,7 +134,11 @@ definePageMeta({
   roles: ['superuser', 'admin', 'auditor'],
 });
 
-const loadingDeposit = ref(false);
+const LocationsServices = useLocation();
+const locationsServices = new LocationsServices();
+
+
+const loadingWarehouse = ref(false);
 const loadingGroup = ref(false);
 const loadingUser = ref(false);
 
@@ -143,11 +147,11 @@ const filters = reactive({
   offset: 0,
   name: '',
   code: '',
-  state: '',
+  status: '',
   group: ''
 });
 
-const deposits = reactive<{
+const warehouse = reactive<{
   rows: Deposit[],
   total: number
 }>({
@@ -189,55 +193,30 @@ const status = [
 ];
 
 
-const getDeposits = async ({
-  id,
-  name,
-  group,
-  limit = 10,
-  offset = 0
-}: {
-  id?: number,
-  name?: string,
-  group?: string,
-  limit?: number,
-  offset?: number
-}) => {
+const setWarehouses = async () => {
   try {
-    loadingDeposit.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Deposit[] }>('/assets/deposits',
-      {
-        params: {
-          ...(name != '' && !name && id && {
-            id
-          }),
-          ...(name != '' && name && {
-            name
-          }),
-          ...(group != '' && group && {
-            group
-          }),
-          ...(offset && {
-            offset: (offset - 1) * limit
-          }),
-          ...(limit && {
-            limit
-          })
-        }
-      }
-    );
+    loadingWarehouse.value = true;
+    const query = {
+    name: filters.name,
+    code: filters.code,
+    limit: filters.limit,
+    offset: filters.offset,
+    group: filters.group,
+    status: ['desplegable', 'pendiente', 'archivado']
+  }
+    const { data, error } = await locationsServices.getLocations(query);
+
     if (error.value) {
-      ElNotification({
-        message: 'Error al obtener las marcas intente de nuevo mas tarde'
-      })
+      throw new Error('Error al cargar los agencias')
     }
 
-    loadingDeposit.value = false;
-    return data.value
+    loadingWarehouse.value = false;
+    const rta = data.value;
+    warehouse.rows = rta?.rows || []
+    warehouse.total = rta?.total || 0
   } catch (error) {
-    loadingDeposit.value = false;
-    ElNotification({
-      message: 'Error al obtener las marcas intente de nuevo mas tarde'
-    })
+    loadingWarehouse.value = false;
+    console.error(error);
   }
 }
 const getUser = async ({
@@ -256,8 +235,8 @@ const getUser = async ({
   offset?: number
 }) => {
   try {
-    loadingDeposit.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Deposit[] }>('/deposits',
+    loadingWarehouse.value = true;
+    const { data, error } = await useFetch<{ total: number, rows: Deposit[] }>('/warehouse',
       {
         params: {
           ...(name != '' && !name && id && {
@@ -287,10 +266,10 @@ const getUser = async ({
       })
     }
 
-    loadingDeposit.value = false;
+    loadingWarehouse.value = false;
     return data.value
   } catch (error) {
-    loadingDeposit.value = false;
+    loadingWarehouse.value = false;
     ElNotification({
       message: 'Error al obtener las marcas intente de nuevo mas tarde'
     })
@@ -299,9 +278,9 @@ const getUser = async ({
 
 const createDeposit = async () => {
   try {
-    loadingDeposit.value = true;
+    loadingWarehouse.value = true;
 
-    const { data, error } = await useFetch<Deposit>('/assets/deposits',
+    const { data, error } = await useFetch<Deposit>('/assets/warehouse',
       {
         method: 'post',
         body: {
@@ -311,7 +290,7 @@ const createDeposit = async () => {
         }
       },
     )
-    loadingDeposit.value = false;
+    loadingWarehouse.value = false;
 
     if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
       ElNotification({
@@ -320,7 +299,7 @@ const createDeposit = async () => {
       })
       return
     }
-    await setDeposits()
+    await setWarehouses()
     ElNotification({
       title: 'Categoria creada correctamente',
       message: `${data.value?.name}`
@@ -330,7 +309,7 @@ const createDeposit = async () => {
     deposit.groupId = undefined
     return data.value
   } catch (error) {
-    loadingDeposit.value = false;
+    loadingWarehouse.value = false;
     ElNotification({
       title: 'Error al crear marcas intente de nuevo mas tarde',
     })
@@ -339,7 +318,7 @@ const createDeposit = async () => {
 
 const patchDeposit = async () => {
   try {
-    loadingDeposit.value = true;
+    loadingWarehouse.value = true;
 
     const body = {
       name: deposit.name,
@@ -347,19 +326,19 @@ const patchDeposit = async () => {
       groupId: deposit.groupId
     }
 
-    const { data, error } = await useFetch<Deposit>(`/assets/deposits/${deposit.id}`,
+    const { data, error } = await useFetch<Deposit>(`/assets/warehouse/${deposit.id}`,
       {
         method: 'PATCH',
         body
       }
     );
-    loadingDeposit.value = false;
+    loadingWarehouse.value = false;
 
 
     if (error.value) {
       throw error
     }
-    await setDeposits()
+    await setWarehouses()
     ElNotification({
       title: 'Categoria modificada correctamente',
       message: `${data.value?.name}`
@@ -371,7 +350,7 @@ const patchDeposit = async () => {
 
     return data.value
   } catch (error) {
-    loadingDeposit.value = false;
+    loadingWarehouse.value = false;
     ElNotification({
       title: 'Error al modificar la deposito intente de nuevo mas tarde',
     })
@@ -389,12 +368,12 @@ const editDeposit = (row: Deposit) => {
 
 const removeDeposit = async (id: number) => {
   try {
-    const { data, error } = await useFetch<Deposit>(`/assets/deposits/${id}`, {
+    const { data, error } = await useFetch<Deposit>(`/assets/warehouse/${id}`, {
       method: 'delete'
     })
 
     if (error.value) {
-      loadingDeposit.value = false;
+      loadingWarehouse.value = false;
       ElNotification({
         message: 'Error al borrar la deposito intente de nuevo mas tarde.'
       });
@@ -404,25 +383,12 @@ const removeDeposit = async (id: number) => {
     ElNotification({
       message: 'La deposito ha sido borrada.'
     })
-    await setDeposits()
+    await setWarehouses()
   } catch (error) {
     ElNotification({
       message: 'Error al borrar la deposito intente de nuevo mas tarde.'
     })
   }
-}
-
-const setDeposits = async () => {
-  const query = {
-    name: filters.name,
-    code: filters.code,
-    limit: filters.limit,
-    offset: filters.offset,
-    group: filters.group
-  }
-  const rta = await getDeposits(query);
-  deposits.rows = rta?.rows || []
-  deposits.total = rta?.total || 0
 }
 
 
@@ -483,7 +449,7 @@ const setGroup = async (query?: string) => {
 }
 
 watch(filters, useDebounce(async () => {
-  await setDeposits()
+  await setWarehouses()
 }, 500)
 )
 
@@ -499,6 +465,6 @@ watch(() => modals.edit, async () => {
 })
 
 onMounted(async () => {
-  await setDeposits();
+  await setWarehouses();
 });
 </script>

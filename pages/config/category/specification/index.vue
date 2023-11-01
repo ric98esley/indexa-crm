@@ -56,7 +56,7 @@
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="newField"
             @submit.prevent="createSpecification()">
             <el-form-item label="Nombre">
-              <el-input v-model="newField.name" placeholder="Ingrese aqui el nombre"></el-input>
+              <el-input v-model="newField.name" placeholder="Ingrese aquí el nombre"></el-input>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" :disabled="!newField.name" native-type="submit">Crear</el-button>
@@ -116,7 +116,7 @@ const newField = reactive<{
 const getSpecification = async () => {
   try {
     loadingSpecification.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Specification[] }>('/assets/specification',
+    const { data, error } = await useFetch<{ total: number, rows: Specification[] }>('/categories/specifications',
       {
         params: {
           ...(filters.name != '' && filters.name && {
@@ -133,7 +133,7 @@ const getSpecification = async () => {
     );
     if (error.value) {
       ElNotification({
-        message: 'Error al obtener las categorias intente de nuevo mas tarde'
+        message: 'Error al obtener las categorías intente de nuevo mas tarde'
       })
     }
 
@@ -142,7 +142,7 @@ const getSpecification = async () => {
   } catch (error) {
     loadingSpecification.value = false;
     ElNotification({
-      message: 'Error al obtener las categorias intente de nuevo mas tarde'
+      message: 'Error al obtener las categorías intente de nuevo mas tarde'
     })
   }
 }
@@ -155,7 +155,7 @@ const createSpecification = async () => {
       name: newField.name
     }
 
-    const { data, error } = await useAsyncData('createSpecification', () => useFetch<Specification>('/assets/specification',
+    const { data, error } = await useAsyncData('createSpecification', () => useFetch<Specification>('/categories/specifications',
       {
         method: 'post',
         body
@@ -182,7 +182,7 @@ const createSpecification = async () => {
 
 const removeSpecification = async (id: number) => {
   try {
-    const { data, error } = await useFetch<Specification>(`/assets/specification/${id}`, {
+    const { data, error } = await useFetch<Specification>(`/categories/specifications/${id}`, {
       method: 'delete'
     })
 
@@ -213,7 +213,7 @@ const updateSpecification = async (id: number) => {
       name: newField.name
     }
 
-    const { data, error } = await useFetch<Specification>(`/assets/specification/${id}`,
+    const { data, error } = await useFetch<Specification>(`/categories/specifications/${id}`,
       {
         method: 'PATCH',
         body
