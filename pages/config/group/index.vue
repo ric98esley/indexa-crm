@@ -166,7 +166,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor', 'receptor'],
+  roles: ['superuser', 'admin', 'asistente', 'auditor', 'receptor'],
 });
 
 const loadingGroup = ref(false);
@@ -306,7 +306,6 @@ const getUser = async ({
           ...(search != '' && search && {
             search
           }),
-          role: 'receptor',
           ...(offset && {
             offset: (offset - 1) * limit
           }),

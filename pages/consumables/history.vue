@@ -30,7 +30,7 @@
             <el-input :debounce="2000" v-model="filters.search" placeholder="Código o nombre" clearable />
           </template>
           <template #default="{ row }">
-            {{ row.warehouse.product.code }} - {{ row.warehouse.product.name }}
+            {{ row.warehouse?.product.code }} - {{ row.warehouse?.product.name }}
           </template>
         </el-table-column>
         <el-table-column label="Deposito" prop="warehouse.deposit.name">
@@ -91,7 +91,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor', 'receptor'],
+  roles: ['superuser', 'admin', 'asistente', 'auditor', 'receptor'],
 });
 
 

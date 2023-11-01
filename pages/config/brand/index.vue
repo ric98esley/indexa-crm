@@ -91,7 +91,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor'],
+  roles: ['superuser', 'admin', 'asistente', 'auditor'],
 });
 
 const loadingBrand = ref(false);

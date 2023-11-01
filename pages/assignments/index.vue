@@ -194,7 +194,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor', 'receptor'],
+  roles: ['superuser', 'admin', 'asistente', 'auditor', 'receptor'],
 });
 
 const route = useRoute();

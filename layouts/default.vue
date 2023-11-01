@@ -57,7 +57,8 @@ const menusA = reactive([
       'superuser',
       'auditor',
       'tecnico',
-      'receptor'
+      'receptor',
+      'asistente'
     ],
     groups: [
       {
@@ -68,7 +69,8 @@ const menusA = reactive([
               'superuser',
               'auditor',
               'tecnico',
-              'receptor'
+              'receptor',
+              'asistente'
             ],
             title: 'Todos los activos',
             route: { path: '/assets' }
@@ -83,7 +85,8 @@ const menusA = reactive([
         roles: [
           'superuser',
           'auditor',
-          'receptor'
+          'receptor',
+          'asistente'
         ],
         items: [
           {
@@ -92,6 +95,7 @@ const menusA = reactive([
             roles: [
               'superuser',
               'auditor',
+              'asistente'
             ],
           },
           {
@@ -100,7 +104,8 @@ const menusA = reactive([
             roles: [
               'superuser',
               'auditor',
-              'receptor'
+              'receptor',
+              'asistente'
             ],
           },
           {
@@ -109,7 +114,8 @@ const menusA = reactive([
             roles: [
               'superuser',
               'auditor',
-              'receptor'
+              'receptor',
+              'asistente'
             ],
           },
         ]
@@ -132,7 +138,8 @@ const menusA = reactive([
             roles: [
               'superuser',
               'auditor',
-              'receptor'
+              'receptor',
+              'asistente'
             ],
             title: 'Usuarios',
             route: { path: '/users' }
@@ -147,7 +154,8 @@ const menusA = reactive([
     roles: [
       'superuser',
       'auditor',
-      'receptor'
+      'receptor',
+      'asistente'
     ],
     groups: [
       {
@@ -157,7 +165,8 @@ const menusA = reactive([
             roles: [
               'superuser',
               'auditor',
-              'receptor'
+              'receptor',
+              'asistente'
             ],
             title: 'Inventario',
             route: { path: '/consumables' }
@@ -166,7 +175,8 @@ const menusA = reactive([
             roles: [
               'superuser',
               'auditor',
-              'receptor'
+              'receptor',
+              'asistente',
             ],
             title: 'Productos',
             route: { path: '/consumables/products' }
@@ -175,7 +185,8 @@ const menusA = reactive([
             roles: [
               'superuser',
               'auditor',
-              'receptor'
+              'receptor',
+              'asistente'
             ],
             title: 'Historial',
             route: { path: '/consumables/history' }
@@ -190,7 +201,8 @@ const menusA = reactive([
     roles: [
       'superuser',
       'auditor',
-      'receptor'
+      'receptor',
+      'asistente'
     ],
     groups: [
       {
@@ -200,7 +212,8 @@ const menusA = reactive([
             roles: [
               'superuser',
               'auditor',
-              'receptor'
+              'receptor',
+              'asistente'
             ],
             title: 'Agencias',
             route: { path: '/places' }
@@ -209,6 +222,7 @@ const menusA = reactive([
             roles: [
               'superuser',
               'auditor',
+              'asistente'
             ],
             title: 'Tipos',
             route: { path: '/places/type' }
@@ -217,6 +231,7 @@ const menusA = reactive([
             roles: [
               'superuser',
               'auditor',
+              'asistente'
             ],
             title: 'Zonas',
             route: { path: '/places/zone' }
@@ -231,7 +246,8 @@ const menusA = reactive([
     roles: [
       'superuser',
       'auditor',
-      'receptor'
+      'receptor',
+      'asistente'
     ],
     groups: [
       {
@@ -241,7 +257,8 @@ const menusA = reactive([
             roles: [
               'superuser',
               'auditor',
-              'receptor'
+              'receptor',
+              'asistente'
             ],
             title: 'Salidas',
             route: {
@@ -255,7 +272,8 @@ const menusA = reactive([
             roles: [
               'superuser',
               'auditor',
-              'receptor'
+              'receptor',
+              'asistente'
             ],
             title: 'Entradas',
             route: {
@@ -275,7 +293,8 @@ const menusA = reactive([
     roles: [
       'superuser',
       'auditor',
-      'receptor'
+      'receptor',
+      'asistente'
     ],
     submenus: [
       {
@@ -283,7 +302,8 @@ const menusA = reactive([
         icon: 'ep:memo',
         roles: [
           'superuser',
-          'auditor'
+          'auditor',
+          'asistente'
         ],
         items: [
           {
@@ -301,7 +321,8 @@ const menusA = reactive([
         icon: 'ep:collection',
         roles: [
           'superuser',
-          'auditor'
+          'auditor',
+          'asistente'
         ],
         items: [
           {
@@ -315,7 +336,8 @@ const menusA = reactive([
         icon: 'ep:coin',
         roles: [
           'superuser',
-          'auditor'
+          'auditor',
+          'asistente'
         ],
         items: [
           {
@@ -330,7 +352,8 @@ const menusA = reactive([
         roles: [
           'superuser',
           'auditor',
-          'admin'
+          'admin',
+          'asistente'
         ],
         items: [
           {
@@ -346,7 +369,8 @@ const menusA = reactive([
           'superuser',
           'auditor',
           'admin',
-          'receptor'
+          'receptor',
+          'asistente'
         ],
         items: [
           {

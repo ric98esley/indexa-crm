@@ -178,7 +178,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor', 'auditor'],
+  roles: ['superuser', 'admin', 'asistente', 'auditor', 'asistente'],
 })
 
 const ruleFormRef = ref<FormInstance>();
