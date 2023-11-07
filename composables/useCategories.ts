@@ -3,7 +3,13 @@ export const useCategories = () => {
     async getCategories({
       name,
       offset,
-      limit
+      limit,
+      type
+    }: {
+      name?: string,
+      offset?: number,
+      limit?: number,
+      type?: string
     }) {
       try {
         const { data, error } = await useFetch<{ total: number, rows: Category[] }>('/categories',
@@ -17,6 +23,9 @@ export const useCategories = () => {
               }),
               ...(limit && {
                 limit: limit
+              }),
+              ...(type && type != '' && {
+                type
               })
             }
           }
@@ -29,7 +38,6 @@ export const useCategories = () => {
 
         return { data, error }
       } catch (error) {
-        loadingCategory.value = false;
         ElNotification({
           message: 'Error al obtener las categorías intente de nuevo mas tarde'
         })
@@ -41,6 +49,11 @@ export const useCategories = () => {
       customFields,
       description,
       type,
+    }: {
+      name?: string,
+      customFields?: Specifications[],
+      description?: string,
+      type?: string
     }) {
       try {
         const { data, error } = await useFetch<Category>('/categories',
@@ -70,7 +83,6 @@ export const useCategories = () => {
         })
         return { data, error }
       } catch (error) {
-        loadingCategory.value = false;
         ElNotification({
           title: 'Error al crear categorías intente de nuevo mas tarde',
         })
@@ -84,6 +96,14 @@ export const useCategories = () => {
       removeFields,
       type,
       description
+    }:
+    {
+      id?: number,
+      name?: string,
+      customFields?: Specifications[],
+      removeFields?: Specifications[],
+      type?: string,
+      description?: string
     }) {
       try {
         const body = {

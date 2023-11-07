@@ -46,16 +46,16 @@
         <template #default>
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon @submit.prevent="patchModel()">
             <el-form-item label="Nombre">
-              <el-input v-model="model.name" placeholder="Ingrese aqui el nombre"></el-input>
+              <el-input v-model="model.name" placeholder="Ingrese aquí el nombre"></el-input>
             </el-form-item>
-            <el-form-item label="Categoria">
+            <el-form-item label="Categoría">
               <el-select class="w-full" v-model="model.categoryId" filterable remote
-                placeholder="Porfavor escoge una categoria" :loading="loadingCategories" :remote-method="searchCategory">
+                placeholder="Por favor escoge una categoría" :loading="loadingCategories" :remote-method="searchCategory">
                 <el-option v-for="item in categories.rows" :key="item.id" :label="item.name" :value="item.id!" />
               </el-select>
             </el-form-item>
             <el-form-item label="Fabricante">
-              <el-select class="w-full" v-model="model.brandId" filterable remote placeholder="Porfavor escoge una marca"
+              <el-select class="w-full" v-model="model.brandId" filterable remote placeholder="Por favor escoge una marca"
                 :loading="loadingBrands" :remote-method="searchBrand">
                 <el-option v-for="item in brands.rows" :key="item.id" :label="item.name" :value="item.id!" />
               </el-select>
@@ -75,16 +75,16 @@
           <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="model"
             @submit.prevent="createModel()">
             <el-form-item label="Nombre">
-              <el-input v-model="model.name" placeholder="Ingrese aqui el nombre"></el-input>
+              <el-input v-model="model.name" placeholder="Ingrese aquí el nombre"></el-input>
             </el-form-item>
-            <el-form-item label="Categoria">
+            <el-form-item label="Categoría">
               <el-select class="w-full" v-model="model.categoryId" filterable remote
-                placeholder="Porfavor escoge una categoria" :loading="loadingCategories" :remote-method="searchCategory">
+                placeholder="Por favor escoge una categoría" :loading="loadingCategories" :remote-method="searchCategory">
                 <el-option v-for="item in categories.rows" :key="item.id" :label="item.name" :value="item.id!" />
               </el-select>
             </el-form-item>
             <el-form-item label="Fabricante">
-              <el-select class="w-full" v-model="model.brandId" filterable remote placeholder="Porfavor escoge una marca"
+              <el-select class="w-full" v-model="model.brandId" filterable remote placeholder="Por favor escoge una marca"
                 :loading="loadingBrands" :remote-method="searchBrand">
                 <el-option v-for="item in brands.rows" :key="item.id" :label="item.name" :value="item.id!" />
               </el-select>
@@ -119,6 +119,9 @@ definePageMeta({
 const loadingCategories = ref(false);
 const loadingModels = ref(false);
 const loadingBrands = ref(false);
+
+const ModelsServices = useModels();
+const modelsServices = new ModelsServices();
 
 const filters = reactive({
   limit: 10,
@@ -234,35 +237,19 @@ const getBrands = async (name: string) => {
 
 const getModels = async () => {
   try {
+
     loadingModels.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Model[] }>('/assets/models',
-      {
-        params: {
-          ...(filters.name != '' && filters.name && {
-            name: filters.name
-          }),
-          ...(filters.offset && {
-            offset: (filters.offset - 1) * filters.limit
-          }),
-          ...(filters.limit && {
-            limit: filters.limit
-          })
-        }
-      }
-    );
-    if (error.value) {
-      ElNotification({
-        message: 'Error al obtener las Modelos intente de nuevo mas tarde'
-      })
-    }
+    const { data } = await modelsServices.getModels({
+      name: filters.name,
+      offset: filters.offset,
+      limit: filters.limit
+    })
 
     loadingModels.value = false;
     return data.value
   } catch (error) {
     loadingModels.value = false;
-    ElNotification({
-      message: 'Error al obtener las Modelos intente de nuevo mas tarde'
-    })
+    console.error(error)
   }
 }
 

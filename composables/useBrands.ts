@@ -4,6 +4,10 @@ export const useBrands = () => {
       name,
       offset,
       limit,
+    }:{
+      name?: string,
+      offset?: number,
+      limit?: number,
     }) {
       try {
         const { data, error } = await useFetch<{ total: number, rows: Brand[] }>('/brands',
@@ -13,7 +17,7 @@ export const useBrands = () => {
                 name
               }),
               ...(offset && {
-                offset: (offset - 1) * limit
+                offset: (offset - 1) * Number(limit)
               }),
               ...(limit && {
                 limit
@@ -34,6 +38,8 @@ export const useBrands = () => {
 
     async createBrand({
       name
+    }: {
+      name: string
     }) {
       try {
         const { data, error } = await useFetch<Brand>('/brands',
@@ -65,6 +71,9 @@ export const useBrands = () => {
     async patchBrand({
       name,
       id,
+    }:{
+      name: string,
+      id: number
     }) {
       try {
         const body = {

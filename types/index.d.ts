@@ -13,10 +13,11 @@ declare global {
   }
   interface NewAsset {
     serial?: string,
-    modelId?: number[],
-    depositId?: number,
+    modelId?: number,
+    locationId?: number,
     customFields?: {
-      name: string
+      id: number,
+      name: string,
       typeId: number,
       assetId?: number,
       value: string

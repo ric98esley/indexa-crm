@@ -161,6 +161,8 @@ const createBrand = async () => {
 
     loadingBrand.value = false;
 
+    await setBrands();
+
     brand.id = undefined;
     brand.name = '';
     return data.value

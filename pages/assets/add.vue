@@ -6,22 +6,43 @@
     <el-col :sm="24" :md="24" :lg="8">
       <el-card>
         <el-form label-position="top" label-width="auto" autocomplete="off" ref="ruleFormRef" :model="asset"
-          :rules="rules" deposits-icon>
+          :rules="rules" warehouses-icon>
           <el-form-item label="Serial">
-            <el-input placeholder="Serial" v-model="asset.serial">
+            <el-input placeholder="Serial" v-model="asset.serial" clearable>
             </el-input>
           </el-form-item>
+          <el-form-item label="Categoría">
+            <el-select v-model="modelSelected.categoryId" class="select-success" placeholder="Selecciona una categoría"
+              :loading="loadingCategories" label="Deposito" style="width: 100%" filterable remote
+              :remote-method="getCategories" clearable>
+              <el-option v-for="option in response.categories" :key="option.id" :value="option.id!"
+                :label="`${option.id} - ${option.name}`">
+                {{ option.id }} - {{ option.name }}
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Marca">
+            <el-select v-model="modelSelected.brandId" class="select-success" placeholder="Selecciona una categoría"
+              :loading="loadingBrands" label="Deposito" style="width: 100%" filterable remote :remote-method="getBrands" clearable>
+              <el-option v-for="option in response.brands" :key="option.id" :value="option.id!"
+                :label="`${option.id} - ${option.name}`">
+                {{ option.id }} - {{ option.name }}
+              </el-option>
+            </el-select>
+          </el-form-item>
           <el-form-item label="Modelo">
-            <el-cascader v-model="asset.modelId" :options="response.categories"
-              :filter-method="(node, keyword) => node.text.toLowerCase().includes(keyword.toLowerCase())" class="w-full"
-              filterable separator=" - " clearable :popper-class="'.hover:bg-sky-700'"
-              :on-change="(value) => console.log(value)">
-            </el-cascader>
+            <el-select v-model="asset.modelId" class="select-success" placeholder="Selecciona un modelo" label="Deposito"
+              style="width: 100%" filterable remote :remote-method="getModels">
+              <el-option v-for="option in response.models" :key="option.id" :value="option.id!"
+                :label="`${option.id} - ${option.name}`">
+                {{ option.id }} - {{ option.name }}
+              </el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="Almacén del activo">
-            <el-select v-model="asset.depositId" class="select-success" placeholder="Selecciona un deposito"
+            <el-select v-model="asset.locationId" class="select-success" placeholder="Selecciona un deposito"
               label="Deposito" style="width: 100%" filterable>
-              <el-option v-for="option in response.deposits" :key="option.id" :value="option.id!"
+              <el-option v-for="option in response.warehouses" :key="option.id" :value="option.id!"
                 :label="`${option.id} - ${option.name}`">
                 {{ option.id }} - {{ option.name }}
               </el-option>
@@ -32,8 +53,8 @@
           </el-form-item>
           <el-row justify="space-between" align="middle">
             <el-form-item>
-              <el-button type="primary" :disabled="!asset.serial || !asset.modelId || !asset.depositId"
-                @click="addAsset()" native-type="submit">Agregar</el-button>
+              <el-button type="primary" :disabled="!asset.serial || !asset.modelId"
+                @click="addAsset()">Agregar</el-button>
             </el-form-item>
             <el-form-item>
               <el-button link plain @click="modals.invoice = true">Facturar</el-button>
@@ -60,17 +81,20 @@
           </el-table-column>
           <el-table-column label="Modelo">
             <template type="text" #default="{ row }">
-              <el-cascader v-model="row.modelId" :options="response.categories"
-                :filter-method="(node, keyword) => node.text.toLowerCase().includes(keyword.toLowerCase())" class="w-full"
-                filterable separator=" - ">
-              </el-cascader>
+              <el-select v-model="row.modelId" class="select-success" placeholder="Selecciona un modelo" label="Deposito"
+                style="width: 100%" filterable remote :remote-method="getModels">
+                <el-option v-for="option in response.models" :key="option.id" :value="option.id!"
+                  :label="`${option.id} - ${option.name}`">
+                  {{ option.id }} - {{ option.name }}
+                </el-option>
+              </el-select>
             </template>
           </el-table-column>
           <el-table-column label="Estado">
             <template type="text" #default="{ row }">
-              <el-select v-model="row.depositId" class="select-success" placeholder="Selecciona un estado" label="Estados"
-                style="width: 100%" name="assetDeposit" filterable>
-                <el-option v-for="option in deposits" :key="option.id" :value="option.id!"
+              <el-select v-model="row.locationId" class="select-success" placeholder="Selecciona un estado"
+                label="Estados" style="width: 100%" name="assetDeposit" filterable>
+                <el-option v-for="option in response.warehouses" :key="option.id" :value="option.id!"
                   :label="`${option.id} - ${option.name}`">
                   {{ option.id }} - {{ option.name }}
                 </el-option>
@@ -185,12 +209,28 @@ const ruleFormRef = ref<FormInstance>();
 const activeName = ref('factura-nueva');
 
 const loadingProvider = ref(false);
+const loadingCategories = ref(false);
+const loadingBrands = ref(false);
 
+const LocationsServices = useLocation();
+const CategoriesServices = useCategories();
+const BrandsServices = useBrands();
+const ModelsServices = useModels();
+const modelServices = new ModelsServices();
+const brandServices = new BrandsServices();
+const locationsServices = new LocationsServices();
+const categoriesServices = new CategoriesServices();
+
+const modelSelected = reactive({
+  categoryId: undefined,
+  brandId: undefined,
+  modelId: undefined
+})
 
 const asset = reactive<NewAsset>({
   serial: undefined,
   modelId: undefined,
-  depositId: undefined,
+  locationId: undefined,
   customFields: []
 });
 const provider = reactive<Provider>({
@@ -205,21 +245,27 @@ const modals = reactive({
 
 
 const response = reactive<{
-  deposits: Deposit[]
+  brands: Brand[]
+  warehouses: Deposit[]
   categories: any[]
+  models: Model[]
   providers: Provider[]
 }>({
   categories: [],
-  deposits: [],
-  providers: []
+  warehouses: [],
+  providers: [],
+  models: [],
+  brands: []
 })
-const deposits = reactive<Deposit[]>([]);
+const warehouses = reactive<Deposit[]>([]);
 
 const toAdd = reactive<{
   assets: NewAsset[],
+  locationId?: number,
   invoice: Invoice
 }>({
   assets: [],
+  locationId: undefined,
   invoice: {
     id: undefined,
     code: undefined,
@@ -260,53 +306,48 @@ const handleSelectInvoice = (item: Invoice) => {
 
 
 
-const getCategories = async () => {
+const getCategories = async (name?: string) => {
   try {
-    const { data } = await useFetch<{ count: number, rows: Category[] }>('/assets/categories', {
-      query: {
-        type: 'asset'
-      }
+    const { data } = await categoriesServices.getCategories({
+      type: 'asset',
+      name
     });
 
-    const categoriesOptions = data.value?.rows.map((row) => {
-      const children = row.brands.map((brand) => {
-        const children = brand.models.map((model) => {
-          return {
-            value: model.id,
-            label: model.name
-          }
-        })
-        return {
-          value: brand.id,
-          label: brand.name,
-          ...(!(children.length > 0) && { disabled: true }),
-          children
-        }
-      })
-      return {
-        value: row.id,
-        label: row.name,
-        customFields: row.customFields,
-        ...(!(children.length > 0) && { disabled: true }),
-        children
-      }
-    }
-    );
-    response.categories = categoriesOptions || [];
+    response.categories = data.value.rows || [];
+  } catch (error) {
+    console.log(error);
+  }
+}
+const getBrands = async (name?: string) => {
+  try {
+    const { data } = await brandServices.getBrands({
+      name
+    });
+
+    response.brands = data.value.rows || [];
+  } catch (error) {
+    console.log(error);
+  }
+}
+const getModels = async (name?: string) => {
+  try {
+    const { data } = await modelServices.getModels({
+      name,
+      categoryId: modelSelected.categoryId,
+      brandId: modelSelected.brandId
+    });
+
+    response.models = data.value.rows || [];
   } catch (error) {
     console.log(error);
   }
 }
 
-const getDeposit = async ({ name }: { name?: string }) => {
+const getWarehouses = async ({ name }: { name?: string }) => {
   try {
-    const { data } = await useFetch<{ total: number, rows: Deposit[] }>('/assets/deposits', {
-      params: {
-        ...(name != '' && name && {
-          name
-        })
-      }
-    });
+    const { data } = await locationsServices.getLocations({
+      status: ['desplegable', 'archivado', 'pendiente']
+    })
     return data.value;
   } catch (error) {
     console.log(error);
@@ -378,7 +419,7 @@ const searchProvider = async ({ name }: { name?: string }) => {
 
 const addAsset = () => {
   const newAsset = { ...asset };
-  if (!newAsset.serial || !newAsset.modelId || !newAsset.depositId) return;
+  if (!newAsset.serial || !newAsset.modelId || !newAsset.locationId) return;
   const newCustomFields = newAsset.customFields.filter(field => field.value !== '');
   newAsset.customFields = JSON.parse(JSON.stringify(newCustomFields.length > 0 ? newCustomFields : []));
 
@@ -386,7 +427,6 @@ const addAsset = () => {
     return;
   }
 
-  console.log(newAsset)
   asset.serial = '';
   toAdd.assets.push(newAsset);
 }
@@ -406,8 +446,8 @@ const addAssets = async () => {
         value: field.value
       }));
       return {
-        modelId: modelId![modelId!.length - 1],
-        specifications ,
+        modelId,
+        specifications,
         ...rest
       }
     }
@@ -429,6 +469,7 @@ const addAssets = async () => {
         ...(!invoiceId && newInvoice.invoiceDate && newInvoice.providerId && newInvoice.code && {
           invoice: newInvoice
         }),
+        description: 'purchase',
         ...(newAssets && {
           assets: newAssets
         })
@@ -480,7 +521,7 @@ const addAssets = async () => {
 watch(() => asset.modelId, async () => {
   if (!asset.modelId) return []
   const foundCategory = response.categories.find((elemento) => {
-    return elemento.value == asset.modelId![0]
+    return elemento.value == asset.modelId
   })
 
   if (!foundCategory) return []
@@ -498,19 +539,15 @@ const setProvider = async (query?: string) => {
   const rta = await searchProvider(search);
   response.providers = rta?.rows || []
 }
-const setDeposit = async (query?: string) => {
+const setWarehouses = async (query?: string) => {
   const search = {
     name: query,
   }
-  const rta = await getDeposit(search);
-  response.deposits = rta?.rows || []
+  const rta = await getWarehouses(search);
+  response.warehouses = rta?.rows || []
 }
 
-
-
-
 onMounted(async () => {
-  await getCategories()
-  await setDeposit()
+  await setWarehouses()
 });
 </script>
