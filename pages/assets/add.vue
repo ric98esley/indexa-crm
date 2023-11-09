@@ -6,7 +6,7 @@
     <el-col :sm="24" :md="24" :lg="8">
       <el-card>
         <el-form label-position="top" label-width="auto" autocomplete="off" ref="ruleFormRef" :model="asset"
-          :rules="rules" deposits-icon>
+          :rules="rules" deposits-icon @submit.prevent="addAsset()">
           <el-form-item label="Serial">
             <el-input placeholder="Serial" v-model="asset.serial">
             </el-input>
@@ -14,8 +14,7 @@
           <el-form-item label="Modelo">
             <el-cascader v-model="asset.modelId" :options="response.categories"
               :filter-method="(node, keyword) => node.text.toLowerCase().includes(keyword.toLowerCase())" class="w-full"
-              filterable separator=" - " clearable :popper-class="'.hover:bg-sky-700'"
-              :on-change="(value) => console.log(value)">
+              filterable separator=" - " clearable :popper-class="'.hover:bg-sky-700'">
             </el-cascader>
           </el-form-item>
           <el-form-item label="Almacén del activo">
@@ -33,7 +32,7 @@
           <el-row justify="space-between" align="middle">
             <el-form-item>
               <el-button type="primary" :disabled="!asset.serial || !asset.modelId || !asset.depositId"
-                @click="addAsset()" native-type="submit">Agregar</el-button>
+                native-type="submit">Agregar</el-button>
             </el-form-item>
             <el-form-item>
               <el-button link plain @click="modals.invoice = true">Facturar</el-button>
@@ -70,7 +69,7 @@
             <template type="text" #default="{ row }">
               <el-select v-model="row.depositId" class="select-success" placeholder="Selecciona un estado" label="Estados"
                 style="width: 100%" name="assetDeposit" filterable>
-                <el-option v-for="option in deposits" :key="option.id" :value="option.id!"
+                <el-option v-for="option in response.deposits" :key="option.id" :value="option.id!"
                   :label="`${option.id} - ${option.name}`">
                   {{ option.id }} - {{ option.name }}
                 </el-option>
@@ -407,7 +406,7 @@ const addAssets = async () => {
       }));
       return {
         modelId: modelId![modelId!.length - 1],
-        specifications ,
+        specifications,
         ...rest
       }
     }
