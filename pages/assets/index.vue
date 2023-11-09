@@ -47,7 +47,7 @@
             </el-table-column>
             <el-table-column label="Estado">
               <template #header>
-                <el-input v-model="filters.deposit" placeholder="Estado" clearable />
+                <el-input v-model="filters.location" placeholder="Estado" clearable />
               </template>
               <template #default="{ row }">
                 <div v-if="row.assignment">
@@ -100,7 +100,7 @@
             <template #header>
               <h2>Editar activo</h2>
             </template>
-            <el-form label-position="top" label-width="auto" autocomplete="off" ref="ruleFormRef" deposits-icon
+            <el-form label-position="top" label-width="auto" autocomplete="off" ref="ruleFormRef" locations-icon
               @submit.prevent="patchAsset()">
               <el-form-item label="Modelo">
                 <el-cascader v-model="request.toEdit.modelId" :options="response.categories"
@@ -110,9 +110,9 @@
                 </el-cascader>
               </el-form-item>
               <el-form-item label="Depósitos del activo">
-                <el-select v-model="request.toEdit.depositId" class="select-success" placeholder="Selecciona un deposito"
+                <el-select v-model="request.toEdit.locationId" class="select-success" placeholder="Selecciona un locationo"
                   label="Deposito" style="width: 100%" filterable>
-                  <el-option v-for="option in response.deposits" :key="option.id" :value="option.id!"
+                  <el-option v-for="option in response.locations" :key="option.id" :value="option.id!"
                     :label="`${option.id} - ${option.name}`">
                     {{ option.id }} - {{ option.name }}
                   </el-option>
@@ -123,7 +123,7 @@
               </el-form-item>
               <el-row justify="space-between" align="middle">
                 <el-form-item>
-                  <el-button type="primary" :disabled="!request.toEdit.modelId || !request.toEdit.depositId"
+                  <el-button type="primary" :disabled="!request.toEdit.modelId || !request.toEdit.locationId"
                     native-type="submit">Guardar</el-button>
                 </el-form-item>
               </el-row>
@@ -151,11 +151,11 @@ const loading = ref(true)
 const response = reactive<{
   assets: Asset[],
   total: number
-  deposits: Deposit[]
+  locations: Deposit[]
   categories: any[]
 }>({
   categories: [],
-  deposits: [],
+  locations: [],
   assets: [],
   total: 0
 });
@@ -170,8 +170,8 @@ const request = reactive<{
 }>({
   asset: undefined,
   toEdit: {
-    modelId: [],
-    depositId: undefined,
+    modelId: undefined,
+    locationId: undefined,
     customFields: []
   }
 });
@@ -187,7 +187,7 @@ const filters = reactive({
   category: '',
   brand: '',
   model: '',
-  deposit: ''
+  location: ''
 })
 
 const assetStatus = ({
@@ -197,11 +197,11 @@ const assetStatus = ({
   row: Asset,
   rowIndex: number
 }) => {
-  if (row.deposit && row.deposit.state === 'archivado') {
+  if (row.location && row.location.type && row.location.type.status === 'archivado') {
     return 'danger-row'
-  } else if (row.deposit && row.deposit.state === 'pendiente') {
+  } else if (row.location && row.location.type && row.location.type.status === 'pendiente') {
     return 'warning-row'
-  } else if (row.deposit && row.enabled === false) {
+  } else if (row.location && row.location.type && row.location.type.status == 'asignado') {
     return 'success-row'
   }
   return ''
@@ -220,8 +220,8 @@ const getAssets = async () => {
           ...(filters.model != '' && filters.model && {
             model: filters.model
           }),
-          ...(filters.deposit != '' && filters.deposit && {
-            deposit: filters.deposit
+          ...(filters.location != '' && filters.location && {
+            location: filters.location
           }),
           ...(filters.category != '' && filters.category && {
             category: filters.category
@@ -285,7 +285,7 @@ const getCategories = async () => {
 
 const getDeposit = async ({ name }: { name?: string }) => {
   try {
-    const { data } = await useFetch<{ total: number, rows: Deposit[] }>('/assets/deposits', {
+    const { data } = await useFetch<{ total: number, rows: Deposit[] }>('/assets/locations', {
       params: {
         ...(name != '' && name && {
           name
@@ -303,7 +303,7 @@ const editAsset = (row: Asset) => {
   request.asset = row;
 
   request.toEdit.modelId = [row.model!.category.id!, row.model!.brand.id!, row.model!.id!];
-  request.toEdit.depositId = row.deposit?.id
+  request.toEdit.locationId = row.location?.id
 }
 
 
@@ -312,7 +312,7 @@ const patchAsset = async () => {
     loading.value = true;
 
     const body = {
-      depositId: request.toEdit?.depositId,
+      locationId: request.toEdit?.locationId,
       modelId: request.toEdit?.modelId![2],
     }
 
@@ -334,7 +334,7 @@ const patchAsset = async () => {
       message: `${data.value?.name}`
     })
 
-    request.toEdit.depositId = undefined;
+    request.toEdit.locationId = undefined;
     request.toEdit.modelId = undefined;
     request.toEdit.customFields = [];
     return data.value
@@ -381,14 +381,13 @@ const setDeposit = async (query?: string) => {
     name: query,
   }
   const rta = await getDeposit(search);
-  response.deposits = rta?.rows || []
+  response.locations = rta?.rows || []
 }
 
 const printDiv = async (nombreDiv: string) => {
-  var contenido = document.getElementById(nombreDiv).innerHTML || undefined;
+  var contenido = document.getElementById(nombreDiv).innerHTML;
   var contenidoOriginal = document.body.innerHTML;
   if (!contenido) return;
-
   document.body.innerHTML = contenido;
 
   window.print();
@@ -418,8 +417,8 @@ const getExcel = async () => {
           ...(filters.model != '' && filters.model && {
             model: filters.model
           }),
-          ...(filters.deposit != '' && filters.deposit && {
-            deposit: filters.deposit
+          ...(filters.location != '' && filters.location && {
+            location: filters.location
           }),
           ...(filters.category != '' && filters.category && {
             category: filters.category

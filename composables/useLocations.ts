@@ -6,6 +6,7 @@ class LocationsService {
     code,
     group,
     manager,
+    groupId,
     type,
     rif,
     address,
@@ -21,6 +22,7 @@ class LocationsService {
     name?: string,
     code?: string,
     group?: string,
+    groupId?: number,
     manager?: string,
     type?: string,
     rif?: string,
@@ -50,6 +52,9 @@ class LocationsService {
             }),
             ...(group != '' && group && {
               group
+            }),
+            ...(groupId && {
+              groupId
             }),
             ...(manager != '' && manager && {
               manager

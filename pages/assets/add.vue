@@ -303,9 +303,6 @@ const handleSelectInvoice = (item: Invoice) => {
   toAdd.invoice.providerId = item.id;
 }
 
-
-
-
 const getCategories = async (name?: string) => {
   try {
     const { data } = await categoriesServices.getCategories({

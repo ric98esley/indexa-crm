@@ -17,9 +17,12 @@
               <el-input v-model="filters.serial" placeholder="Serial" clearable />
             </template>
           </el-table-column>
-          <el-table-column label="Estado" prop="deposit.name">
+          <el-table-column label="Estado" prop="location.name">
             <template #header>
-              <el-input v-model="filters.deposit" placeholder="Estado" clearable />
+              <el-input v-model="filters.location" placeholder="Estado" clearable />
+            </template>
+            <template #default="{ row }">
+              {{ row.location.code }} - {{ row.location.name }}
             </template>
           </el-table-column>
           <el-table-column label="Categoría" prop="model.category.name">
@@ -40,7 +43,7 @@
           <el-table-column label="Acciones">
             <template #default="{ row }">
               <el-row>
-                <el-button type="primary" circle @click="addAssignment(row)" :disabled="assetsId.includes(row.id)">
+                <el-button type="primary" circle @click="addAssignment(row)" :disabled="targets.includes(row.id)">
                   <Icon name="ep:plus" />
                 </el-button>
               </el-row>
@@ -56,8 +59,80 @@
     <el-row :span="24" class="p-4">
       <el-card class="w-full">
         <template #header>
-          <el-row justify="end">
-            <el-button type="primary" :disabled="assetsCount == 0" @click="modals.get = true">Recibir</el-button>
+          <el-row>
+            <el-descriptions class="margin-top w-full" :column="3" border>
+              <template #title>
+                Datos de la asignación - activos {{ assetsCount }}
+              </template>
+              <template #extra>
+                <el-select v-model="assignments.locationId" class="select-success" placeholder="Selecciona un estado"
+                  label="Estados" style="width: 100%" name="assetDeposit" filterable>
+                  <el-option v-for="option in places.rows" :key="option.id" :value="option.id!"
+                    :label="`${option.id} - ${option.name}`">
+                    {{ option.id }} - {{ option.name }}
+                  </el-option>
+                </el-select>
+                <el-button type="primary" v-if="assignments.place" :disabled="assetsCount == 0"
+                  @click="checking()">Recibir</el-button>
+              </template>
+              <template v-if="assignments.place">
+
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">
+                      <Icon name="ep:user" />
+                      Responsable
+                    </div>
+                  </template>
+                  {{ assignments.place?.manager?.name }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">
+                      <Icon name="mdi-light:eye" />
+                      Código
+                    </div>
+                  </template>
+                  {{ assignments.place?.code }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">
+                      <Icon name="ep:phone" />
+                      Teléfono
+                    </div>
+                  </template>
+                  {{ assignments.place?.phone }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">
+                      <Icon name="ep:school" />
+                      Agencia
+                    </div>
+                  </template>
+                  {{ assignments.place?.name }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">
+                      <Icon name="ep:connection" />
+                      Grupo
+                    </div>
+                  </template>
+                  {{ assignments.place?.group?.code }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">
+                      <Icon name="ep:place" />
+                      Dirección
+                    </div>
+                  </template>
+                  {{ assignments.place?.address }}
+                </el-descriptions-item>
+              </template>
+            </el-descriptions>
           </el-row>
         </template>
         <template #default>
@@ -73,7 +148,16 @@
             </el-table-column>
             <el-table-column label="Serial" prop="serial">
             </el-table-column>
-            <el-table-column label="Estado" prop="deposit.name">
+            <el-table-column label="Estado" prop="location.name">
+              <template type="text" #default="{ row }">
+                <el-select v-model="row.locationId" class="select-success" placeholder="Selecciona un estado"
+                  label="Estados" style="width: 100%" name="assetDeposit" filterable>
+                  <el-option v-for="option in places.rows" :key="option.id" :value="option.id!"
+                    :label="`${option.id} - ${option.name}`">
+                    {{ option.id }} - {{ option.name }}
+                  </el-option>
+                </el-select>
+              </template>
             </el-table-column>
             <el-table-column label="Categoría" prop="model.category.name">
             </el-table-column>
@@ -93,27 +177,25 @@
       </el-card>
     </el-row>
     <el-container>
-      <el-dialog v-model="modals.get">
+      <el-dialog v-model="modals.assign">
         <template #header>
-          <h2>Buscar </h2>
+          <h2>Buscar</h2>
         </template>
         <template #default>
-          <el-form label-width="120px" @submit.prevent="checking()">
-            <el-form-item label="Depósitos del activo">
-              <el-select v-model="assignments.depositId" class="select-success" placeholder="Selecciona un deposito"
-                label="Deposito" style="width: 100%" filterable>
-                <el-option v-for="option in response.deposits" :key="option.id" :value="option.id!"
-                  :label="`${option.id} - ${option.name}`">
-                  {{ option.id }} - {{ option.name }}
-                </el-option>
+          <el-form label-width="120px">
+            <el-form-item label="Agencia">
+              <el-select class="w-full" v-model="assignments.place" filterable remote effect="dark"
+                placeholder="Elige una agencia" :loading="loadingPlace" :remote-method="setPlaces">
+                <el-option v-for="item in places.rows" :key="item.id"
+                  :label="`${item.code} - ${item.name} -  ${item.group?.code}`" :value="item">
+                  <span style="float: left">{{ item.code }} {{ item.name }}</span>
+                  <span style="
+                      float: right;
+                      color: var(--el-text-color-secondary);
+                      font-size: 13px;
+                  ">{{ item.group?.code }}</span> </el-option>
               </el-select>
             </el-form-item>
-            <el-row justify="space-between" align="middle">
-              <el-form-item>
-                <el-button type="primary" :disabled="!assignments.depositId"
-                  native-type="submit">Guardar</el-button>
-              </el-form-item>
-            </el-row>
           </el-form>
         </template>
       </el-dialog>
@@ -131,31 +213,52 @@ definePageMeta({
 })
 
 const loadingAssets = ref(true)
+const loadingPlace = ref(false);
+const loadingGroup = ref(false);
+
+const LocationsServices = useLocation();
+const locationsServices = new LocationsServices();
+
 
 
 const response = reactive<{
-  deposits: Deposit[],
   rows: Asset[],
   total: number
 }>({
-  deposits:[],
   rows: [],
   total: 0
 });
 
+const places = reactive<{
+  rows: Place[],
+  total: number
+}>({
+  rows: [],
+  total: 0
+});
+
+const groups = reactive<{
+  rows: Group[],
+  total: number
+}>({
+  rows: [],
+  total: 0
+})
+
 const assignments = reactive<{
   assets: Asset[],
-  deposit?: Deposit,
-  depositId?: number,
+  place?: Place,
+  locationId?: number,
+  groupId?: number
 }>({
   assets: [],
-  deposit: undefined,
-  depositId: undefined
+  place: undefined,
+  locationId: undefined
 })
 
 const modals = reactive({
   edit: false,
-  get: false
+  assign: false
 })
 
 const filters = reactive({
@@ -165,7 +268,7 @@ const filters = reactive({
   category: '',
   brand: '',
   model: '',
-  deposit: ''
+  location: ''
 })
 
 const assetStatus = ({
@@ -175,11 +278,11 @@ const assetStatus = ({
   row: Asset,
   rowIndex: number
 }) => {
-  if (row.deposit && row.deposit.state === 'archivado') {
+  if (row.location && row.location.type && row.location.type.status === 'archivado') {
     return 'danger-row'
-  } else if (row.deposit && row.deposit.state === 'pendiente') {
+  } else if (row.location && row.location.type && row.location.type.status === 'pendiente') {
     return 'warning-row'
-  } else if (row.deposit && row.enabled === false) {
+  } else if (row.location && row.location.type && row.location.type.status === 'asignado') {
     return 'success-row'
   }
   return ''
@@ -197,8 +300,8 @@ const getAssets = async () => {
           ...(filters.model != '' && filters.model && {
             model: filters.model
           }),
-          ...(filters.deposit != '' && filters.deposit && {
-            deposit: filters.deposit
+          ...(filters.location != '' && filters.location && {
+            location: filters.location
           }),
           ...(filters.category != '' && filters.category && {
             category: filters.category
@@ -206,7 +309,8 @@ const getAssets = async () => {
           ...(filters.brand != '' && filters.brand && {
             brand: filters.brand
           }),
-          enabled: false,
+          enabled: true,
+          status: 'asignado',
           ...(filters.offset && {
             offset: (filters.offset - 1) * filters.limit
           }),
@@ -227,7 +331,7 @@ const getAssets = async () => {
 }
 
 const addAssignment = (row: Asset) => {
-  if (assetsId.value.includes(row.id)) return;
+  if (targets.value.some(e => e.assetId === row.id)) return;
 
   assignments.assets.push(row);
 }
@@ -239,32 +343,45 @@ const deleteAssignment = (row: Asset) => {
   }
 }
 
-const getDeposit = async ({ name }: { name?: string }) => {
+const getPlaces = async ({
+  search,
+  groupId,
+}: {
+  id?: number,
+  search?: string,
+  groupId?: number
+}) => {
   try {
-    const { data } = await useFetch<{ total: number, rows: Deposit[] }>('/assets/deposits', {
-      params: {
-        ...(name != '' && name && {
-          name
-        })
-      }
-    });
-    return data.value;
+    loadingPlace.value = true;
+    const { data, error } = await locationsServices.getLocations({
+      search,
+      groupId,
+      status: ['desplegable', 'archivado', 'pendiente']
+    })
+
+    if (error.value) {
+      throw new Error('Error al cargar los agencias')
+    }
+
+    loadingPlace.value = false;
+    return data.value
   } catch (error) {
-    console.log(error);
+    loadingPlace.value = false;
+    ElNotification({
+      message: 'Error al obtener las agencia intente de nuevo mas tarde'
+    })
   }
 }
 
-const setDeposit = async (query?: string) => {
-  const search = {
-    name: query,
-  }
-  const rta = await getDeposit(search);
-  response.deposits = rta?.rows || []
-}
-
-const assetsId = computed(() => {
+const targets = computed(() => {
   return assignments.assets.map((asset) => {
-    return asset.id;
+    const assetId = asset.id;
+    const locationId = assignments.place?.id || undefined;
+    const target = {
+      assetId,
+      locationId
+    };
+    return target
   });
 })
 
@@ -273,15 +390,27 @@ const assetsCount = computed(() => {
 })
 
 
+const setPlaces = async (search: string) => {
+  const query = {
+    search,
+    groupId: assignments.groupId
+  }
+  const rta = await getPlaces(query);
+  places.rows = rta?.rows || []
+  places.total = rta?.total || 0
+}
+
 const checking = async () => {
   try {
+
     const { data, error } = await useFetch<Order>(
       '/orders/checking',
       {
         method: 'post',
         body: {
-          targets: assetsId.value,
-          depositId: assignments.depositId
+          targets: targets.value,
+          locationId: assignments.place!.id,
+          description: 'borrowing'
         }
       }
     );
@@ -290,31 +419,31 @@ const checking = async () => {
       throw new Error()
     }
     ElNotification({
-      message: "Activos recibidos correctamente",
+      message: "Activos asignado correctamente",
     });
 
     await getAssets();
 
+    modals.assign = false
     assignments.assets = [];
-    assignments.depositId = undefined;
-    assignments.deposit = undefined;
-    modals.get = false
+    assignments.place = undefined;
+    assignments.locationId = undefined;
 
-    
     if (data.value && data.value.id) return navigateTo(
-    {
-      path: `/assignments/${data.value.id}/print`,
-    },
-    {
-      open: {
-        target: '_blank',
-        windowFeatures: {
-          popup: true,
-          noopener: true,
-          noreferrer: true,
+      {
+        path: `/assignments/${data.value.id}/print`,
+      },
+      {
+        open: {
+          target: '_blank',
+          windowFeatures: {
+            popup: true,
+            noopener: true,
+            noreferrer: true,
+          }
         }
-      }
-    })
+      })
+
   } catch (error) {
     ElNotification({
       message: "Vuelve a intentarlo mas tarde",
@@ -323,15 +452,13 @@ const checking = async () => {
   }
 }
 
-
-
 watch(filters, useDebounce(async () => {
   await getAssets()
 }, 500))
 
 onMounted(async () => {
   await getAssets();
-  await setDeposit();
+  await setPlaces('')
 })
 
 </script>

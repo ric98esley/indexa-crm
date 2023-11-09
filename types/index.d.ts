@@ -68,7 +68,7 @@ declare global {
     countChecking?: number,
     notes?: string,
     invoiceId?: number,
-    deposit?: Deposit,
+    location?: Place,
     model?: Model,
     assignment?: Assignments
     enabled: boolean
@@ -85,6 +85,7 @@ declare global {
     value: string
   }
   interface Type extends Base {
+    status: string
   }
   interface Place extends Base {
     group?: Group;

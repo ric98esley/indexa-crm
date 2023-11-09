@@ -17,9 +17,12 @@
               <el-input v-model="filters.serial" placeholder="Serial" clearable />
             </template>
           </el-table-column>
-          <el-table-column label="Estado" prop="deposit.name">
+          <el-table-column label="Estado" prop="location.name">
             <template #header>
               <el-input v-model="filters.deposit" placeholder="Estado" clearable />
+            </template>
+            <template #default="{ row }">
+              {{ row.location.code }} - {{ row.location.name }}
             </template>
           </el-table-column>
           <el-table-column label="Categoría" prop="model.category.name">
@@ -40,7 +43,8 @@
           <el-table-column label="Acciones">
             <template #default="{ row }">
               <el-row>
-                <el-button type="primary" circle @click="addAssignment(row)" :disabled="assetsId.includes(row.id)">
+                <el-button type="primary" circle @click="addAssignment(row)"
+                  :disabled="targets.some(e => e.assetId === row.id)">
                   <Icon name="ep:plus" />
                 </el-button>
               </el-row>
@@ -63,7 +67,8 @@
               </template>
               <template #extra>
                 <el-button @click="modals.assign = true">Elige la agencia</el-button>
-                <el-button type="primary" v-if="assignments.place" :disabled="assetsCount == 0" @click="checkout()">Asignar</el-button>
+                <el-button type="primary" v-if="assignments.place" :disabled="assetsCount == 0"
+                  @click="checkout()">Asignar</el-button>
               </template>
               <template v-if="assignments.place">
 
@@ -138,8 +143,6 @@
             </el-table-column>
             <el-table-column label="Serial" prop="serial">
             </el-table-column>
-            <el-table-column label="Estado" prop="deposit.name">
-            </el-table-column>
             <el-table-column label="Categoría" prop="model.category.name">
             </el-table-column>
             <el-table-column label="Marca" prop="model.brand.name">
@@ -211,6 +214,8 @@ const loadingAssets = ref(true)
 const loadingPlace = ref(false);
 const loadingGroup = ref(false);
 
+const LocationsServices = useLocation();
+const locationsServices = new LocationsServices();
 
 const response = reactive<{
   rows: Asset[],
@@ -269,11 +274,11 @@ const assetStatus = ({
   row: Asset,
   rowIndex: number
 }) => {
-  if (row.deposit && row.deposit.state === 'archivado') {
+  if (row.location && row.location.type && row.location.type.status === 'archivado') {
     return 'danger-row'
-  } else if (row.deposit && row.deposit.state === 'pendiente') {
+  } else if (row.location && row.location.type && row.location.type.status === 'pendiente') {
     return 'warning-row'
-  } else if (row.deposit && row.enabled === false) {
+  } else if (row.location && row.enabled === false) {
     return 'success-row'
   }
   return ''
@@ -322,7 +327,7 @@ const getAssets = async () => {
 }
 
 const addAssignment = (row: Asset) => {
-  if (assetsId.value.includes(row.id)) return;
+  if (targets.value.some(e => e.assetId === row.id)) return;
 
   assignments.assets.push(row);
 }
@@ -344,19 +349,12 @@ const getPlaces = async ({
 }) => {
   try {
     loadingPlace.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Place[] }>('/locations',
-      {
-        params: {
+    const { data, error } = await locationsServices.getLocations({
+      search,
+      groupId,
+      status: ['asignado']
+    })
 
-          ...(search != '' && search && {
-            search
-          }),
-          ...(groupId && {
-            groupId
-          }),
-        }
-      }
-    );
     if (error.value) {
       throw new Error('Error al cargar los agencias')
     }
@@ -416,9 +414,15 @@ const getGroups = async ({
   }
 }
 
-const assetsId = computed(() => {
+const targets = computed(() => {
   return assignments.assets.map((asset) => {
-    return asset.id;
+    const assetId = asset.id;
+    const locationId = assignments.place?.id || undefined;
+    const target = {
+      assetId,
+      locationId
+    };
+    return target
   });
 })
 
@@ -448,18 +452,20 @@ const setPlaces = async (search: string) => {
 
 const checkout = async () => {
   try {
+
     const { data, error } = await useFetch<Order>(
       '/orders/checkout',
       {
         method: 'post',
         body: {
-          targets: assetsId.value,
-          locationId: assignments.place!.id
+          targets: targets.value,
+          locationId: assignments.place!.id,
+          description: 'borrowing'
         }
       }
     );
 
-    if(error.value) {
+    if (error.value) {
       throw new Error()
     }
     ElNotification({
@@ -474,19 +480,19 @@ const checkout = async () => {
     assignments.locationId = undefined;
 
     if (data.value && data.value.id) return navigateTo(
-    {
-      path: `/assignments/${data.value.id}/print`,
-    },
-    {
-      open: {
-        target: '_blank',
-        windowFeatures: {
-          popup: true,
-          noopener: true,
-          noreferrer: true,
+      {
+        path: `/assignments/${data.value.id}/print`,
+      },
+      {
+        open: {
+          target: '_blank',
+          windowFeatures: {
+            popup: true,
+            noopener: true,
+            noreferrer: true,
+          }
         }
-      }
-    })
+      })
 
   } catch (error) {
     ElNotification({
