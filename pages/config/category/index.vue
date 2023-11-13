@@ -99,7 +99,7 @@
             <el-form-item label="Nombre">
               <el-input v-model="category.name" placeholder="Ingrese aquí el nombre"></el-input>
             </el-form-item>
-            <el-form-item label="Especificaciones"  v-if="category.type === 'asset'">
+            <el-form-item label="Especificaciones" v-if="category.type === 'asset'">
               <el-select class="w-full" v-model="category.customFields" multiple filterable reserve-keyword
                 placeholder="Por favor escoge características" :loading="loadingCustomFields">
                 <el-option v-for="item in specification.rows" :key="item.id" :label="item.name" :value="item.id!" />
@@ -305,8 +305,12 @@ const patchCategory = async () => {
       removeFields: category.removeFields?.map((field) => {
         return { typeId: field }
       }),
-      type: category.type,
-      description: category.description
+      ...(category.description !== '' && category.description && {
+        description: category.description
+      }),
+      ...(category.type !== '' && {
+        type: category.type
+      }),
     }
 
     const { data, error } = await useFetch<Category>(`/assets/categories/${category.id}`,

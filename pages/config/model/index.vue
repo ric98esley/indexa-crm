@@ -13,10 +13,17 @@
               <el-input :debounce="2000" v-model="filters.name" placeholder="Nombre" clearable />
             </template>
           </el-table-column>
-          <el-table-column label="Cantidad de activos">
-            <template #default="props">
+          <el-table-column prop="category.name" label="Categoría">
+            <template #header>
+              <el-input :debounce="2000" v-model="filters.category" placeholder="Categoria" clearable />
             </template>
           </el-table-column>
+          <el-table-column prop="brand.name" label="Fabricante">
+            <template #header>
+              <el-input :debounce="2000" v-model="filters.brand" placeholder="Fabricante" clearable />
+            </template>
+          </el-table-column>
+
           <el-table-column label="Acciones">
             <template #default="props">
               <el-row>
@@ -123,7 +130,9 @@ const loadingBrands = ref(false);
 const filters = reactive({
   limit: 10,
   offset: 0,
-  name: ''
+  name: '',
+  category: '',
+  brand: ''
 })
 
 const categories = reactive<{
@@ -168,7 +177,7 @@ const model = reactive<{
 });
 
 
-const getCategories = async (name: string) => {
+const getCategories = async ({ name }: { name?: string }) => {
   try {
     loadingCategories.value = true;
     const { data, error } = await useFetch<{ total: number, rows: Category[] }>('/assets/categories',
@@ -243,6 +252,12 @@ const getModels = async () => {
           }),
           ...(filters.offset && {
             offset: (filters.offset - 1) * filters.limit
+          }),
+          ...(filters.category != '' && filters.category && {
+            category: filters.category
+          }),
+          ...(filters.brand != '' && filters.brand && {
+            brand: filters.brand
           }),
           ...(filters.limit && {
             limit: filters.limit
@@ -401,7 +416,7 @@ const setModels = async () => {
   models.total = rta?.total || 0
 }
 const setCategories = async (name: string) => {
-  const rta = await getCategories(name);
+  const rta = await getCategories({ name });
   categories.rows = rta?.rows || [];
   categories.total = rta?.total || 0;
 }

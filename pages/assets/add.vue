@@ -43,6 +43,11 @@
     </el-col>
     <el-col :sm="24" :md="24" :lg="16">
       <el-card>
+        <template #header>
+          <el-row justify="end" >
+            Total: {{ toAdd.assets.length }}
+          </el-row>
+        </template>
         <el-table :data="toAdd.assets">
           <el-table-column type="expand" width="50">
             <template #default="props">
@@ -94,7 +99,7 @@
       <template #header>
         <h2>Datos de la factura</h2>
       </template>
-      <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
+      <!-- <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
         <el-tab-pane label="Factura nueva" name="factura-nueva">
           <el-form label-position="top">
             <el-form-item label="Numero de factura">
@@ -139,13 +144,13 @@
             </el-form-item>
           </el-form>
         </el-tab-pane>
-      </el-tabs>
+      </el-tabs> -->
       <template #footer>
         <el-row class="m-1" justify="space-between">
           <el-button @click="addAssets()" type="warning">Guardar</el-button>
-          <el-button @click="modals.provider = true" v-if="activeName === 'factura-nueva'" link type="primary">
+          <!-- <el-button @click="modals.provider = true" v-if="activeName === 'factura-nueva'" link type="primary">
             Agregar Proveedor
-          </el-button>
+          </el-button> -->
         </el-row>
       </template>
     </el-dialog>
@@ -387,7 +392,7 @@ const addAsset = () => {
 
   console.log(newAsset)
   asset.serial = '';
-  toAdd.assets.push(newAsset);
+  toAdd.assets.unshift(newAsset);
 }
 const removeAsset = (row: NewAsset) => {
   const index = toAdd.assets.indexOf(row);

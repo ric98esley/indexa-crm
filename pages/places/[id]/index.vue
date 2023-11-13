@@ -159,7 +159,7 @@
             layout="total, sizes, prev, pager, next, jumper" :total="response.assignments.total" />
         </el-row>
         <el-divider />
-        <h2 class="m-4">Préstamos anteriores</h2>
+        <h2 class="m-4">Historial de préstamos</h2>
         <el-row>
           <el-table :data="response.last.rows" v-loading="loadingAssignmentsLast">
             <el-table-column type="index" width="50" />
