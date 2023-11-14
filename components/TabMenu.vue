@@ -41,13 +41,13 @@ const props = defineProps({
   <el-menu :router="false" :collapse="props.collapse">
     <el-sub-menu v-for="(menu, indexMenu) in props.menus" :index="`${indexMenu}`" v-role="menu.roles">
       <template #title>
-        <el-icon>
-          <Icon :name="menu.icon" class="mx-1 text-lg" />
-        </el-icon>
-        <span> {{ menu.title }} </span>
+          <el-icon>
+            <Icon :name="menu.icon" class="mx-1 text-lg" />
+          </el-icon>
+          <span> {{ menu.title }} </span>
       </template>
       <el-menu-item-group v-for="(group, indexGroup) in menu.groups" :index="`g-${indexMenu}-${indexGroup}`"
-        v-role="group.roles">
+        v-role="group.roles" class="text-sky-400">
         <template #title>
           {{ group.title }}
         </template>

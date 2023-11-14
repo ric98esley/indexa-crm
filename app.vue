@@ -5,6 +5,7 @@ import ESLang from "element-plus/dist/locale/es.js";
 <template>
   <ElConfigProvider :locale="ESLang">
     <NuxtLayout>
+      <NuxtLoadingIndicator/>
       <NuxtPage />
     </NuxtLayout>
   </ElConfigProvider>
