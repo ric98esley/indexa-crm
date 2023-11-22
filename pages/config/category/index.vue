@@ -1,20 +1,7 @@
 <template>
   <el-container direction="vertical" class="p-3">
     <el-row>
-
-      <el-col :span="24">
-        <el-row>
-          <el-page-header @back="onBack" class="w-full">
-            <template #content>
-              <div class="flex items-center">
-                <span class="text-sm mr-2" style="color: var(--el-text-color-regular)">
-                  Categorías
-                </span>
-              </div>
-            </template>
-          </el-page-header>
-        </el-row>
-      </el-col>
+      <PageHeader name="Categorías"/>
       <el-col :span="24" :gutter="20">
         <el-col :span="24">
           <el-table :data="response.categories" stripe v-loading="loadingCategory">

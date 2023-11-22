@@ -1,6 +1,7 @@
 <template>
   <el-container direction="vertical" class="p-3">
     <el-row :span="24" :gutter="20">
+      <PageHeader name="Modelos" />
       <el-col :span="24">
         <el-table :data="models.rows" stripe v-loading="loadingModels">
           <el-table-column type="expand" width="50">
@@ -8,16 +9,24 @@
             </template>
           </el-table-column>
           <el-table-column type="index" width="50" />
-          <el-table-column prop="name" label="Nombre">
+          <el-table-column prop="name" label="Nombre" min-width="120">
             <template #header>
               <el-input :debounce="2000" v-model="filters.name" placeholder="Nombre" clearable />
             </template>
           </el-table-column>
-          <el-table-column label="Cantidad de activos">
-            <template #default="props">
+          <el-table-column prop="category.name" label="Categoría" min-width="120">
+            <template #header>
+              <el-input :debounce="2000" v-model="filters.category" placeholder="Categoría" clearable />
             </template>
           </el-table-column>
-          <el-table-column label="Acciones">
+          <el-table-column prop="brand.name" label="Fabricante" min-width="120">
+            <template #header>
+              <el-input :debounce="2000" v-model="filters.brand" placeholder="Fabricante" clearable />
+            </template>
+          </el-table-column>
+          <el-table-column label="Total activos" min-width="120" prop="count">
+          </el-table-column>
+          <el-table-column label="Acciones" width="180">
             <template #default="props">
               <el-row>
                 <el-button type="info" circle @click="editModel(props.row)">
@@ -33,9 +42,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <el-pagination class="m-4" v-model:current-page="filters.offset" v-model:page-size="filters.limit"
-          :page-sizes="[10, 20, 50, 100, 200, 300, 400]" :background="true"
-          layout="total, sizes, prev, pager, next, jumper" :total="models.total" />
+        <Pagination :offset="filters.offset" :limit="filters.limit" :total="models.total" />
       </el-col>
     </el-row>
     <el-container>
@@ -126,6 +133,8 @@ const modelsServices = new ModelsServices();
 const filters = reactive({
   limit: 10,
   offset: 0,
+  category: '',
+  brand: '',
   name: ''
 })
 
@@ -241,8 +250,11 @@ const getModels = async () => {
     loadingModels.value = true;
     const { data } = await modelsServices.getModels({
       name: filters.name,
+      brand: filters.brand,
+      category: filters.category,
       offset: filters.offset,
       limit: filters.limit
+
     })
 
     loadingModels.value = false;

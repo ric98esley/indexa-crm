@@ -1,87 +1,83 @@
 <template>
   <el-container direction="vertical" class="p-3">
-    <el-row :span="24" :gutter="12">
-      <el-table :data="response.brands" stripe v-loading="loadingBrand">
-        <el-table-column type="expand" width="50">
-          <template #default="props">
-            <el-row :span="24" :gutter="24">
-              <el-col :span="22" :offset="2">
-                Creado por: {{ props.row.createdBy.name }} {{ props.row.createdBy.lastName }}
-              </el-col>
-              <el-col :span="22" :offset="2">
-                Fecha de creación: {{ new Date(props.row.createdAt).toLocaleString('es-VE') }}
-              </el-col>
-            </el-row>
-          </template>
-        </el-table-column>
-        <el-table-column type="index" width="50" />
-        <el-table-column prop="name" label="Nombre">
+    <el-row>
+      <PageHeader name="Fabricantes" />
+      <el-col :span="24" :gutter="12">
+        <el-table :data="response.brands" stripe v-loading="loadingBrand">
+          <el-table-column type="expand" width="50">
+            <template #default="props">
+              <el-row :span="24" :gutter="24">
+                <el-col :span="22" :offset="2">
+                  Fecha de creación: {{ new Date(props.row.createdAt).toLocaleString('es-VE') }}
+                </el-col>
+              </el-row>
+            </template>
+          </el-table-column>
+          <el-table-column type="index" width="50" />
+          <el-table-column prop="name" label="Nombre" min-width="120">
+            <template #header>
+              <el-input :debounce="2000" v-model="filters.name" placeholder="Nombre" clearable />
+            </template>
+          </el-table-column>
+          <el-table-column label="Total activos" prop="count" min-width="120">
+          </el-table-column>
+          <el-table-column label="Acciones" width="120">
+            <template #default="props">
+              <el-row>
+                <el-button type="info" circle @click="editBrand(props.row)">
+                  <Icon name="ep:edit" />
+                </el-button>
+                <el-button type="danger" circle @click="removeBrand(props.row.id)">
+                  <Icon name="ep:delete" />
+                </el-button>
+              </el-row>
+            </template>
+          </el-table-column>
+        </el-table>
+        <Pagination :offset="filters.offset" :limit="filters.limit" :total="response.total" />
+
+      </el-col>
+      <el-row justify="end" :span="24">
+        <div
+          class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
+          @click="modals.create = true">
+          <Icon name="ep:plus" size="2rem" color="white" />
+        </div>
+      </el-row>
+      <el-container>
+        <el-dialog v-model="modals.create">
           <template #header>
-            <el-input :debounce="2000" v-model="filters.name" placeholder="Nombre" clearable />
+            <h2>Crear nueva marca</h2>
           </template>
-        </el-table-column>
-        <el-table-column label="Cantidad de activos" prop="assetCount">
-        </el-table-column>
-        <el-table-column label="Acciones">
-          <template #default="props">
-            <el-row>
-              <el-button type="info" circle @click="editBrand(props.row)">
-                <Icon name="ep:edit" />
-              </el-button>
-              <el-button type="primary" circle>
-                <Icon name="ep:view" />
-              </el-button>
-              <el-button type="danger" circle @click="removeBrand(props.row.id)">
-                <Icon name="ep:delete" />
-              </el-button>
-            </el-row>
+          <template #default>
+            <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="brand"
+              @submit.prevent="createBrand()">
+              <el-form-item label="Nombre">
+                <el-input v-model="brand.name" placeholder="Ingrese aqui el nombre"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" :disabled="!brand.name" native-type="submit">Crear</el-button>
+              </el-form-item>
+            </el-form>
           </template>
-        </el-table-column>
-      </el-table>
-      <el-pagination class="m-4" v-model:current-page="filters.offset" v-model:page-size="filters.limit"
-        :page-sizes="[10, 20, 50, 100, 200, 300, 400]" :background="true" layout="total, sizes, prev, pager, next, jumper"
-        :total="response.total" />
-    </el-row>
-    <el-container>
-      <el-dialog v-model="modals.create">
-        <template #header>
-          <h2>Crear nueva marca</h2>
-        </template>
-        <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="brand"
-            @submit.prevent="createBrand()">
-            <el-form-item label="Nombre">
-              <el-input v-model="brand.name" placeholder="Ingrese aqui el nombre"></el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :disabled="!brand.name" native-type="submit">Crear</el-button>
-            </el-form-item>
-          </el-form>
-        </template>
-      </el-dialog>
-      <el-dialog v-model="modals.edit">
-        <template #header>
-          <h2>Crear nueva marca</h2>
-        </template>
-        <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="brand"
-            @submit.prevent="patchBrand()">
-            <el-form-item label="Nombre">
-              <el-input v-model="brand.name" placeholder="Ingrese aqui el nombre"></el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :disabled="!brand.name" native-type="submit">Editar</el-button>
-            </el-form-item>
-          </el-form>
-        </template>
-      </el-dialog>
-    </el-container>
-    <el-row justify="end" :span="24">
-      <div
-        class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
-        @click="modals.create = true">
-        <Icon name="ep:plus" size="2rem" color="white" />
-      </div>
+        </el-dialog>
+        <el-dialog v-model="modals.edit">
+          <template #header>
+            <h2>Crear nueva marca</h2>
+          </template>
+          <template #default>
+            <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="brand"
+              @submit.prevent="patchBrand()">
+              <el-form-item label="Nombre">
+                <el-input v-model="brand.name" placeholder="Ingrese aqui el nombre"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" :disabled="!brand.name" native-type="submit">Editar</el-button>
+              </el-form-item>
+            </el-form>
+          </template>
+        </el-dialog>
+      </el-container>
     </el-row>
   </el-container>
 </template>
