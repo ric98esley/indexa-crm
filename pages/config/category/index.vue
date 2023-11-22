@@ -1,127 +1,146 @@
 <template>
   <el-container direction="vertical" class="p-3">
-    <el-row :span="24" :gutter="20">
+    <el-row>
+
       <el-col :span="24">
-        <el-table :data="response.categories" stripe v-loading="loadingCategory">
-          <el-table-column type="expand" width="50">
-            <template #default="{ row }">
-              <el-row>
-                <el-col :span="12">
-                  Descripción:
-                  {{ row.description }}
-                </el-col>
-                <el-col :span="12">
-                  <el-table :data="row.customFields" :border="true">
-                    <el-table-column label="Campos personalizados" prop="name"></el-table-column>
-                  </el-table>
-                </el-col>
-              </el-row>
+        <el-row>
+          <el-page-header @back="onBack" class="w-full">
+            <template #content>
+              <div class="flex items-center">
+                <span class="text-sm mr-2" style="color: var(--el-text-color-regular)">
+                  Categorías
+                </span>
+              </div>
             </template>
-          </el-table-column>
-          <el-table-column type="index" width="50" />
-          <el-table-column prop="name" label="Nombre">
-            <template #header>
-              <el-input :debounce="2000" v-model="filters.name" placeholder="Nombre" clearable />
-            </template>
-          </el-table-column>
-          <el-table-column>
-            <template #default="{ row }">
-              {{ row.type == 'asset' ? 'Activo' : 'Consumible' }}
-            </template>
-          </el-table-column>
-          <el-table-column label="Acciones">
-            <template #default="props">
-              <el-row>
-                <el-button type="info" circle @click="editCategory(props.row)">
-                  <Icon name="ep:edit" />
-                </el-button>
-                <el-button type="primary" circle>
-                  <Icon name="ep:view" />
-                </el-button>
-                <el-button type="danger" circle @click="removeCategory(props.row.id)">
-                  <Icon name="ep:delete" />
-                </el-button>
-              </el-row>
-            </template>
-          </el-table-column>
-        </el-table>
-        <el-pagination class="m-4" v-model:current-page="filters.offset" v-model:page-size="filters.limit"
-          :page-sizes="[10, 20, 50, 100, 200, 300, 400]" :background="true"
-          layout="total, sizes, prev, pager, next, jumper" :total="response.total" />
+          </el-page-header>
+        </el-row>
       </el-col>
+      <el-col :span="24" :gutter="20">
+        <el-col :span="24">
+          <el-table :data="response.categories" stripe v-loading="loadingCategory">
+            <el-table-column type="expand" width="50">
+              <template #default="{ row }">
+                <el-row>
+                  <el-col :small="24" :md="12">
+                    Descripción:
+                    {{ row.description }}
+                  </el-col>
+                  <el-col :small="24" :md="12">
+                    <el-table :data="row.customFields" :border="true">
+                      <el-table-column label="Campos personalizados" prop="name"></el-table-column>
+                    </el-table>
+                  </el-col>
+                </el-row>
+              </template>
+            </el-table-column>
+            <el-table-column type="index" width="50" />
+            <el-table-column prop="name" label="Nombre" min-width="120">
+              <template #header>
+                <el-input :debounce="2000" v-model="filters.name" placeholder="Nombre" clearable />
+              </template>
+            </el-table-column>
+            <el-table-column label="Tipo" min-width="120">
+              <template #header>
+                <el-select class="w-full" v-model="filters.type" placeholder="Tipo" clearable>
+                  <el-option v-for="item in categoryType" :key="item.label" :label="item.label"
+                    :value="item.value!"></el-option>
+                </el-select>
+              </template>
+              <template #default="{ row }">
+                {{ CATEGORIES_TYPES[row.type] }}
+              </template>
+            </el-table-column>
+            <el-table-column label="Total Activos" prop="count" min-width="120">
+            </el-table-column>
+            <el-table-column label="Acciones" width="100">
+              <template #default="props">
+                <el-row>
+                  <el-button type="info" circle @click="editCategory(props.row)">
+                    <Icon name="ep:edit" />
+                  </el-button>
+                  <el-button type="danger" circle @click="removeCategory(props.row.id)">
+                    <Icon name="ep:delete" />
+                  </el-button>
+                </el-row>
+              </template>
+            </el-table-column>
+          </el-table>
+          <Pagination :offset="filters.offset" :limit="filters.limit" :total="response.total" />
+        </el-col>
+      </el-col>
+      <el-container>
+        <el-dialog v-model="modals.edit">
+          <template #header>
+            <h2>Editar la categoría</h2>
+          </template>
+          <template #default>
+            <el-form label-position="top" label-width="auto" autocomplete="off" status-icon
+              @submit.prevent="patchCategory()">
+              <el-form-item label="Nombre">
+                <el-input v-model="category.name" placeholder="Ingrese aquí el nombre"></el-input>
+              </el-form-item>
+              <el-form-item label="Campos personalizados" v-if="category.type === 'asset'">
+                <el-select class="w-full" v-model="category.customFields" multiple filterable reserve-keyword
+                  placeholder="Por favor escoge un campo personalizado" :loading="loadingCustomFields"
+                  @remove-tag="removeField">
+                  <el-option v-for="item in specification.rows" :key="item.id" :label="item.name" :value="item.id!" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="Tipo">
+                <el-select class="w-full" v-model="category.type">
+                  <el-option v-for="item in categoryType" :key="item.label" :label="item.label"
+                    :value="item.value!"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="Descripción">
+                <el-input v-model="category.description" type="textarea"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" :disabled="!category.name" native-type="submit">Editar</el-button>
+              </el-form-item>
+            </el-form>
+          </template>
+        </el-dialog>
+        <el-dialog v-model="modals.create">
+          <template #header>
+            <h2>Crear nueva categoría</h2>
+          </template>
+          <template #default>
+            <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="category"
+              @submit.prevent="createCategory()">
+              <el-form-item label="Nombre">
+                <el-input v-model="category.name" placeholder="Ingrese aquí el nombre"></el-input>
+              </el-form-item>
+              <el-form-item label="Especificaciones" v-if="category.type === 'asset'">
+                <el-select class="w-full" v-model="category.customFields" multiple filterable reserve-keyword
+                  placeholder="Por favor escoge características" :loading="loadingCustomFields">
+                  <el-option v-for="item in specification.rows" :key="item.id" :label="item.name" :value="item.id!" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="Tipo">
+                <el-select class="w-full" v-model="category.type">
+                  <el-option v-for="item in categoryType" :key="item.label" :label="item.label"
+                    :value="item.value!"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="Descripción">
+                <el-input v-model="category.description" type="textarea"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" :disabled="!category.name" native-type="submit">Crear</el-button>
+              </el-form-item>
+            </el-form>
+          </template>
+        </el-dialog>
+        <el-row justify="end" :span="24">
+          <div
+            class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
+            @click="modals.create = true">
+            <Icon name="ep:plus" size="2rem" color="white" />
+          </div>
+        </el-row>
+      </el-container>
     </el-row>
-    <el-container>
-      <el-dialog v-model="modals.edit">
-        <template #header>
-          <h2>Editar la categoría</h2>
-        </template>
-        <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon
-            @submit.prevent="patchCategory()">
-            <el-form-item label="Nombre">
-              <el-input v-model="category.name" placeholder="Ingrese aquí el nombre"></el-input>
-            </el-form-item>
-            <el-form-item label="Campos personalizados" v-if="category.type === 'asset'">
-              <el-select class="w-full" v-model="category.customFields" multiple filterable reserve-keyword
-                placeholder="Por favor escoge un campo personalizado" :loading="loadingCustomFields"
-                @remove-tag="removeField">
-                <el-option v-for="item in specification.rows" :key="item.id" :label="item.name" :value="item.id!" />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="Tipo">
-              <el-select class="w-full" v-model="category.type">
-                <el-option v-for="item in categoryType" :key="item.label" :label="item.label"
-                  :value="item.value!"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="Descripción">
-              <el-input v-model="category.description" type="textarea"></el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :disabled="!category.name" native-type="submit">Editar</el-button>
-            </el-form-item>
-          </el-form>
-        </template>
-      </el-dialog>
-      <el-dialog v-model="modals.create">
-        <template #header>
-          <h2>Crear nueva categoría</h2>
-        </template>
-        <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="category"
-            @submit.prevent="createCategory()">
-            <el-form-item label="Nombre">
-              <el-input v-model="category.name" placeholder="Ingrese aquí el nombre"></el-input>
-            </el-form-item>
-            <el-form-item label="Especificaciones" v-if="category.type === 'asset'">
-              <el-select class="w-full" v-model="category.customFields" multiple filterable reserve-keyword
-                placeholder="Por favor escoge características" :loading="loadingCustomFields">
-                <el-option v-for="item in specification.rows" :key="item.id" :label="item.name" :value="item.id!" />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="Tipo">
-              <el-select class="w-full" v-model="category.type">
-                <el-option v-for="item in categoryType" :key="item.label" :label="item.label"
-                  :value="item.value!"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="Descripción">
-              <el-input v-model="category.description" type="textarea"></el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :disabled="!category.name" native-type="submit">Crear</el-button>
-            </el-form-item>
-          </el-form>
-        </template>
-      </el-dialog>
-      <el-row justify="end" :span="24">
-        <div
-          class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
-          @click="modals.create = true">
-          <Icon name="ep:plus" size="2rem" color="white" />
-        </div>
-      </el-row>
-    </el-container>
   </el-container>
 </template>
 
@@ -138,15 +157,26 @@ const categoriesService = new CategoriesService()
 const loadingCategory = ref(false);
 const loadingCustomFields = ref(false);
 
+const router = useRouter();
+
+const CATEGORIES_TYPES = {
+  asset: 'Activo',
+  consumable: 'Consumible',
+  accessory: 'Accesorio'
+}
+
 const categoryType = [
   { label: "Activo", value: "asset" },
   { label: "Consumible", value: "consumable" },
+  { label: "Accesorio", value: "accessory" }
 ];
+
 
 
 const filters = reactive({
   limit: 10,
   offset: 0,
+  type: '',
   name: ''
 })
 const specification = reactive<{
@@ -187,6 +217,11 @@ const category = reactive<{
   type: ''
 });
 
+const onBack = () => {
+  router.back();
+}
+
+
 const getSpecification = async () => {
   try {
     loadingCustomFields.value = true;
@@ -213,8 +248,9 @@ const getCategories = async () => {
 
     const { data, error } = await categoriesService.getCategories({
       name: filters.name,
+      type: filters.type,
+      limit: filters.limit,
       offset: filters.offset,
-      limit: filters.limit
     })
 
     loadingCategory.value = false;
@@ -265,7 +301,7 @@ const patchCategory = async () => {
       })
     }
 
-    const { data }  = await categoriesService.patchCategory(body);
+    const { data } = await categoriesService.patchCategory(body);
 
     loadingCategory.value = false;
 
