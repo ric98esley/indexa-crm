@@ -61,7 +61,7 @@
                   @change="(val) => (updateUserStatus({ active: val || false, userId: row.id }))" />
               </template>
             </el-table-column>
-            <el-table-column label="Acciones" :min-width="minWidth * 1.5">
+            <el-table-column label="Acciones" width="180">
               <template #default="props">
                 <el-row>
                   <el-button type="info" circle @click="editUser(props.row)">
@@ -125,10 +125,10 @@
                   <el-option v-for="item in groups.rows" :key="item.id" :label="item.name" :value="item.id!">
                     <span style="float: left">{{ item.name }}</span>
                     <span style="
-                      float: right;
-                      color: var(--el-text-color-secondary);
-                      font-size: 13px;
-                  ">{{ item.code }}</span> </el-option>
+                          float: right;
+                          color: var(--el-text-color-secondary);
+                          font-size: 13px;
+                      ">{{ item.code }}</span> </el-option>
                 </el-select>
               </el-form-item>
               <el-form-item label="Contraseña">
@@ -186,10 +186,10 @@
                   <el-option v-for="item in groups.rows" :key="item.id" :label="item.name" :value="item.id!">
                     <span style="float: left">{{ item.name }}</span>
                     <span style="
-                      float: right;
-                      color: var(--el-text-color-secondary);
-                      font-size: 13px;
-                  ">{{ item.code }}</span> </el-option>
+                          float: right;
+                          color: var(--el-text-color-secondary);
+                          font-size: 13px;
+                      ">{{ item.code }}</span> </el-option>
                 </el-select>
               </el-form-item>
               <el-form-item label="Contraseña">
@@ -225,9 +225,16 @@ definePageMeta({
 
 const router = useRouter();
 
+
+
 const loadingUser = ref(false);
 const loadingGroup = ref(false);
 const minWidth = ref(120);
+
+const UserService = useUsers();
+const userService = new UserService();
+
+
 
 
 const filters = reactive({
@@ -489,16 +496,23 @@ const removeUser = async (id: number) => {
 }
 
 const setUsers = async () => {
-  const query = {
-    name: filters.name,
-    code: filters.lastName,
-    limit: filters.limit,
-    offset: filters.offset,
-    parent: filters.username
+  try {
+    const query = {
+      name: filters.name,
+      code: filters.lastName,
+      limit: filters.limit,
+      offset: filters.offset,
+      parent: filters.username
+    }
+
+    const rta = await userService.getUsers(query);
+    // const rta = await getUsers(query);
+    users.rows = rta?.rows || []
+    users.total = rta?.total || 0
+  } catch (error) {
+
   }
-  const rta = await getUsers(query);
-  users.rows = rta?.rows || []
-  users.total = rta?.total || 0
+
 }
 
 const getGroups = async ({

@@ -1,163 +1,160 @@
 <template>
   <el-container direction="vertical" class="p-3">
-    <el-row :span="24" :gutter="12">
-      <el-table :data="groups.rows" stripe v-loading="loadingGroup">
-        <el-table-column type="expand" width="50">
-          <template #default="props">
-            <el-row :span="24" :gutter="24">
-              <el-col :span="22" :offset="2">
-                Creado por: {{ props.row.createdBy.name }} {{ props.row.createdBy.lastName }}
-              </el-col>
-              <el-col :span="22" :offset="2">
-                Fecha de creación: {{ new Date(props.row.createdAt).toLocaleString('es-VE') }}
-              </el-col>
-            </el-row>
-          </template>
-        </el-table-column>
-        <el-table-column type="index" width="50" />
-        <el-table-column prop="name" label="Nombre">
+    <el-row>
+      <PageHeader name="Categorías" />
+      <el-col :span="24" :gutter="12">
+        <el-table :data="groups.rows" stripe v-loading="loadingGroup">
+          <el-table-column type="expand" width="50">
+            <template #default="{ row }">
+              <el-row :span="24" :gutter="24">
+                <el-col :span="22" :offset="2">
+                  Creado por: {{ row.createdBy.name }} {{ row.createdBy.email }}
+                </el-col>
+                <el-col :span="22" :offset="2">
+                  Fecha de creación: {{ new Date(row.createdAt).toLocaleString('es-VE') }}
+                </el-col>
+              </el-row>
+            </template>
+          </el-table-column>
+          <el-table-column type="index" width="50" />
+          <el-table-column prop="name" label="Nombre" min-width="120">
+            <template #header>
+              <el-input v-model="filters.name" placeholder="Nombre" clearable />
+            </template>
+          </el-table-column>
+          <el-table-column label="Codigo" prop="code" min-width="120">
+            <template #header>
+              <el-input v-model="filters.code" placeholder="Código" clearable />
+            </template>
+          </el-table-column>
+          <el-table-column label="Padre" min-width="120">
+            <template #header>
+              <el-input v-model="filters.parent" placeholder="Padre" clearable />
+            </template>
+            <template #default="{ row }">
+              {{ row?.parent?.code }} - {{ row?.parent?.name }}
+            </template>
+          </el-table-column>
+          <el-table-column label="Receptor" min-width="120">
+            <template #header>
+              <el-input v-model="filters.manager" placeholder="Receptor" clearable />
+            </template>
+            <template #default="{ row }">
+              {{ row.manager?.username }} - {{ row?.manager?.profile?.name }} {{ row?.manager?.profile?.lastName }}
+            </template>
+          </el-table-column>
+          <el-table-column label="Acciones" width="180">
+            <template #default="props">
+              <el-row>
+                <el-button type="info" circle @click="editGroup(props.row)">
+                  <Icon name="ep:edit" />
+                </el-button>
+                <el-button type="primary" circle>
+                  <Icon name="ep:view" />
+                </el-button>
+                <el-button type="danger" circle @click="removeGroup(props.row.id)">
+                  <Icon name="ep:delete" />
+                </el-button>
+              </el-row>
+            </template>
+          </el-table-column>
+        </el-table>
+        <Pagination :offset="filters.offset" :limit="filters.limit" :total="groups.total" />
+      </el-col>
+      <el-container>
+        <!-- crear grupo -->
+        <el-dialog v-model="modals.create">
           <template #header>
-            <el-input v-model="filters.name" placeholder="Nombre" clearable />
+            <h2>Crear nuevo grupo</h2>
           </template>
-        </el-table-column>
-        <el-table-column label="Codigo" prop="code">
+          <template #default>
+            <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="group"
+              @submit.prevent="createGroup()">
+              <el-form-item label="Nombre">
+                <el-input v-model="group.name" placeholder="Ingrese el nombre"></el-input>
+              </el-form-item>
+              <el-form-item label="Código">
+                <el-input v-model="group.code" placeholder="Ingrese aqui el código"></el-input>
+              </el-form-item>
+              <el-form-item label="Padre">
+                <el-select class="w-full" v-model="group.parentId" filterable remote placeholder="Elige un grupo padre"
+                  :loading="loadingParent" :remote-method="setParent">
+                  <el-option v-for="item in parents.rows" :key="item.id" :label="item.name" :value="item.id!">
+                    <span style="float: left">{{ item.name }}</span>
+                    <span style="
+                            float: right;
+                        ">{{ item.code }}</span> </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="Receptor">
+                <el-select class="w-full" v-model="group.managerId" filterable remote placeholder="Elige un receptor"
+                  :loading="loadingUser" :remote-method="setUser">
+                  <el-option v-for="item in users.rows" :key="item.id" :label="`${item.username} - ${item.profile?.name}  ${item.profile?.lastName}`" :value="item.id!">
+                    <span style="float: left">{{ item.name }} {{ item.lastName }}</span>
+                    <span style="float: right;">{{ item.username }}</span> </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" :disabled="!group.name && !group.code" native-type="submit">Crear</el-button>
+              </el-form-item>
+            </el-form>
+          </template>
+        </el-dialog>
+        <!-- editar grupo -->
+        <el-dialog v-model="modals.edit">
           <template #header>
-            <el-input v-model="filters.code" placeholder="Código" clearable />
+            <h2>Editar grupo</h2>
           </template>
-        </el-table-column>
-        <el-table-column label="Padre">
-          <template #header>
-            <el-input v-model="filters.parent" placeholder="Padre" clearable />
+          <template #default>
+            <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="group"
+              @submit.prevent="patchGroup()">
+              <el-form-item label="Nombre">
+                <el-input v-model="group.name" placeholder="Ingrese aqui el nombre"></el-input>
+              </el-form-item>
+              <el-form-item label="Código">
+                <el-input v-model="group.code" placeholder="Ingrese aqui el código"></el-input>
+              </el-form-item>
+              <el-form-item label="Padre">
+                <el-select class="w-full" v-model="group.parentId" filterable remote placeholder="Elige un padre"
+                  :loading="loadingParent" :remote-method="setParent">
+                  <el-option v-for="item in parents.rows" :key="item.id" :label="item.name" :value="item.id!">
+                    <span style="float: left">{{ item.name }}</span>
+                    <span style="
+                            float: right;
+                            color: var(--el-text-color-secondary);
+                            font-size: 13px;
+                        ">{{ item.code }}</span> </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="Receptor">
+                <el-select class="w-full" v-model="group.managerId" filterable remote placeholder="Elige un receptor"
+                  :loading="loadingUser" :remote-method="setUser">
+                  <el-option v-for="item in users.rows" :key="item.id" :value="item.id!"
+                    :label="`${item.username} - ${item.profile?.name}  ${item.profile?.lastName}`">
+                    <span style="float: left">{{ item.name }} {{ item.lastName }}</span>
+                    <span style="
+                            float: right;
+                            color: var(--el-text-color-secondary);
+                            font-size: 13px;
+                        ">{{ item.username }}</span> </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" :disabled="!group.name && !group.code" native-type="submit">Editar</el-button>
+              </el-form-item>
+            </el-form>
           </template>
-          <template #default="{ row }">
-            {{ row?.parent?.code }} - {{ row?.parent?.name }}
-          </template>
-        </el-table-column>
-        <el-table-column label="Receptor">
-          <template #header>
-            <el-input v-model="filters.manager" placeholder="Receptor" clearable />
-          </template>
-          <template #default="{ row }">
-            {{ row.manager?.username }} - {{ row?.manager?.name }} {{ row?.manager?.lastName }}
-          </template>
-        </el-table-column>
-        <el-table-column label="Acciones">
-          <template #default="props">
-            <el-row>
-              <el-button type="info" circle @click="editGroup(props.row)">
-                <Icon name="ep:edit" />
-              </el-button>
-              <el-button type="primary" circle>
-                <Icon name="ep:view" />
-              </el-button>
-              <el-button type="danger" circle @click="removeGroup(props.row.id)">
-                <Icon name="ep:delete" />
-              </el-button>
-            </el-row>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-pagination class="m-4" v-model:current-page="filters.offset" v-model:page-size="filters.limit"
-        :page-sizes="[10, 20, 50, 100, 200, 300, 400]" :background="true" layout="total, sizes, prev, pager, next, jumper"
-        :total="groups.total" />
+        </el-dialog>
+      </el-container>
+      <el-col justify="end" :span="24">
+        <div
+          class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
+          @click="modals.create = true">
+          <Icon name="ep:plus" size="2rem" color="white" />
+        </div>
+      </el-col>
     </el-row>
-    <el-container>
-      <!-- crear grupo -->
-      <el-dialog v-model="modals.create">
-        <template #header>
-          <h2>Crear nuevo grupo</h2>
-        </template>
-        <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="group"
-            @submit.prevent="createGroup()">
-            <el-form-item label="Nombre">
-              <el-input v-model="group.name" placeholder="Ingrese aqui el nombre"></el-input>
-            </el-form-item>
-            <el-form-item label="Código">
-              <el-input v-model="group.code" placeholder="Ingrese aqui el código"></el-input>
-            </el-form-item>
-            <el-form-item label="Padre">
-              <el-select class="w-full" v-model="group.parentId" filterable remote effect="dark"
-                placeholder="Elige un grupo padre" :loading="loadingParent" :remote-method="setParent">
-                <el-option v-for="item in parents.rows" :key="item.id" :label="item.name" :value="item.id!">
-                  <span style="float: left">{{ item.name }}</span>
-                  <span style="
-                      float: right;
-                      color: var(--el-text-color-secondary);
-                      font-size: 13px;
-                  ">{{ item.code }}</span> </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="Receptor">
-              <el-select class="w-full" v-model="group.managerId" filterable remote effect="dark"
-                placeholder="Elige un receptor" :loading="loadingUser" :remote-method="setUser">
-                <el-option v-for="item in users.rows" :key="item.id" :label="item.name" :value="item.id!">
-                  <span style="float: left">{{ item.name }} {{ item.lastName }}</span>
-                  <span style="
-                      float: right;
-                      color: var(--el-text-color-secondary);
-                      font-size: 13px;
-                  ">{{ item.username }}</span> </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :disabled="!group.name && !group.code" native-type="submit">Crear</el-button>
-            </el-form-item>
-          </el-form>
-        </template>
-      </el-dialog>
-      <!-- editar grupo -->
-      <el-dialog v-model="modals.edit">
-        <template #header>
-          <h2>Editar grupo</h2>
-        </template>
-        <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="group"
-            @submit.prevent="patchGroup()">
-            <el-form-item label="Nombre">
-              <el-input v-model="group.name" placeholder="Ingrese aqui el nombre"></el-input>
-            </el-form-item>
-            <el-form-item label="Código">
-              <el-input v-model="group.code" placeholder="Ingrese aqui el código"></el-input>
-            </el-form-item>
-            <el-form-item label="Padre">
-              <el-select class="w-full" v-model="group.parentId" filterable remote effect="dark"
-                placeholder="Elige un padre" :loading="loadingParent" :remote-method="setParent">
-                <el-option v-for="item in parents.rows" :key="item.id" :label="item.name" :value="item.id!">
-                  <span style="float: left">{{ item.name }}</span>
-                  <span style="
-                      float: right;
-                      color: var(--el-text-color-secondary);
-                      font-size: 13px;
-                  ">{{ item.code }}</span> </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="Receptor">
-              <el-select class="w-full" v-model="group.managerId" filterable remote effect="dark"
-                placeholder="Elige un receptor" :loading="loadingUser" :remote-method="setUser">
-                <el-option v-for="item in users.rows" :key="item.id" :label="item.name" :value="item.id!">
-                  <span style="float: left">{{ item.name }} {{ item.lastName }}</span>
-                  <span style="
-                      float: right;
-                      color: var(--el-text-color-secondary);
-                      font-size: 13px;
-                  ">{{ item.username }}</span> </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :disabled="!group.name && !group.code" native-type="submit">Editar</el-button>
-            </el-form-item>
-          </el-form>
-        </template>
-      </el-dialog>
-    </el-container>
-    <el-row justify="end" :span="24">
-      <div
-        class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
-        @click="modals.create = true">
-        <Icon name="ep:plus" size="2rem" color="white" />
-      </div>
-    </el-row>
+
   </el-container>
 </template>
 
@@ -420,11 +417,11 @@ const editGroup = (row: Group) => {
   group.code = row.code || '';
   group.parentId = row.parent?.id;
   group.managerId = row.manager?.id;
-  if(row.parent) {
+  if (row.parent) {
     parents.rows = []
     parents.rows.push(row.parent)
   };
-  if(row.manager) {
+  if (row.manager) {
     users.rows = []
     users.rows.push(row.manager)
   }
