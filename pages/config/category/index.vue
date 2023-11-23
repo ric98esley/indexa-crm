@@ -1,7 +1,7 @@
 <template>
   <el-container direction="vertical" class="p-3">
     <el-row>
-      <PageHeader name="Categorías"/>
+      <PageHeader name="Categorías" />
       <el-col :span="24" :gutter="20">
         <el-col :span="24">
           <el-table :data="response.categories" stripe v-loading="loadingCategory">
@@ -69,7 +69,7 @@
               <el-form-item label="Campos personalizados" v-if="category.type === 'asset'">
                 <el-select class="w-full" v-model="category.customFields" multiple filterable reserve-keyword
                   placeholder="Por favor escoge un campo personalizado" :loading="loadingCustomFields"
-                  @remove-tag="removeField">
+                  @remove-tag="removeField" remote :remote-method="(name: string) => setSpecification(name)">
                   <el-option v-for="item in specification.rows" :key="item.id" :label="item.name" :value="item.id!" />
                 </el-select>
               </el-form-item>
@@ -140,6 +140,9 @@ definePageMeta({
 });
 
 const CategoriesService = useCategories();
+const SpecificationService = useSpecifications();
+
+const specificationsService = new SpecificationService();
 const categoriesService = new CategoriesService()
 const loadingCategory = ref(false);
 const loadingCustomFields = ref(false);
@@ -162,7 +165,7 @@ const categoryType = [
 
 const filters = reactive({
   limit: 10,
-  offset: 0,
+  offset: 1,
   type: '',
   name: ''
 })
@@ -206,27 +209,6 @@ const category = reactive<{
 
 const onBack = () => {
   router.back();
-}
-
-
-const getSpecification = async () => {
-  try {
-    loadingCustomFields.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Specification[] }>('/categories/specifications');
-    if (error.value) {
-      ElNotification({
-        message: 'Error al obtener las campos personalizados intente de nuevo mas tarde'
-      })
-    }
-
-    loadingCustomFields.value = false;
-    return data.value;
-  } catch (error) {
-    loadingCustomFields.value = false;
-    ElNotification({
-      message: 'Error al obtener las personalizados intente de nuevo mas tarde'
-    })
-  }
 }
 
 const getCategories = async () => {
@@ -334,10 +316,21 @@ const setCategories = async () => {
   response.categories = rta?.rows || []
   response.total = rta?.total || 0
 }
-const setSpecification = async () => {
-  const rta = await getSpecification();
-  specification.rows = rta?.rows || [];
-  specification.total = rta?.total || 0;
+const setSpecification = async (name: string) => {
+  try {
+
+    loadingCustomFields.value = true;
+    const data = await specificationsService.getSpecification({ name });
+
+    if (!data) throw new Error();
+
+    specification.rows = data?.rows || [];
+    specification.total = data?.total || 0;
+
+    loadingCustomFields.value = false;
+  } catch (error) {
+    console.log(error);
+  }
 
 }
 
@@ -357,7 +350,7 @@ watch(() => modals.edit, async () => {
 
 onMounted(async () => {
   await setCategories();
-  await setSpecification();
+  await setSpecification('');
 });
 
 </script>

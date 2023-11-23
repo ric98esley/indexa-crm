@@ -34,7 +34,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <Pagination :offset="filters.offset" :limit="filters.limit" :total="response.total" />
+        <Pagination v-model:offset="filters.offset" v-model:limit="filters.limit" :total="response.total" />
 
       </el-col>
       <el-row justify="end" :span="24">
@@ -97,7 +97,7 @@ const loadingBrand = ref(false);
 
 const filters = reactive({
   limit: 10,
-  offset: 0,
+  offset: 1,
   name: ''
 });
 

@@ -42,7 +42,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <Pagination :offset="filters.offset" :limit="filters.limit" :total="models.total" />
+        <Pagination v-model:offset="filters.offset" v-model:limit="filters.limit" :total="models.total" />
       </el-col>
     </el-row>
     <el-container>
@@ -132,7 +132,7 @@ const modelsServices = new ModelsServices();
 
 const filters = reactive({
   limit: 10,
-  offset: 0,
+  offset: 1,
   category: '',
   brand: '',
   name: ''
@@ -198,7 +198,7 @@ const getCategories = async (name: string) => {
     );
     if (error.value) {
       ElNotification({
-        message: 'Error al obtener las categorias intente de nuevo mas tarde'
+        message: 'Error al obtener las categorías intente de nuevo mas tarde'
       })
     }
 
@@ -207,7 +207,7 @@ const getCategories = async (name: string) => {
   } catch (error) {
     loadingCategories.value = false;
     ElNotification({
-      message: 'Error al obtener las categorias intente de nuevo mas tarde'
+      message: 'Error al obtener las categorías intente de nuevo mas tarde'
     })
   }
 }

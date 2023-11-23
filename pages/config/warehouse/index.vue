@@ -1,128 +1,182 @@
 <template>
   <el-container direction="vertical" class="p-3">
-    <el-row :span="24" :gutter="12">
-      <el-table :data="warehouse.rows" stripe v-loading="loadingWarehouse">
-        <el-table-column type="expand" width="50">
-          <template #default="props">
-            <el-row :span="24" :gutter="24">
-              <el-col :span="22" :offset="2">
-                Creado por: {{ props.row.createdBy.name }} {{ props.row.createdBy.lastName }}
-              </el-col>
-              <el-col :span="22" :offset="2">
-                Fecha de creación: {{ new Date(props.row.createdAt).toLocaleString('es-VE') }}
-              </el-col>
-            </el-row>
-          </template>
-        </el-table-column>
-        <el-table-column type="index" width="50" />
-        <el-table-column prop="name" label="Nombre">
+    <el-row>
+      <PageHeader name="Depósitos de activos" />
+      <el-col :span="24" :gutter="12">
+        <el-table :data="warehouse.rows" stripe v-loading="loadingWarehouse">
+          <el-table-column type="expand" width="50">
+            <template #default="props">
+              <el-row :span="24" :gutter="24">
+                <el-col :span="22" :offset="2">
+                  Creado por: {{ props.row.createdBy.name }} {{ props.row.createdBy.lastName }}
+                </el-col>
+                <el-col :span="22" :offset="2">
+                  Fecha de creación: {{ new Date(props.row.createdAt).toLocaleString('es-VE') }}
+                </el-col>
+              </el-row>
+            </template>
+          </el-table-column>
+          <el-table-column type="index" width="50" />
+          <el-table-column prop="name" label="Nombre" min-width="180">
+            <template #header>
+              <el-input v-model="filters.name" placeholder="Nombre" clearable />
+            </template>
+          </el-table-column>
+          <el-table-column label="Estatus" prop="type.status" min-width="120">
+            <template #header>
+              <el-input v-model="filters.status" placeholder="Estatus" clearable />
+            </template>
+          </el-table-column>
+          <el-table-column label="Grupo" prop="group.name" min-width="120">
+            <template #header>
+              <el-input v-model="filters.group" placeholder="Grupo" clearable />
+            </template>
+            <template #default="{ row }">
+              {{ row.group.code }} - {{ row.group.name }}
+            </template>
+          </el-table-column>
+          <el-table-column label="Acciones" width="180">
+            <template #default="props">
+              <el-row>
+                <el-button type="info" circle @click="editDeposit(props.row)">
+                  <Icon name="ep:edit" />
+                </el-button>
+                <el-button type="primary" circle>
+                  <Icon name="ep:view" />
+                </el-button>
+                <el-button type="danger" circle @click="removeDeposit(props.row.id)">
+                  <Icon name="ep:delete" />
+                </el-button>
+              </el-row>
+            </template>
+          </el-table-column>
+        </el-table>
+        <Pagination v-model:offset="filters.offset" v-model:limit="filters.limit" :total="warehouse.total" />
+      </el-col>
+      <el-container>
+        <el-dialog v-model="modals.create">
           <template #header>
-            <el-input v-model="filters.name" placeholder="Nombre" clearable />
+            <h2>Crear nuevo agencia</h2>
           </template>
-        </el-table-column>
-        <el-table-column label="Estatus" prop="type.status">
+          <template #default>
+            <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="place"
+              @submit.prevent="createPlace()">
+              <el-row :gutter="20">
+                <el-col :span="18">
+                  <el-form-item label="Código">
+                    <el-input v-model="place.code" placeholder="Ingrese el código de la agencia"></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="4">
+                  <el-form-item label="Activar">
+                    <el-switch v-model="place.isActive" class="ml-2" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-form-item label="Nombre">
+                <el-input v-model="place.name" placeholder="Ingrese el nombre"></el-input>
+              </el-form-item>
+              <el-form-item label="Zona">
+                <el-select class="w-full" v-model="place.zoneId" filterable remote placeholder="Elige una zona"
+                  :loading="loadingZone" :remote-method="setZone">
+                  <el-option v-for="item in zones.rows" :key="item.id" :label="item.name" :value="item.id!">
+                    <span style="float: left">{{ item.name }}</span>
+                  </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="Teléfono">
+                <el-input v-model="place.phone" placeholder="Ingrese el teléfono"></el-input>
+              </el-form-item>
+              <el-form-item label="Tipo de agencia">
+                <el-select class="w-full" v-model="place.typeId" filterable remote placeholder="Elige un tipo"
+                  :loading="loadingType" :remote-method="setTypes">
+                  <el-option v-for="item in types.rows" :key="item.id" :label="item.name" :value="item.id!">
+                    <span style="float: left">{{ item.name }}</span>
+                  </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="Grupo">
+                <el-select class="w-full" v-model="place.groupId" filterable remote placeholder="Elige un grupo"
+                  :loading="loadingGroup" :remote-method="setGroup">
+                  <el-option v-for="item in groups.rows" :key="item.id" :label="`${item.code} - ${item.name}`"
+                    :value="item.id!">
+                    <span style="float: left">{{ item.code }}</span>
+                    <span style="
+                        float: right;
+                        color: var(--el-text-color-secondary);
+                        font-size: 13px;
+                    ">{{ item.name }}</span> </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="Responsable">
+                <el-select class="w-full" v-model="place.managerId" filterable remote effect="dark"
+                  placeholder="Elige un responsable" :loading="loadingUser" :remote-method="setUser">
+                  <el-option v-for="item in users.rows" :key="item.id"
+                    :label="`${item.username} - ${item.name} ${item.lastName} - ${item.cardId}`" :value="item.id!">
+                    <span style="float: left">{{ item.name }} {{ item.lastName }}</span>
+                    <span style="
+                        float: right;
+                        color: var(--el-text-color-secondary);
+                        font-size: 13px;
+                    ">{{ item.username }}</span> </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="RIF">
+                <el-input v-model="place.rif" placeholder="RIF"></el-input>
+              </el-form-item>
+              <el-form-item label="Dirección">
+                <el-input v-model="place.address" placeholder="Dirección"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button :loading="loadingPlace" type="primary"
+                  :disabled="!place.name && !place.code && !place.zoneId && !place.typeId"
+                  native-type="submit">Crear</el-button>
+              </el-form-item>
+            </el-form>
+          </template>
+        </el-dialog>
+        <el-dialog v-model="modals.edit">
           <template #header>
-            <el-input v-model="filters.status" placeholder="Estatus" clearable />
+            <h2>Editar deposito</h2>
           </template>
-        </el-table-column>
-        <el-table-column label="Grupo" prop="group.name">
-          <template #header>
-            <el-input v-model="filters.group" placeholder="Grupo" clearable />
+          <template #default>
+            <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="deposit"
+              @submit.prevent="patchDeposit()">
+              <el-form-item label="Nombre">
+                <el-input v-model="deposit.name" placeholder="Ingrese aqui el nombre"></el-input>
+              </el-form-item>
+              <el-form-item label="Status">
+                <el-input v-model="deposit.state" placeholder="Ingrese aqui el status"></el-input>
+              </el-form-item>
+              <el-form-item label="Grupo">
+                <el-select class="w-full" v-model="deposit.groupId" filterable remote placeholder="Elige un grupo"
+                  :loading="loadingGroup" :remote-method="setGroup">
+                  <el-option v-for="item in groups.rows" :key="item.id" :label="item.name" :value="item.id!">
+                    <span style="float: left">{{ item.name }}</span>
+                    <span style="
+                          float: right;
+                          color: var(--el-text-color-secondary);
+                          font-size: 13px;
+                      ">{{ item.name }}</span> </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" :disabled="!deposit.name && !deposit.state"
+                  native-type="submit">Editar</el-button>
+              </el-form-item>
+            </el-form>
           </template>
-        </el-table-column>
-        <el-table-column label="Acciones">
-          <template #default="props">
-            <el-row>
-              <el-button type="info" circle @click="editDeposit(props.row)">
-                <Icon name="ep:edit" />
-              </el-button>
-              <el-button type="primary" circle>
-                <Icon name="ep:view" />
-              </el-button>
-              <el-button type="danger" circle @click="removeDeposit(props.row.id)">
-                <Icon name="ep:delete" />
-              </el-button>
-            </el-row>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-pagination class="m-4" v-model:current-page="filters.offset" v-model:page-size="filters.limit"
-        :page-sizes="[10, 20, 50, 100, 200, 300, 400]" :background="true" layout="total, sizes, prev, pager, next, jumper"
-        :total="warehouse.total" />
+        </el-dialog>
+      </el-container>
+      <el-col justify="end" :span="24">
+        <div
+          class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
+          @click="modals.create = true">
+          <Icon name="ep:plus" size="2rem" color="white" />
+        </div>
+      </el-col>
     </el-row>
-    <el-container>
-      <el-dialog v-model="modals.create">
-        <template #header>
-          <h2>Crear nuevo grupo</h2>
-        </template>
-        <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="deposit"
-            @submit.prevent="createDeposit()">
-            <el-form-item label="Nombre">
-              <el-input v-model="deposit.name" placeholder="Ingrese aqui el nombre"></el-input>
-            </el-form-item>
-            <el-form-item label="Status">
-              <el-select class="w-full" v-model="deposit.state" filterable placeholder="Elige un status">
-                <el-option v-for="item in status" :key="item.label" :label="item.label" :value="item.value!"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="Grupo">
-              <el-select class="w-full" v-model="deposit.groupId" filterable remote
-                placeholder="Elige un grupo" :loading="loadingGroup" :remote-method="setGroup">
-                <el-option v-for="item in groups.rows" :key="item.id" :label="item.name" :value="item.id!">
-                  <span style="float: left">{{ item.name }}</span>
-                  <span style="
-                      float: right;
-                      color: var(--el-text-color-secondary);
-                      font-size: 13px;
-                  ">{{ item.code }}</span> </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :disabled="!deposit.name && !deposit.state" native-type="submit">Editar</el-button>
-            </el-form-item>
-          </el-form>
-        </template>
-      </el-dialog>
-      <el-dialog v-model="modals.edit">
-        <template #header>
-          <h2>Editar deposito</h2>
-        </template>
-        <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="deposit"
-            @submit.prevent="patchDeposit()">
-            <el-form-item label="Nombre">
-              <el-input v-model="deposit.name" placeholder="Ingrese aqui el nombre"></el-input>
-            </el-form-item>
-            <el-form-item label="Status">
-              <el-input v-model="deposit.state" placeholder="Ingrese aqui el status"></el-input>
-            </el-form-item>
-            <el-form-item label="Grupo">
-              <el-select class="w-full" v-model="deposit.groupId" filterable remote
-                placeholder="Elige un grupo" :loading="loadingGroup" :remote-method="setGroup">
-                <el-option v-for="item in groups.rows" :key="item.id" :label="item.name" :value="item.id!">
-                  <span style="float: left">{{ item.name }}</span>
-                  <span style="
-                      float: right;
-                      color: var(--el-text-color-secondary);
-                      font-size: 13px;
-                  ">{{ item.name }}</span> </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :disabled="!deposit.name && !deposit.state" native-type="submit">Editar</el-button>
-            </el-form-item>
-          </el-form>
-        </template>
-      </el-dialog>
-    </el-container>
-    <el-row justify="end" :span="24">
-      <div
-        class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
-        @click="modals.create = true">
-        <Icon name="ep:plus" size="2rem" color="white" />
-      </div>
-    </el-row>
+
   </el-container>
 </template>
 
@@ -144,7 +198,7 @@ const loadingUser = ref(false);
 
 const filters = reactive({
   limit: 10,
-  offset: 0,
+  offset: 1,
   name: '',
   code: '',
   status: '',
@@ -174,6 +228,21 @@ const modals = reactive({
 });
 
 
+const place = reactive<Place>({
+  id: undefined,
+  name: '',
+  code: '',
+  isActive: true,
+  zoneId: undefined,
+  typeId: undefined,
+  managerId: undefined,
+  groupId: undefined,
+  rif: '',
+  phone: '',
+  address: '',
+});
+
+
 const deposit = reactive<{
   id?: number,
   name: string,
@@ -197,13 +266,13 @@ const setWarehouses = async () => {
   try {
     loadingWarehouse.value = true;
     const query = {
-    name: filters.name,
-    code: filters.code,
-    limit: filters.limit,
-    offset: filters.offset,
-    group: filters.group,
-    status: ['desplegable', 'pendiente', 'archivado']
-  }
+      name: filters.name,
+      code: filters.code,
+      limit: filters.limit,
+      offset: filters.offset,
+      group: filters.group,
+      status: ['desplegable', 'pendiente', 'archivado']
+    }
     const { data, error } = await locationsServices.getLocations(query);
 
     if (error.value) {
@@ -276,42 +345,24 @@ const getUser = async ({
   }
 }
 
-const createDeposit = async () => {
+const createWarehouse = async () => {
   try {
     loadingWarehouse.value = true;
 
-    const { data, error } = await useFetch<Deposit>('/assets/warehouse',
-      {
-        method: 'post',
-        body: {
-          name: deposit.name,
-          state: deposit.state,
-          groupId: deposit.groupId,
-        }
-      },
-    )
+    const { data, error } = locationsServices.createLocation(place);
     loadingWarehouse.value = false;
 
-    if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
-      ElNotification({
-        title: 'Error al crear marcas intente de nuevo mas tarde',
-        message: error.value?.data.message.message,
-      })
-      return
-    }
-    await setWarehouses()
-    ElNotification({
-      title: 'Categoria creada correctamente',
-      message: `${data.value?.name}`
-    })
-    deposit.id = undefined;
-    deposit.name = '';
-    deposit.groupId = undefined
+    await setPlaces()
+
+    place.id = undefined;
+    place.name = '';
+    place.phone = '';
+    place.isActive = false
     return data.value
   } catch (error) {
     loadingWarehouse.value = false;
     ElNotification({
-      title: 'Error al crear marcas intente de nuevo mas tarde',
+      title: 'Error al crear agencia intente de nuevo mas tarde',
     })
   }
 }

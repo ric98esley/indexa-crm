@@ -305,7 +305,7 @@ const menusA = reactive([
         ],
         items: [
           {
-            title: 'Ver marcas',
+            title: 'Ver y crear',
             route: { path: '/config/brand' }
           }
         ]
@@ -319,7 +319,7 @@ const menusA = reactive([
         ],
         items: [
           {
-            title: 'Ver modelos',
+            title: 'Ver y crear',
             route: { path: '/config/model' }
           }
         ]
@@ -334,7 +334,7 @@ const menusA = reactive([
         ],
         items: [
           {
-            title: 'Ver grupos',
+            title: 'Ver y crear',
             route: { path: '/config/warehouse' }
           }
         ]

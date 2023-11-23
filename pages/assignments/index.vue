@@ -91,7 +91,6 @@
                       {{ row.location?.group.code }}
                     </b>
                     -{{ row.location?.group.name }}
-
                   </template>
                 </el-table-column>
                 <el-table-column label="Acciones" :min-width="minWidth">
