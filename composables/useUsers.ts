@@ -1,3 +1,6 @@
+const isObjectEmpty = (objectName) => {
+  return Object.keys(objectName).length === 0
+}
 export const useUsers = () => {
   return class UsersService {
     async getUsers({
@@ -99,12 +102,119 @@ export const useUsers = () => {
           throw new Error('Error al cargar los usuarios')
         }
 
-        if(!data.value) throw new Error()
+        if (!data.value) throw new Error()
 
         return data.value
       } catch (error) {
         ElNotification({
           message: 'Error al obtener las usuario intente de nuevo mas tarde'
+        })
+      }
+    }
+
+    async createUser(user: {
+      username: string,
+      email: string,
+      role: string,
+      password: string,
+      isActive?: false,
+      groupId?: number,
+      profile?: {
+        name: string,
+        lastName: string,
+        cardId: string,
+        phone: string,
+      }
+    }) {
+      try {
+        const body = useFilterObject(user);
+        body.profile = useFilterObject(user.profile)
+
+        if (isObjectEmpty(body.profile)) delete body.profile;
+        const { data, error } = await useFetch<User>('/users',
+          {
+            method: 'POST',
+            body
+          },
+        )
+        if (error.value) {
+          console.log(error)
+          throw new Error(error.value.data.message)
+        }
+        ElNotification({
+          title: 'Usuario creada correctamente',
+          message: `${data.value?.username}`
+        })
+        return { data, error }
+      } catch (error) {
+        ElNotification({
+          title: 'Error al crear usuario intente de nuevo mas tarde',
+          message: error.message
+        })
+      }
+    }
+    async editUser({
+      id,
+      username,
+      email,
+      role,
+      isActive,
+      groupId,
+    }: {
+      username?: string,
+      email?: string,
+      role?: string,
+      isActive?: false,
+      groupId?: number,
+      id: number
+    },
+     ) {
+      try {
+        const body = {
+          username,
+          email,
+          role,
+          isActive,
+          groupId
+        };
+        const { data, error } = await useFetch<User>(`/users/${id}`,
+          {
+            method: 'patch',
+            body
+          },
+        );
+        if (error.value) {
+          throw new Error(error.value.data.message)
+        }
+        ElNotification({
+          title: 'Usuario editado correctamente',
+          message: `${data.value?.username}`
+        })
+        return { data, error }
+      } catch (error) {
+        ElNotification({
+          title: 'Error al editar usuario intente de nuevo mas tarde',
+          message: error.message,
+        })
+      }
+    }
+    async removeUser ({ id }: { id: number }) {
+      try {
+        const { data, error } = await useFetch<User>(`/users/${id}`, {
+          method: 'delete'
+        })
+
+        if (error.value) {
+          throw new Error(error.value.data.message);
+        }
+
+        ElNotification({
+          message: 'El usuario ha sido borrada.'
+        })
+      } catch (error) {
+        ElNotification({
+          title: 'Error al borrar el usuario intente de nuevo mas tarde.',
+          message: error.message
         })
       }
     }

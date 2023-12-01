@@ -1,6 +1,6 @@
 export const useGroups = () => (
   class GroupsService {
-    async getGroups  ({
+    async getGroups({
       id,
       name,
       manager,
@@ -9,7 +9,6 @@ export const useGroups = () => (
       limit = 10,
       offset = 0
     }: {
-      id?: number,
       name?: string,
       manager?: string,
       code?: string,
@@ -18,13 +17,9 @@ export const useGroups = () => (
       offset?: number
     }) {
       try {
-        loadingGroup.value = true;
         const { data, error } = await useFetch<{ total: number, rows: Group[] }>('/groups',
           {
             params: {
-              ...(name != '' && !name && id && {
-                id
-              }),
               ...(name != '' && name && {
                 name
               }),
@@ -47,17 +42,13 @@ export const useGroups = () => (
           }
         );
         if (error.value) {
-          ElNotification({
-            message: 'Error al obtener las marcas intente de nuevo mas tarde'
-          })
+          throw new Error(error.value.data.message);
         }
-    
-        loadingGroup.value = false;
         return data.value
       } catch (error) {
-        loadingGroup.value = false;
         ElNotification({
-          message: 'Error al obtener las marcas intente de nuevo mas tarde'
+          title: 'Error al obtener las marcas intente de nuevo mas tarde',
+          message: error.message
         })
       }
     }

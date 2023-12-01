@@ -31,16 +31,19 @@ declare global {
     total?: string,
     invoiceDate?: string,
   }
-  interface User extends Base {
+  interface Profile extends Base {
+    lastName: string,
+    cardId?: string
+    phone?: string,
+  }
+  interface User extends Omit<Base, 'name'> {
     username: string,
     email: string,
     role: string,
-    isActive?: boolean,
+    isActive: boolean,
     password: string,
-    lastName: string,
-    phone?: string,
-    cardId?: string
-    group?: Group
+    group?: Group,
+    profile: Profile
   }
   interface Category extends Base {
     brands: Brand[],

@@ -52,7 +52,7 @@
               </template>
             </el-table-column>
           </el-table>
-          <Pagination :offset="filters.offset" :limit="filters.limit" :total="response.total" />
+          <Pagination v-model:offset="filters.offset" v-model:limit="filters.limit" :total="response.total" />
         </el-col>
       </el-col>
       <el-container>

@@ -4,3 +4,5 @@
 html {
   font-family: 'Roboto';
 }
+
+@media (max-width: 768px) { .el-dialog { width: 100% !important; } }
