@@ -1,7 +1,6 @@
 export const useGroups = () => (
   class GroupsService {
     async getGroups({
-      id,
       name,
       manager,
       code,

@@ -90,12 +90,13 @@ class LocationsService {
         }
       );
       if (error.value) {
-        throw new Error('Error al cargar los agencias')
+        throw new Error(error.value.data.message)
       }
       return { data, error }
     } catch (error) {
       ElNotification({
-        message: 'Error al obtener las agencia intente de nuevo mas tarde'
+        title:'Error al obtener las agencia intente de nuevo mas tarde',
+        message: error.message,
       })
     }
   }
