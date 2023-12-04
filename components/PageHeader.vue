@@ -18,9 +18,13 @@ const onBack = () => {
         <template #content>
           <div class="flex items-center">
             <span class="text-sm mr-2" style="color: var(--el-text-color-regular)">
+              <slot name="title"/>
               {{ props.name }}
             </span>
           </div>
+        </template>
+        <template #extra>
+          <slot name="buttons" />
         </template>
       </el-page-header>
     </el-row>

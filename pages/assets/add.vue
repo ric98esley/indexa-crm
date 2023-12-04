@@ -6,7 +6,7 @@
     <el-col :sm="24" :md="12" :lg="8">
       <el-card>
         <el-form label-position="top" label-width="auto" autocomplete="off" ref="ruleFormRef" :model="asset"
-          :rules="rules" warehouses-icon>
+          :rules="rules" warehouses-icon @submit.prevent="addAssets()">
           <el-form-item label="Serial">
             <el-input placeholder="Serial" v-model="asset.serial" clearable>
               <template #append>
@@ -57,10 +57,10 @@
           <el-row justify="space-between" align="middle">
             <el-form-item>
               <el-button type="primary" :disabled="!asset.serial || !asset.modelId || !asset.locationId"
-                @click="addAsset()">Agregar</el-button>
+              native-type="submit">Agregar</el-button>
             </el-form-item>
             <el-form-item>
-              <el-button @click="addAssets()" type="warning" :disabled="toAdd.assets.length < 1">Guardar</el-button>
+              <el-button @click="" type="warning" :disabled="toAdd.assets.length < 1">Guardar</el-button>
             </el-form-item>
           </el-row>
         </el-form>

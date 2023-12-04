@@ -99,7 +99,7 @@ declare global {
     zone?: Zone;
     typeId?: number;
     managerId?: number;
-    manager?: User;
+    manager?: Profile;
     phone: string;
     rif: string
     address: string

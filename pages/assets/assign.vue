@@ -224,7 +224,7 @@ const handleSelectAsset = (row: Asset) => {
 const getAssets = async (query: string, cb: (arg: any) => void) => {
   try {
     loadingAssets.value = true;
-    const { data, error } = await assetService.getAssets({ serial: query, status: 'desplegable' })
+    const { data } = await assetService.getAssets({ serial: query, status: 'desplegable' })
     const rows = data.value?.rows || [];
     loadingAssets.value = false;
 
@@ -306,17 +306,3 @@ onUnmounted(() => {
   window.removeEventListener("resize", resize);
 })
 </script>
-
-<style>
-.el-table .warning-row {
-  --el-table-tr-bg-color: var(--el-color-warning-light-5);
-}
-
-.el-table .success-row {
-  --el-table-tr-bg-color: var(--el-color-success-light-5);
-}
-
-.el-table .danger-row {
-  --el-table-tr-bg-color: var(--el-color-danger-light-5);
-}
-</style>
