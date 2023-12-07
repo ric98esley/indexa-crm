@@ -106,25 +106,24 @@ declare global {
   }
 
   interface Assignments extends Omit<Base, 'name'> {
-    assignmentType: string;
-    isCurrent: boolean;
-    checkingAt: string;
-    checkoutAt: string;
-    target: Asset;
-    user?: User;
-    location?: Place;
-    asset?: Asset,
+    type: string;
+    current: boolean;
+    createdAt: string;
+    asset: Asset;
+    order?: Order;
+    from: Location;
+    to: Location;
   }
 
   interface Order extends Omit<Base, 'name'> {
     type: string;
-    assignmentType: string;
+    description: string;
+    content?: string;
+    count: number;
     delivered: boolean;
     closed: boolean;
-    user?: User;
     location?: Place;
-    asset?: Asset,
-    assignments: Assignments[]
+  
   }
 
   interface Zone extends Base { }
@@ -161,4 +160,26 @@ declare global {
     groupCode?: string,
     count?: number
   }
+
+  export interface LocalVideoModel {
+    id:          number;
+    orderId:     number;
+    serial:      string;
+    model:       string;
+    category:    string;
+    brand:       string;
+    fromId:      number;
+    fromCode:    string;
+    fromName:    string;
+    toId:        number;
+    toCode:      string;
+    toName:      string;
+    toGroupCode: string;
+    toGroupName: string;
+    type:        string;
+    description: string;
+    current:     boolean;
+    createdBy: string;
+    createdAt:   Date;
+}
 }

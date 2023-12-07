@@ -327,7 +327,7 @@ const createPlace = async () => {
   try {
     loadingPlace.value = true;
 
-    const { data, error } = locationsServices.createLocation(place);
+    const { data } = locationsServices.createLocation(place);
     loadingPlace.value = false;
 
     await setPlaces()
