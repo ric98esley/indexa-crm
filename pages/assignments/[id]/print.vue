@@ -32,35 +32,25 @@
             Fecha de impresión: {{ new Date().toLocaleString() }} <br />
             Creado el: {{ new Date(order.createdAt || '').toLocaleString() }} <br />
             Realizado por:
-            <b> {{ order.createdBy?.name }} {{ order.createdBy?.lastName }} </b>
+            <b> {{ order.createdBy?.username }} </b>
           </el-col>
-          <template v-if="order.assignmentType == 'user'">
-            <el-col :span="16">
-              <strong>Datos de {{ order.user?.username }}</strong> <br />
-              {{ order.user?.name }} {{ order.user?.lastName }} <br />
-              <b>Teléfono:</b> {{ order.user?.phone }} <br />
-              <b>Email:</b> {{ order.user?.email }} <br />
-              <b>Cédula:</b> {{ order.user?.cardId }}
-            </el-col>
-          </template>
-          <template v-if="order.assignmentType == 'location'">
-            <el-col :span="10">
-              <strong>Datos de la {{ order.location?.type?.name }}</strong> <br />
-              {{ order.location?.code }} - {{ order.location?.name }} | Grupo:
-              {{ order.location?.group?.code }} - {{ order.location?.group?.name }}
-              <br />
-              Dirección: <b> {{ order.location?.address }} </b><br />
-              Numero de la {{ order.location?.type?.name }}:
-              <b> {{ order.location?.phone }}</b>
-            </el-col>
-            <el-col :span="6">
-              <strong>
-                Datos del responsable de la
-                {{ order.location?.type?.name || '' }}: </strong><br />
-              Nombre: <b> {{ order.location?.manager?.name || '' }}</b> <br />
-              Teléfono: <b>{{ order.location?.manager?.phone || '' }}</b> <br />
-            </el-col>
-          </template>
+
+          <el-col :span="10" v-if="order.type == 'checkout'">
+            <strong>Datos de la {{ order.location?.type?.name }}</strong> <br />
+            {{ order.location?.code }} - {{ order.location?.name }} | Grupo:
+            {{ order.location?.group?.code }} - {{ order.location?.group?.name }}
+            <br />
+            Dirección: <b> {{ order.location?.address }} </b><br />
+            Numero de la {{ order.location?.type?.name }}:
+            <b> {{ order.location?.phone }}</b>
+          </el-col>
+          <el-col :span="6" v-if="order.type == 'checkout'">
+            <strong>
+              Datos del responsable de la
+              {{ order.location?.type?.name || '' }}: </strong><br />
+            Nombre: <b> {{ order.location?.manager?.name || '' }}</b> <br />
+            Teléfono: <b>{{ order.location?.manager?.phone || '' }}</b> <br />
+          </el-col>
         </el-row>
         <br /><br />
         <table class="w-full table-print">
@@ -73,40 +63,28 @@
               <th>Lugar</th>
             </template>
           </tr>
-          <tr v-for="(assignment, index) in order.assignments" v-bind:key="index">
+          <tr v-for="(assignment, index) in assignments" v-bind:key="index">
             <td>{{ index + 1 }}</td>
-            <td>{{ new Date(assignment.checkoutAt).toLocaleString() }}</td>
-            <td>{{ assignment.target?.serial }}</td>
+            <td>{{ new Date(assignment.createdAt).toLocaleString() }}</td>
+            <td>{{ assignment.asset?.serial }}</td>
             <td>
-              {{ assignment.target.model?.category.name || '' }} -
-              {{ assignment.target.model?.brand.name || '' }} -
-              {{ assignment.target.model?.name || '' }}
+              {{ assignment.asset.model?.category.name || '' }} -
+              {{ assignment.asset.model?.brand.name || '' }} -
+              {{ assignment.asset.model?.name || '' }}
             </td>
             <td v-if="order.type == 'checking'">
-              <template v-if="assignment.user">
+              <template v-if="assignment.to">
                 <b>
-                  {{ assignment.user?.username }}
+                  {{ assignment.to?.code }}
                 </b> -
-                {{ assignment.user?.name }} {{ assignment.user?.lastName }}
-              </template>
-              <template v-if="assignment.location">
-                <b>
-                  {{ assignment.location?.code }}
-                </b> -
-                {{ assignment.location?.name }}
-              </template>
-              <template v-if="assignment.asset">
-                <b>
-                  Serial:
-                </b>
-                {{ assignment.asset?.serial }}
+                {{ assignment.to?.name }}
               </template>
             </td>
           </tr>
           <tr>
             <th colspan="4">
               <b>
-                Cantidad de activos asignados: {{ order.assignments.length }}
+                Cantidad de activos asignados: {{ assignments.length }}
               </b>
             </th>
           </tr>
@@ -133,7 +111,12 @@
 
 <script setup lang="ts">
 
-const route = useRoute()
+const route = useRoute();
+
+const MovementsService = useMovements();
+const OrderService = useOrders();
+const orderService = new OrderService();
+const movementService = new MovementsService();
 
 definePageMeta({
   layout: 'print',
@@ -143,38 +126,56 @@ definePageMeta({
   roles: ['superuser', 'admin', 'auditor', 'receptor'],
 })
 
+const assignments = ref<Assignments[]>([])
+
 
 const order = reactive<Order>({
   type: '',
-  assignmentType: '',
+  description: '',
+  content: '',
+  count: 0,
   delivered: false,
   closed: false,
-  user: undefined,
   location: undefined,
-  asset: undefined,
-  assignments: []
+  createdAt: '',
 });
 
 const getOrder = async () => {
   try {
-    const { data, pending, error } = await useFetch<Order>(`/orders/${route.params.id}`)
-    order.type = data.value?.type || '';
-    order.assignmentType = data.value?.assignmentType || '';
-    order.delivered = data.value?.delivered || false;
-    order.user = data.value?.user;
-    order.location = data.value?.location;
-    order.asset = data.value?.asset;
-    order.assignments = data.value?.assignments || [];
+    const data = await orderService.getOrder({ id: route.params.id });
+    order.type = data?.value?.type || '';
+    order.description = data?.value?.description || '';
+    order.content = data?.value?.content;
+    order.count = data?.value?.count || 0;
+    order.delivered = data?.value?.delivered || false;
+    order.closed = data?.value?.closed || false;
+    order.location = data?.value?.location;
+    order.createdAt = data?.value?.createdAt;
+    order.createdBy = data?.value?.createdBy;
   } catch (error) {
 
   }
 }
 
+const getMovements = async () => {
+  try {
+    const data = await orderService.getOrderMovements({ id: route.params.id, limit: order.count })
+
+    assignments.value = data?.value?.rows || [];
+
+  } catch (error) {
+
+  }
+}
+
+
 onMounted(async () => {
-  await getOrder().then(() => {
+  await getOrder().then(async () => {
+    await getMovements()
+  }).then(() => {
     window.print();
     setTimeout(window.close, 500);
-  });
+  }).catch(() => { setTimeout(window.close, 500) });
 })
 
 

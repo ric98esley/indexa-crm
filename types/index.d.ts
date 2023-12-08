@@ -111,8 +111,8 @@ declare global {
     createdAt: string;
     asset: Asset;
     order?: Order;
-    from: Location;
-    to: Location;
+    from: Place;
+    to: Place;
   }
 
   interface Order extends Omit<Base, 'name'> {

@@ -130,17 +130,17 @@
                 </el-select>
               </el-form-item>
               <el-form-item label="Agencia" v-if="assignments.groupId">
-                <el-select class="w-full" v-model="assignments.place" filterable remote effect="dark"
-                  placeholder="Elige una agencia" :loading="loadingPlace" :remote-method="setPlaces">
-                  <el-option v-for="item in places.rows" :key="item.id"
-                    :label="`${item.code} - ${item.name} -  ${item.group?.code}`" :value="item">
+                <el-autocomplete v-model="assignments.location" value-key="name" :fetch-suggestions="setPlaces"
+                  @select="handleSelectPlace" class="w-full">
+                  <template #default="{ item }">
                     <span style="float: left">{{ item.code }} {{ item.name }}</span>
                     <span style="
                       float: right;
                       color: var(--el-text-color-secondary);
                       font-size: 13px;
-                  ">{{ item.group?.code }}</span> </el-option>
-                </el-select>
+                  ">{{ item.group?.code }}</span>
+                  </template>
+                </el-autocomplete>
               </el-form-item>
             </el-form>
           </template>
@@ -160,8 +160,10 @@ definePageMeta({
 
 const AssetsServices = useAssets();
 const GroupsServices = useGroups();
+const OrdersServices = useOrders();
 const assetService = new AssetsServices();
 const groupService = new GroupsServices();
+const orderService = new OrdersServices();
 
 const loadingAssets = ref(true)
 const loadingPlace = ref(false);
@@ -171,14 +173,6 @@ const width = ref<number>(window.screen.width);
 
 const LocationsServices = useLocation();
 const locationsServices = new LocationsServices();
-
-const places = reactive<{
-  rows: Place[],
-  total: number
-}>({
-  rows: [],
-  total: 0
-});
 
 const groups = reactive<{
   rows: Group[],
@@ -191,12 +185,12 @@ const groups = reactive<{
 const assignments = reactive<{
   assets: Asset[],
   place?: Place,
-  locationId?: number,
+  location?: string,
   groupId?: number
 }>({
   assets: [],
   place: undefined,
-  locationId: undefined
+  location: undefined
 })
 
 const modals = reactive({
@@ -273,29 +267,42 @@ const setGroup = async (query?: string) => {
   }
 }
 
-const setPlaces = async (search: string) => {
+const setPlaces = async (search: string, cb: (arg: any) => void) => {
   try {
     const query = {
       search,
       groupId: assignments.groupId
     }
     loadingPlace.value = true;
-    const { data, error } = await locationsServices.getLocations({
+    const { data } = await locationsServices.getLocations({
       ...query,
       status: ['asignado']
     })
 
-    places.rows = data?.value.rows || []
-    places.total = data?.value.total || 0
-
-    loadingPlace.value = false;
+    cb(data.value.rows);
   } catch (error) {
-    loadingPlace.value = false;
   }
 }
 
 const resize = (e: any) => {
   width.value = window.screen.width;
+}
+
+const handleSelectPlace = (row: Place) => {
+  assignments.location = `${row.name} - ${row.code}`;
+  assignments.place = row;
+}
+
+const checkout = async () => {
+  await orderService.checkout({
+    targets: targets.value,
+    placeId: assignments.place?.id,
+  })
+
+  assignments.assets = [];
+  assignments.groupId = undefined;
+  assignments.location = undefined;
+  assignments.place = undefined
 }
 
 onMounted(() => {

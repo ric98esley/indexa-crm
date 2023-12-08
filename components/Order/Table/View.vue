@@ -130,7 +130,7 @@ watch(() => props.id , async () => {
     <template #header>
       <el-row justify="space-between">
         {{ order.data.type == 'checking'? 'Entrada': 'Salida' }} Orden {{ order.data?.id }} tipo: {{ enumOrderDescription[order.data.description] ?? ''}}
-        <el-button @click="print(order.total, props.id, 'order')" type="primary">Imprimir</el-button>
+        <el-button class="mx-4" @click="print(order.total, props.id, 'order')" type="primary">Imprimir</el-button>
       </el-row>
     </template>
     <el-table :data="order.assignments" v-loading="loadingAssignments">

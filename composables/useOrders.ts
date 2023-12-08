@@ -1,7 +1,7 @@
 export const useOrders = () => {
   return class OrderService {
 
-    async  getOrder ({ id }: { id: number }) {
+    async  getOrder ({ id }: { id?: number }) {
       try {
         if (!id) {
           throw new Error('Debes cargar un id')
@@ -20,12 +20,18 @@ export const useOrders = () => {
         })
       }
     }
-    async  getOrderMovements ({ id }: { id: number }) {
+    async  getOrderMovements ({ id , limit}: { id?: number, limit: number }) {
       try {
         if (!id) {
           throw new Error('Debes cargar un id')
         }
-        const { data, error } = await useFetch<{total: number, rows: Assignments[]}>(`/orders/${id}/movements`);
+        const { data, error } = await useFetch<{total: number, rows: Assignments[]}>(`/orders/${id}/movements`,
+        {
+          params: {
+            limit
+          }
+        }
+        );
         if (error.value) {
           throw new Error(error.value.data.message);
         }
@@ -38,22 +44,30 @@ export const useOrders = () => {
         })
       }
     }
-    async checkout () {
+    async checkout ({ targets, placeId, description = 'borrowing' } : {
+      targets: {
+        assetId?: number;
+        locationId?: number;
+      }[];
+      placeId?: number;
+      description?: string;
+    }) {
       try {
+        if(!placeId) throw new Error('Selecciona un lugar para asignar');
         const { data, error } = await useFetch<Order>(
           '/orders/checkout',
           {
             method: 'post',
             body: {
-              targets: targets.value,
-              locationId: assignments.place!.id,
-              description: 'borrowing'
+              targets: targets,
+              locationId: placeId,
+              description: description
             }
           }
         );
-    
+
         if (error.value) {
-          throw new Error()
+          throw new Error(error.value.data.message)
         }
         ElNotification({
           message: "Activos asignado correctamente",
@@ -76,7 +90,8 @@ export const useOrders = () => {
     
       } catch (error) {
         ElNotification({
-          message: "Vuelve a intentarlo mas tarde",
+          title:"Vuelve a intentarlo mas tarde",
+          message: error.message ,
         });
         console.log(error);
       }
