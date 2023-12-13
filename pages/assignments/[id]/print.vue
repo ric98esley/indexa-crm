@@ -116,7 +116,6 @@ const route = useRoute();
 const MovementsService = useMovements();
 const OrderService = useOrders();
 const orderService = new OrderService();
-const movementService = new MovementsService();
 
 definePageMeta({
   layout: 'print',
@@ -159,7 +158,7 @@ const getOrder = async () => {
 
 const getMovements = async () => {
   try {
-    const data = await orderService.getOrderMovements({ id: route.params.id, limit: order.count })
+    const data = await orderService.getOrderMovements({ id: Number(route.params.id), limit: order.count })
 
     assignments.value = data?.value?.rows || [];
 

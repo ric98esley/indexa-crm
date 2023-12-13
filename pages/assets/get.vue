@@ -23,7 +23,7 @@
               </el-autocomplete>
             </el-form-item>
             <el-form-item label="Deposito (Por defecto)">
-              <el-select class="w-full" v-model="assignments.place" filterable remote effect="dark"
+              <el-select class="w-full" v-model="assignments.place" filterable remote
                 placeholder="Elige un deposito" :loading="loadingPlace" :remote-method="setPlaces">
                 <el-option v-for="item in places.rows" :key="item.id" :label="`${item.id} - ${item.name}`"
                   :value="item.id!">
@@ -70,9 +70,6 @@
 </template>
 
 <script lang="ts" setup>
-import { count } from 'console';
-
-
 definePageMeta({
   middleware: [
     'nuxt-permissions'
@@ -117,10 +114,6 @@ const filters = reactive({
   limit: 2,
   offset: 0,
   serial: '',
-  category: '',
-  brand: '',
-  model: '',
-  location: ''
 })
 
 const getAssets = async (query: string, cb: (arg: any) => void) => {

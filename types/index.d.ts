@@ -73,8 +73,8 @@ declare global {
     invoiceId?: number,
     location?: Place,
     model?: Model,
-    assignment?: Assignments
-    enabled: boolean
+    location: Place,
+    enabled: boolean,
     specifications?: Specification[]
   }
 

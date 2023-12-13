@@ -1,5 +1,3 @@
-import { title } from "process";
-
 export const useAssets = () => {
   return class AssetsServices {
     async getAssets({
@@ -84,13 +82,94 @@ export const useAssets = () => {
         const { data, error } = await useFetch<Asset>(`/assets/${id}`,
         );
 
-        if(error.value) {
+        if (error.value) {
           throw new Error(error.value.data.message)
         }
         return data
       } catch (error) {
         ElNotification({
           title: 'Error al obtener el activo',
+          message: error.message,
+          type: 'error'
+        }
+        )
+      }
+    }
+    async getAssetMovements({
+      id,
+      paranoid,
+      current,
+      all,
+      orderType,
+      movementType,
+      location,
+      group,
+      serial,
+      category,
+      model,
+      brand,
+      limit,
+      offset,
+      sort,
+      order,
+      startDate,
+      endDate,
+    }: {
+      id: number
+      paranoid?: boolean,
+      current?: boolean,
+      all?: boolean,
+      orderType?: string,
+      movementType?: string,
+      location?: string,
+      group?: string,
+      serial?: string,
+      category?: string,
+      model?: string,
+      brand?: string,
+      limit?: number,
+      offset?: number,
+      sort?: string,
+      order?: string,
+      startDate?: string,
+      endDate?: string,
+    }) {
+      try {
+        const params = useFilterObject({
+          paranoid,
+          current,
+          all,
+          orderType,
+          movementType,
+          location,
+          group,
+          serial,
+          category,
+          model,
+          brand,
+          limit,
+          offset,
+          sort,
+          order,
+          startDate,
+          endDate,
+        })
+        const { data, error } = await useFetch<{
+          rows: Assignments[],
+          total: number
+        }>(`/assets/${id}/movements`,
+          {
+            params
+          }
+        );
+
+        if (error.value) {
+          throw new Error(error.value.data.message)
+        }
+        return data
+      } catch (error) {
+        ElNotification({
+          title: 'Error al obtener los movimientos del activo',
           message: error.message,
           type: 'error'
         }
