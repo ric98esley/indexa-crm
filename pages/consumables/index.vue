@@ -203,7 +203,7 @@ const filters = reactive({
 const response = reactive<{
   rows: Consumable[],
   categories: Category[],
-  deposits: Deposit[],
+  deposits: Warehouse[],
   total: number
 }>({
   rows: [],
@@ -278,7 +278,7 @@ const rules = reactive<FormRules<{
 
 const getDeposit = async ({ name }: { name?: string }) => {
   try {
-    const { data } = await useFetch<{ total: number, rows: Deposit[] }>('/assets/deposits', {
+    const { data } = await useFetch<{ total: number, rows: Warehouse[] }>('/assets/deposits', {
       params: {
         ...(name != '' && name && {
           name

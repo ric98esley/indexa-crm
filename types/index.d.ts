@@ -1,4 +1,4 @@
-export { NewAsset, Invoice, User, Category, Brand, Model, Deposit }
+export { NewAsset, Invoice, User, Category, Brand, Model, Warehouse }
 
 declare global {
 
@@ -62,7 +62,7 @@ declare global {
     brand: Brand
   }
 
-  interface Deposit extends Base {
+  interface Warehouse extends Base {
     state: string,
     group?: Group
   }

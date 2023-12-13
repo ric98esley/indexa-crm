@@ -218,8 +218,8 @@ const handleSelectAsset = (row: Asset) => {
 const getAssets = async (query: string, cb: (arg: any) => void) => {
   try {
     loadingAssets.value = true;
-    const { data } = await assetService.getAssets({ serial: query, status: 'desplegable' })
-    const rows = data.value?.rows || [];
+    const data = await assetService.getAssets({ serial: query, status: 'desplegable' })
+    const rows = data?.value?.rows || [];
     loadingAssets.value = false;
 
     cb(rows)

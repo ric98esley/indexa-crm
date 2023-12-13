@@ -206,7 +206,7 @@ const filters = reactive({
 });
 
 const warehouse = reactive<{
-  rows: Deposit[],
+  rows: Warehouse[],
   total: number
 }>({
   rows: [],
@@ -305,7 +305,7 @@ const getUser = async ({
 }) => {
   try {
     loadingWarehouse.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Deposit[] }>('/warehouse',
+    const { data, error } = await useFetch<{ total: number, rows: Warehouse[] }>('/warehouse',
       {
         params: {
           ...(name != '' && !name && id && {
@@ -377,7 +377,7 @@ const patchDeposit = async () => {
       groupId: deposit.groupId
     }
 
-    const { data, error } = await useFetch<Deposit>(`/assets/warehouse/${deposit.id}`,
+    const { data, error } = await useFetch<Warehouse>(`/assets/warehouse/${deposit.id}`,
       {
         method: 'PATCH',
         body
@@ -409,7 +409,7 @@ const patchDeposit = async () => {
   }
 }
 
-const editDeposit = (row: Deposit) => {
+const editDeposit = (row: Warehouse) => {
   modals.edit = true;
   deposit.id = row.id;
   deposit.name = row.name || '';
@@ -419,7 +419,7 @@ const editDeposit = (row: Deposit) => {
 
 const removeDeposit = async (id: number) => {
   try {
-    const { data, error } = await useFetch<Deposit>(`/assets/warehouse/${id}`, {
+    const { data, error } = await useFetch<Warehouse>(`/assets/warehouse/${id}`, {
       method: 'delete'
     })
 

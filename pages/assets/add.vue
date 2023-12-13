@@ -6,7 +6,7 @@
     <el-col :sm="24" :md="12" :lg="8">
       <el-card>
         <el-form label-position="top" label-width="auto" autocomplete="off" ref="ruleFormRef" :model="asset"
-          :rules="rules" warehouses-icon @submit.prevent="addAssets()">
+          :rules="rules" warehouses-icon @submit.prevent="addAsset()">
           <el-form-item label="Serial">
             <el-input placeholder="Serial" v-model="asset.serial" clearable>
               <template #append>
@@ -60,7 +60,7 @@
               native-type="submit">Agregar</el-button>
             </el-form-item>
             <el-form-item>
-              <el-button @click="" type="warning" :disabled="toAdd.assets.length < 1">Guardar</el-button>
+              <el-button @click="addAssets()" type="warning" :disabled="toAdd.assets.length < 1">Guardar</el-button>
             </el-form-item>
           </el-row>
         </el-form>
@@ -136,7 +136,7 @@
 </template>
 
 <script setup lang="ts">
-import type { FormInstance, FormRules, TabsPaneContext } from 'element-plus';
+import type { FormInstance, FormRules } from 'element-plus';
 
 definePageMeta({
   middleware: [
@@ -180,7 +180,7 @@ const modals = reactive({
 
 const response = reactive<{
   brands: Brand[]
-  warehouses: Deposit[]
+  warehouses: Warehouse[]
   categories: any[]
   models: Model[]
 }>({
@@ -189,7 +189,6 @@ const response = reactive<{
   models: [],
   brands: []
 })
-const warehouses = reactive<Deposit[]>([]);
 
 const toAdd = reactive<{
   assets: NewAsset[],
@@ -213,11 +212,6 @@ const rules = reactive<FormRules<NewAsset>>({
   ]
 
 });
-
-
-const handleClick = (tab: TabsPaneContext, event: Event) => {
-  console.log(tab, event)
-}
 
 
 const getTag = async (business: string) => {
@@ -290,6 +284,7 @@ const addAsset = () => {
   asset.serial = '';
   toAdd.assets.push(newAsset);
 }
+
 const removeAsset = (row: NewAsset) => {
   const index = toAdd.assets.indexOf(row);
   if (index !== -1) {
