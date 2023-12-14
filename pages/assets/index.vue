@@ -64,7 +64,7 @@
           <el-table-column v-role:not="'receptor'" :min-width="144">
             <template #default="{ row }">
               <el-row>
-                <el-button type="info" circle @click="editAsset(row)">
+                <el-button type="info" circle @click="getAsset(row)">
                   <Icon name="ep:edit" />
                 </el-button>
                 <el-button type="primary" circle @click="viewDetails(row.id)">
@@ -81,7 +81,7 @@
       </el-col>
       <!-- editar activo -->
       <el-container>
-        <AssetsFormSave :id="toEdit" v-model:open="editModal" />
+        <AssetsFormGet :id="toEdit" v-model:open="editModal"></AssetsFormGet>
       </el-container>
     </el-row>
   </el-container>
@@ -96,7 +96,6 @@ definePageMeta({
 })
 
 const AssetServices = useAssets();
-const LocationsServices = useLocation();
 const assetServices = new AssetServices();
 
 const minWidth = 120;
@@ -114,22 +113,6 @@ const response = reactive<{
   locations: [],
   assets: [],
   total: 0
-});
-
-const modals = reactive({
-  edit: false
-})
-
-const request = reactive<{
-  asset?: Asset;
-  toEdit: NewAsset
-}>({
-  asset: undefined,
-  toEdit: {
-    modelId: undefined,
-    locationId: undefined,
-    customFields: []
-  }
 });
 
 const viewDetails = async (id: number) => {
@@ -177,46 +160,6 @@ const getAssets = async () => {
   }
 }
 
-const patchAsset = async () => {
-  try {
-    loading.value = true;
-
-    const body = {
-      locationId: request.toEdit?.locationId,
-      modelId: request.toEdit?.modelId![2],
-    }
-
-    const { data, error } = await useFetch<Zone>(`/assets/${request.asset!.id}`,
-      {
-        method: 'PATCH',
-        body
-      }
-    );
-    loading.value = false;
-
-
-    if (error.value) {
-      throw new Error()
-    }
-    await getAssets()
-    ElNotification({
-      title: 'Activo modificado correctamente',
-      message: `${data.value?.name}`
-    })
-
-    request.toEdit.locationId = undefined;
-    request.toEdit.modelId = undefined;
-    request.toEdit.customFields = [];
-    return data.value
-  } catch (error) {
-    loading.value = false;
-    ElNotification({
-      title: 'Error al modificar la zona intente de nuevo mas tarde',
-    })
-    console.log(error)
-  }
-}
-
 const removeAsset = async (id: number) => {
   try {
     loading.value = true;
@@ -253,7 +196,7 @@ const printDiv = async (nombreDiv: string) => {
   document.body.innerHTML = contenidoOriginal;
 }
 
-const editAsset = (row: Asset) => {
+const getAsset = (row: Asset) => {
   toEdit.value = row.id || 0;
   editModal.value = true;
 }
@@ -262,6 +205,10 @@ const editAsset = (row: Asset) => {
 const getExcel = async () => {
   await assetServices.getExcel({ ...filters, limit: response.total })
 }
+
+watch(editModal, () => {
+  if(!editModal.value) getAssets();
+})
 
 watch(filters, useDebounce(async () => {
   await getAssets()
