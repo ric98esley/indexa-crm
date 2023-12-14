@@ -38,18 +38,6 @@
                 {{ row.createdBy.username }}
               </template>
             </el-table-column>
-            <!-- <el-table-column label="Acciones" width="120">
-              <template #default="{ row }">
-                <el-row>
-                  <el-button type="primary" circle>
-                    <Icon name="ep:view" />
-                  </el-button>
-                  <el-button type="danger" circle @click="" v-role="['auditor', 'superuser']">
-                    <Icon name="ep:delete" />
-                  </el-button>
-                </el-row>
-              </template>
-            </el-table-column> -->
           </el-table>
           <Pagination v-model:offset="filters.offset" v-model:limit="filters.limit" :total="movements.total" />
         </el-row>
@@ -66,13 +54,13 @@ definePageMeta({
   roles: ['superuser', 'admin', 'auditor', 'receptor'],
 });
 
+
 const AssetServices = useAssets();
 const assetServices = new AssetServices();
 
 const route = useRoute();
 
 const loadingAssignments = ref(false)
-const loadingAsset = ref(false)
 
 const movements = reactive<{
   rows: Assignments[],
@@ -120,27 +108,6 @@ const getAssetMovements = async (assetId?: number) => {
     loadingAssignments.value = false;
     console.log(error);
   }
-}
-
-const print = () => {
-  return navigateTo(
-    {
-      path: `/assets/${route.params.id}/print`,
-      query: {
-        total: response.assignments.total,
-        all: 'false'
-      }
-    },
-    {
-      open: {
-        target: '_blank',
-        windowFeatures: {
-          popup: true,
-          noopener: true,
-          noreferrer: true,
-        }
-      }
-    })
 }
 
 watch(filters, useDebounce(async () => {

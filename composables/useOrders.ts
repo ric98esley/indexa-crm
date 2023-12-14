@@ -1,7 +1,7 @@
 export const useOrders = () => {
   return class OrderService {
 
-    async  getOrder ({ id }: { id?: number }) {
+    async getOrder({ id }: { id?: number }) {
       try {
         if (!id) {
           throw new Error('Debes cargar un id')
@@ -20,17 +20,17 @@ export const useOrders = () => {
         })
       }
     }
-    async  getOrderMovements ({ id , limit}: { id?: number, limit: number }) {
+    async getOrderMovements({ id, limit }: { id?: number, limit: number }) {
       try {
         if (!id) {
           throw new Error('Debes cargar un id')
         }
-        const { data, error } = await useFetch<{total: number, rows: Assignments[]}>(`/orders/${id}/movements`,
-        {
-          params: {
-            limit
+        const { data, error } = await useFetch<{ total: number, rows: Assignments[] }>(`/orders/${id}/movements`,
+          {
+            params: {
+              limit
+            }
           }
-        }
         );
         if (error.value) {
           throw new Error(error.value.data.message);
@@ -44,7 +44,7 @@ export const useOrders = () => {
         })
       }
     }
-    async checkout ({ targets, placeId, description = 'borrowing' } : {
+    async checkout({ targets, placeId, description = 'borrowing' }: {
       targets: {
         assetId?: number;
         locationId?: number;
@@ -53,7 +53,7 @@ export const useOrders = () => {
       description?: string;
     }) {
       try {
-        if(!placeId) throw new Error('Selecciona un lugar para asignar');
+        if (!placeId) throw new Error('Selecciona un lugar para asignar');
         const { data, error } = await useFetch<Order>(
           '/orders/checkout',
           {
@@ -87,14 +87,64 @@ export const useOrders = () => {
               }
             }
           })
-    
+
       } catch (error) {
         ElNotification({
-          title:"Vuelve a intentarlo mas tarde",
-          message: error.message ,
+          title: "Vuelve a intentarlo mas tarde",
+          message: error.message,
         });
         console.log(error);
       }
+    }
+    async checking({ targets, description = 'checking' }: {
+      targets: {
+        assetId?: number;
+        locationId?: number;
+      }[];
+      placeId?: number;
+      description?: string;
+    }) {
+      try {
+        const { data, error } = await useFetch<Order>(
+          '/orders/checking',
+          {
+            method: 'post',
+            body: {
+              targets,
+              description
+            }
+          }
+        );
+
+        if (error.value) {
+          throw new Error(error.value.data.message)
+        }
+        ElNotification({
+          message: "Activos recibidos correctamente",
+        });
+
+        if (data.value && data.value.id) return navigateTo(
+          {
+            path: `/assignments/${data.value.id}/print`,
+          },
+          {
+            open: {
+              target: '_blank',
+              windowFeatures: {
+                popup: true,
+                noopener: true,
+                noreferrer: true,
+              }
+            }
+          })
+
+      } catch (error) {
+        ElNotification({
+          title: "Error al recibir",
+          message: error.message,
+        });
+      }
+
     }
   }
 }

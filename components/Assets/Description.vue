@@ -6,6 +6,9 @@ const props = defineProps({
   }
 })
 
+const getModal = ref(false);
+const editModal = ref(false);
+
 const width = ref<number>(window.screen.width);
 
 const AssetServices = useAssets();
@@ -32,11 +35,12 @@ const setAsset = async () => {
   }
 }
 
-
-const resize = (e: any) => {
-  console.log(e)
-  width.value = window.screen.width;
-}
+watch(getModal,() => {
+  if(getModal.value == false) setAsset();
+})
+watch(editModal,() => {
+  if(editModal.value == false) setAsset();
+})
 
 onMounted(async () => {
   await setAsset()
@@ -55,16 +59,16 @@ onMounted(async () => {
       </template>
       <template #buttons>
         <div class="sm:flex items-center hidden">
-          <el-button type="danger">Recibir</el-button>
-          <el-button type="warning" class="hidden">Editar</el-button>
+          <el-button type="danger" @click="getModal = true">Recibir</el-button>
+          <el-button type="warning" class="hidden" @click="editModal = true">Editar</el-button>
         </div>
       </template>
     </PageHeader>
     <el-row>
       <el-col :span="24">
         <div class="sm:hidden items-center justify-end flex w-full">
-          <el-button type="danger">Recibir</el-button>
-          <el-button type="warning" class="hidden">Editar</el-button>
+          <el-button type="danger" @click="getModal = true">Recibir</el-button>
+          <el-button type="warning" class="hidden" @click="editModal = true">Editar</el-button>
         </div>
         <h2> Datos del activo</h2>
         <el-descriptions :column="width > 768 ? 3 : 1" border>
@@ -138,6 +142,11 @@ onMounted(async () => {
           </el-descriptions-item>
         </el-descriptions>
       </el-col>
+      <el-container>
+        <AssetsFormGet :id="$props.id" v-model:open="getModal"></AssetsFormGet>
+        <AssetsFormSave :id="props.id" v-model:open="editModal" />
+
+      </el-container>
     </el-row>
   </el-col>
 </template>

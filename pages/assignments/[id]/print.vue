@@ -167,13 +167,14 @@ const getMovements = async () => {
   }
 }
 
-
 onMounted(async () => {
   await getOrder().then(async () => {
     await getMovements()
   }).then(() => {
-    window.print();
-    setTimeout(window.close, 500);
+    setTimeout(()=> {
+      window.print();
+      setTimeout(window.close, 500);
+    }, 1000);
   }).catch(() => { setTimeout(window.close, 500) });
 })
 
