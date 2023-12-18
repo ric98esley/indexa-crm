@@ -161,7 +161,6 @@ export const useUsers = () => {
       isActive,
       groupId,
     }: {
-      username?: string,
       email?: string,
       role?: string,
       isActive?: false,
@@ -171,7 +170,6 @@ export const useUsers = () => {
      ) {
       try {
         const body = {
-          username,
           email,
           role,
           isActive,

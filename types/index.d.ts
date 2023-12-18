@@ -32,7 +32,7 @@ declare global {
     invoiceDate?: string,
   }
   interface Profile extends Base {
-    lastName: string,
+    lastName?: string,
     cardId?: string
     phone?: string,
   }

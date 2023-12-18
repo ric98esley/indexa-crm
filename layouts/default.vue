@@ -136,9 +136,18 @@ const menusA = reactive([
             ],
             title: 'Usuarios',
             route: { path: '/users' }
+          },
+          {
+            roles: [
+              'superuser',
+              'auditor',
+              'receptor'
+            ],
+            title: 'Contactos',
+            route: { path: '/users/contacts' }
           }
         ]
-      }
+      },
     ],
   },
   {
