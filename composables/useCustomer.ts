@@ -66,13 +66,17 @@ export const useCustomer = () => {
           throw new Error(error.value.data.message);
         }
 
-        if (!data.value) throw new Error()
-
+        ElNotification({
+          title: 'Contacto creado correctamente',
+          message: data.value?.name+ ' | ' + data.value?.phone,
+          type: 'success'
+        })
         return data
       } catch (error) {
         ElNotification({
           title: 'Error al obtener los contactos intente de nuevo mas tarde',
-          message: error.message
+          message: error.message,
+          type: 'error'
         })
       }
     }
@@ -144,8 +148,6 @@ export const useCustomer = () => {
         if (error.value) {
           throw new Error(error.value.data.message);
         }
-
-        if (!data.value) throw new Error()
 
         ElNotification({
           title: 'Contacto eliminado correctamente',

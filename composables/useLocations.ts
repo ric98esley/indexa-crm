@@ -95,16 +95,49 @@ class LocationsService {
       return { data, error }
     } catch (error) {
       ElNotification({
-        title:'Error al obtener las agencia intente de nuevo mas tarde',
+        title: 'Error al obtener las agencia intente de nuevo mas tarde',
         message: error.message,
       })
     }
   }
 
-  async createLocation(place) {
+  async createLocation({
+    code,
+    isActive,
+    name,
+    zoneId,
+    phone,
+    typeId,
+    groupId,
+    managerId,
+    rif,
+    address,
+  }: {
+    code: string,
+    name: string,
+    typeId: number,
+    zoneId: number,
+    groupId: number,
+    isActive?: boolean,
+    phone?: string,
+    rif?: string,
+    address?: string,
+    managerId?: number
+  }) {
     try {
 
-      const body = useFilterObject(place);
+      const body = useFilterObject({
+        code,
+        isActive,
+        name,
+        zoneId,
+        phone,
+        typeId,
+        groupId,
+        managerId,
+        rif,
+        address,
+      });
 
       const { data, error } = await useFetch<Place>('/locations',
         {
@@ -114,11 +147,7 @@ class LocationsService {
       )
 
       if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
-        ElNotification({
-          title: 'Error al crear agencia intente de nuevo mas tarde',
-          message: error.value?.data.message,
-        })
-        return
+        throw new Error(error.value.data.message);
       }
       ElNotification({
         title: 'Agencia creada correctamente',
@@ -128,6 +157,96 @@ class LocationsService {
     } catch (error) {
       ElNotification({
         title: 'Error al crear agencia intente de nuevo mas tarde',
+        message: error.message,
+        type: 'error'
+      })
+    }
+  }
+
+  async removePlace(id: number) {
+    try {
+      const { data, error } = await useFetch<Place>(`/locations/${id}`, {
+        method: 'delete'
+      })
+
+      if (error.value) {
+        throw new Error(error.value.data.message)
+      }
+
+      ElNotification({
+        message: 'la agencia ha sido borrada.'
+      })
+
+      return data.value
+    } catch (error) {
+      ElNotification({
+        title: 'Error al borrar la agencia intente de nuevo mas tarde.',
+        message: error.me
+      })
+    }
+  }
+
+  async patchPlace({
+    id,
+    code,
+    name,
+    isActive,
+    typeId,
+    groupId,
+    phone,
+    rif,
+    managerId,
+    zoneId,
+    address,
+  }: {
+    id: number,
+    code?: string,
+    name?: string,
+    isActive?: string | number | boolean,
+    typeId?: number,
+    groupId?: number,
+    phone?: string,
+    rif?: string,
+    managerId?: number,
+    zoneId?: number,
+    address?: string,
+  }) {
+    try {
+
+      const body = useFilterObject({
+        code,
+        name,
+        isActive,
+        typeId,
+        groupId,
+        phone,
+        rif,
+        managerId,
+        zoneId,
+        address,
+      });
+
+      const { data, error } = await useFetch<Place>(`/locations/${id}`,
+        {
+          method: 'PATCH',
+          body
+        }
+      );
+
+      if (error.value) {
+        throw new Error(error.value.data.message);
+      }
+
+      ElNotification({
+        title: 'Agencia modificada correctamente',
+        message: `${data.value?.name}`
+      })
+
+      return data.value
+    } catch (error) {
+      ElNotification({
+        title: 'Error al modificar el agencia intente de nuevo mas tarde',
+        message: error.message
       })
     }
   }

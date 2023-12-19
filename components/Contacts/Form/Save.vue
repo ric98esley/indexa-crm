@@ -42,7 +42,7 @@ const rules = {
     { pattern: /^[0-9]+$/, message: 'La cédula debe ser de tipo numérico' }
   ],
   phone: [
-    { min: 3, message: 'El teléfono debe tener mas de 3 caracteres' },
+    { min: 6, message: 'El teléfono debe tener mas de 6 caracteres' },
     { pattern: /^[0-9]+$/, message: 'El teléfono debe ser de tipo numérico' },
     { required: true, message: 'El teléfono es obligatorio' }
   ],
