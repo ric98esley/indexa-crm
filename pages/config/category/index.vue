@@ -37,9 +37,10 @@
                 {{ CATEGORIES_TYPES[row.type] }}
               </template>
             </el-table-column>
+            <el-table-column label="Descripción" prop="description" min-width="120" />
             <el-table-column label="Total Activos" prop="count" min-width="120">
             </el-table-column>
-            <el-table-column label="Acciones" width="100">
+            <el-table-column label="Acciones" width="150">
               <template #default="props">
                 <el-row>
                   <el-button type="info" circle @click="editCategory(props.row)">

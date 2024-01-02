@@ -59,7 +59,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <Pagination :offset="filters.offset" :limit="filters.limit" :total="groups.total" />
+        <Pagination v-model:offset="filters.offset" v-model:limit="filters.limit" :total="groups.total" />
       </el-col>
       <el-container>
         <!-- crear grupo -->
@@ -90,7 +90,7 @@
                 <el-select class="w-full" v-model="group.managerId" filterable remote placeholder="Elige un receptor"
                   :loading="loadingUser" :remote-method="setUser">
                   <el-option v-for="item in users.rows" :key="item.id" :label="`${item.username} - ${item.profile?.name}  ${item.profile?.lastName}`" :value="item.id!">
-                    <span style="float: left">{{ item.name }} {{ item.lastName }}</span>
+                    <span style="float: left">{{ item.profile?.name }} {{ item.profile?.lastName }}</span>
                     <span style="float: right;">{{ item.username }}</span> </el-option>
                 </el-select>
               </el-form-item>
@@ -131,7 +131,7 @@
                   :loading="loadingUser" :remote-method="setUser">
                   <el-option v-for="item in users.rows" :key="item.id" :value="item.id!"
                     :label="`${item.username} - ${item.profile?.name}  ${item.profile?.lastName}`">
-                    <span style="float: left">{{ item.name }} {{ item.lastName }}</span>
+                    <span style="float: left">{{ item.profile?.name }} {{ item.profile?.lastName }}</span>
                     <span style="
                             float: right;
                             color: var(--el-text-color-secondary);

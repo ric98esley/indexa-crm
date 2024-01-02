@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import type { FormInstance } from 'element-plus'
 
 const props = defineProps({
   id: {
-    type: Number || String
+    type: Number || String || undefined
   }
 })
 
@@ -13,6 +14,7 @@ const emit = defineEmits({
 })
 
 const addContact = ref(false);
+const addZone = ref(false);
 
 const GroupService = useGroups();
 const CustomerService = useCustomer();
@@ -48,6 +50,8 @@ const place = reactive<{
   phone: '',
   address: '',
 });
+
+const savePlace = ref<FormInstance>();
 
 const loadingPlace = ref(false);
 const loadingGroup = ref(false);
@@ -92,7 +96,7 @@ const setGroup = async (query?: string) => {
 
   const rta = await groupService.getGroups(search);
   groups.rows = rta?.rows || []
-  groups
+  groups.total = rta?.total || 0
 }
 const setZone = async (query?: string) => {
   const search = {
@@ -136,12 +140,75 @@ const createPlace = async () => {
       rif: place.rif,
       phone: place.phone,
       address: place.address,
-    })
+    });
 
-    emit('submit', { id: data.value.id })
-
+    emit('submit', { id: data.value.id });
   } catch (error) {
     console.error(error)
+  }
+}
+
+const updatePlace = async () => {
+  try {
+    if (!place.zoneId || !place.typeId || !place.groupId || !props.id) return;
+
+    const data = await locationsServices.patchPlace({
+      id: props.id,
+      name: place.name,
+      isActive: place.isActive,
+      zoneId: place.zoneId,
+      typeId: place.typeId,
+      managerId: place.managerId,
+      groupId: place.groupId,
+      rif: place.rif,
+      phone: place.phone,
+      address: place.address,
+    })
+
+    emit('submit', { id: data?.id || 0 })
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+const setPlace = async () => {
+  try {
+    if (!props.id || props.id <= 0) {
+      savePlace.value?.resetFields();
+      return
+    };
+
+    loadingPlace.value = true;
+    const data = await locationsServices.getLocation({
+      id: props.id
+    })
+
+    zones.rows = [];
+    groups.rows = [];
+    types.rows = [];
+    users.rows = [];
+
+    if (data?.zone) zones.rows.push(data?.zone);
+    if (data?.group) groups.rows.push(data?.group);
+    if (data?.type) types.rows.push(data?.type || {});
+    if (data?.manager) users.rows.push(data?.manager || {});
+
+    place.code = data?.code || '';
+    place.isActive = data?.isActive;
+    place.name = data?.name || '';
+    place.zoneId = data?.zone?.id || undefined;
+    place.phone = data?.phone || '';
+    place.typeId = data?.type?.id || undefined;
+    place.groupId = data?.group?.id || undefined;
+    place.managerId = data?.manager?.id || undefined;
+    place.rif = data?.rif || '';
+    place.address = data?.address || '';
+
+    loadingPlace.value = false;
+
+  } catch (error) {
+    loadingPlace.value = false;
+    console.log(error)
   }
 }
 
@@ -167,21 +234,41 @@ const rules = {
   ]
 }
 
+const submitPlace = () => {
+  savePlace.value?.validate(async (valid) => {
+    if (!valid) return;
+    if (props.id) {
+      await updatePlace();
+    } else {
+      await createPlace();
+    }
+  })
+  savePlace.value?.resetFields();
+}
+watch(() => props.id, async () => {
+  await setPlace();
+})
+
+onMounted(async () => {
+  await setPlace();
+})
+
 
 </script>
 
 <template>
   <el-container>
-    <el-col>
+    <el-col v-loading="loadingPlace">
       <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="place" :rules="rules"
-        @submit.prevent="createPlace()" v-model="place" require-asterisk-position="right">
+        @submit.prevent="submitPlace()" v-model="place" require-asterisk-position="right" resetFields ref="savePlace">
         <el-row :gutter="20">
-          <el-col :span="18">
+          <el-col :span="18" :lg="21">
             <el-form-item label="Código" prop="code">
-              <el-input v-model="place.code" placeholder="Ingrese el código de la agencia"></el-input>
+              <el-input v-model="place.code" placeholder="Ingrese el código de la agencia"
+                :disabled="!!props.id"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="4">
+          <el-col :span="4" :lg="2">
             <el-form-item label="Activar" prop="isActive">
               <el-switch v-model="place.isActive" class="ml-2" />
             </el-form-item>
@@ -191,12 +278,25 @@ const rules = {
           <el-input v-model="place.name" placeholder="Ingrese el nombre"></el-input>
         </el-form-item>
         <el-form-item label="Zona" prop="zoneId">
-          <el-select class="w-full" v-model="place.zoneId" filterable remote placeholder="Elige una zona"
-            :loading="loadingZone" :remote-method="setZone">
-            <el-option v-for="item in zones.rows" :key="item.id" :label="item.name" :value="item.id!">
-              <span style="float: left">{{ item.name }}</span>
-            </el-option>
-          </el-select>
+          <el-row justify="space-between" class="w-full">
+            <el-col :span="20" :lg="22">
+              <el-row justify="end">
+                <el-select class="w-full" v-model="place.zoneId" filterable remote placeholder="Elige una zona"
+                  :loading="loadingZone" :remote-method="setZone">
+                  <el-option v-for="item in zones.rows" :key="item.id" :label="item.name" :value="item.id!">
+                    <span style="float: left">{{ item.name }}</span>
+                  </el-option>
+                </el-select>
+              </el-row>
+            </el-col>
+            <el-col :span="4" :lg="2">
+              <el-row justify="end">
+                <el-button type="info" @click="addZone = true">
+                  <Icon name="ep:plus" />
+                </el-button>
+              </el-row>
+            </el-col>
+          </el-row>
         </el-form-item>
         <el-form-item label="Teléfono" prop="phone">
           <el-input v-model="place.phone" placeholder="Ingrese el teléfono"></el-input>
@@ -230,8 +330,8 @@ const rules = {
                   :loading="loadingUser" :remote-method="setContact">
                   <el-option v-for="item in users.rows" :key="item.id"
                     :label="`${item.name} ${item.lastName} - ${item.cardId}`" :value="item.id!">
-                    <span style="float: left">{{ item.name }} {{ item.lastName }}</span>
-                    <span style="float: right;">{{ item.phone }}</span> </el-option>
+                    <span style="float: left">{{ item.name }} {{ item.lastName || '' }}</span>
+                    <span style="float: right;">{{ item?.phone || '' }}</span> </el-option>
                 </el-select>
               </el-row>
             </el-col>
@@ -262,6 +362,12 @@ const rules = {
         Agregar un contacto
       </template>
       <ContactsFormSave />
+    </el-dialog>
+    <el-dialog v-model:model-value="addZone">
+      <template #header>
+        Agregar una zona
+      </template>
+      <ZoneFormSave @submit="setZone" />
     </el-dialog>
   </el-container>
 </template>

@@ -44,10 +44,22 @@ const rules = {
   ]
 }
 
+const setZone = () => {
+  if (props.id == 0 || props.id == undefined) {
+    zone.id = undefined;
+    zone.name = undefined;
+
+    return
+  } else {
+    zone.id = props.id;
+    zone.name = props.name;
+  };
+}
+
 const createZone = async () => {
   try {
-    if (zoneName.value) await zoneServices.createZone({
-      name: zoneName.value
+    if (zone.name) await zoneServices.createZone({
+      name: zone.name
     })
   } catch (error) {
     console.error(error)
@@ -65,11 +77,11 @@ const editZone = async () => {
   }
 }
 
-const saveZone = () => {
-  if (!props.id) {
-    createZone();
+const saveZone = async () => {
+  if (props.id == 0 || props.id == undefined) {
+    await createZone();
   } else {
-    editZone();
+    await editZone();
   }
 
   zoneId.value = undefined;
@@ -77,6 +89,13 @@ const saveZone = () => {
 
   emit('submit')
 }
+
+watch(() => props.id, () => {
+  setZone()
+})
+onMounted(() => {
+  setZone();
+})
 </script>
 <template>
   <el-form label-position="top" label-width="auto" autocomplete="off" :rules="rules" status-icon :model="zone"

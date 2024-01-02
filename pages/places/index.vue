@@ -61,10 +61,10 @@
       <el-container>
         <el-dialog v-model="modals.create">
           <template #header>
-            <h2>Crear nuevo agencia</h2>
+            <h2>Crear o editar agencia</h2>
           </template>
           <template #default>
-            <LocationFormSave @submit="setPlaces" />
+            <LocationFormSave @submit="setPlaces" :id="placeToEdit"/>
           </template>
         </el-dialog>
       </el-container>
@@ -84,11 +84,13 @@ definePageMeta({
 const LocationsServices = useLocation();
 const locationsServices = new LocationsServices();
 
+const placeToEdit = ref<number | undefined>(undefined);
+
 const loadingPlace = ref(false);
 
 const filters = reactive({
   limit: 10,
-  offset: 0,
+  offset: 1,
   code: '',
   group: '',
   name: '',
@@ -105,7 +107,6 @@ const places = reactive<{
 });
 
 const modals = reactive({
-  details: false,
   create: false,
 });
 
@@ -118,8 +119,9 @@ const updatePlaceStatus = async ({ active, placeId }: { active: string | number 
   await setPlaces()
 }
 
-const editPlace = () => {
+const editPlace = (row: Place) => {
   modals.create = true;
+  placeToEdit.value = row.id;
 };
 
 const removePlace = async (id: number) => {
@@ -155,6 +157,12 @@ const setPlaces = async () => {
     console.error(error);
   }
 }
+
+watch(() => modals.create, (value) => {
+  if (!value) {
+    placeToEdit.value = undefined;
+  }
+})
 
 watch(filters, useDebounce(async () => {
   await setPlaces()

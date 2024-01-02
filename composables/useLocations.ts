@@ -163,6 +163,25 @@ class LocationsService {
     }
   }
 
+  async getLocation({ id }: { id: number }) {
+    try {
+      const { data, error } = await useFetch<Place>('/locations/' + id)
+
+      if (error.value) {
+        throw new Error(error.value.data.message);
+      }
+
+      return data.value
+
+    } catch (error) {
+      ElNotification({
+        title: 'Error al obtener la localización',
+        message: error.message,
+        type: 'error'
+      })
+    }
+  }
+
   async removePlace(id: number) {
     try {
       const { data, error } = await useFetch<Place>(`/locations/${id}`, {
@@ -188,7 +207,6 @@ class LocationsService {
 
   async patchPlace({
     id,
-    code,
     name,
     isActive,
     typeId,
@@ -200,7 +218,6 @@ class LocationsService {
     address,
   }: {
     id: number,
-    code?: string,
     name?: string,
     isActive?: string | number | boolean,
     typeId?: number,
@@ -212,9 +229,7 @@ class LocationsService {
     address?: string,
   }) {
     try {
-
       const body = useFilterObject({
-        code,
         name,
         isActive,
         typeId,

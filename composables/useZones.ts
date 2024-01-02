@@ -1,15 +1,15 @@
 export const useZones = () => {
   return class ZoneServices {
-    async getZones({ name, limit, offset }: {
+    async getZones({ name, limit = 50, offset }: {
       name?: string,
-      limit: number,
-      offset: number
+      limit?: number,
+      offset?: number
     }) {
       try {
         const params = useFilterObject({
           name,
           limit,
-          offset: (offset - 1) * Number(limit)
+          ...(offset && { offset: (offset - 1) * Number(limit) })
         })
         const { data, error } = await useFetch<{ total: number, rows: Zone[] }>('/locations/zones',
           {
@@ -23,7 +23,8 @@ export const useZones = () => {
       } catch (error) {
         ElNotification({
           title: 'Error al obtener las zonas intente de nuevo mas tarde',
-          message: error.message
+          message: error.message,
+          type: 'error'
         })
       }
     }

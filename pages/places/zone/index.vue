@@ -37,7 +37,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <Pagination v-model:limit="filters.limit" v-model:offset="filters.offset" :total="response.total"/>
+      <Pagination v-model:limit="filters.limit" v-model:offset="filters.offset" :total="response.total" />
     </el-row>
     <el-container>
       <el-dialog v-model="modals.create">
@@ -45,7 +45,7 @@
           <h2>Crear nueva tipo</h2>
         </template>
         <template #default>
-          <ZoneFormSave @submit="getZones" v-model:id="zone.id" v-model:name="zone.name"/>
+          <ZoneFormSave @submit="setZones" v-model:id="zone.id" v-model:name="zone.name" />
         </template>
       </el-dialog>
     </el-container>
@@ -81,7 +81,6 @@ const response = reactive<{
 })
 
 const modals = reactive({
-  edit: false,
   create: false,
 });
 
@@ -93,35 +92,27 @@ const zone = reactive<{
   name: ''
 });
 
-const getZones = async () => {
-  try {
-    loadingZone.value = true;
-    const data = await zoneServices.getZones({
-      name: filters.name,
-      offset: (filters.offset - 1) * filters.limit,
-      limit: filters.limit
-    })
-    loadingZone.value = false;
-    return data
-  } catch (error) {
-    loadingZone.value = false;
-  }
-}
-
 const editZone = (row: Zone) => {
   modals.create = true;
   zone.id = row.id;
   zone.name = row.name || '';
 }
 
-const removeZone = async (id: number) => {
-  await zoneServices.removeZone(id)
-}
-
 const setZones = async () => {
-  const rta = await getZones();
+  loadingZone.value = true;
+  const rta = await zoneServices.getZones({
+    name: filters.name,
+    offset: (filters.offset - 1) * filters.limit,
+    limit: filters.limit
+  })
+  loadingZone.value = false;
   response.rows = rta?.rows || []
   response.total = rta?.total || 0
+}
+
+const removeZone = async (id: number) => {
+  await zoneServices.removeZone(id)
+  setZones()
 }
 
 watch(filters, useDebounce(async () => {
@@ -129,8 +120,8 @@ watch(filters, useDebounce(async () => {
 }, 500)
 )
 
-watch(() => modals.edit, async () => {
-  if (modals.edit) {
+watch(() => modals.create, async () => {
+  if (modals.create) {
   } else {
     zone.id = undefined;
     zone.name = '';
