@@ -22,7 +22,7 @@ const props = defineProps({
   groups: Array
 })
 
-const emit = defineEmits(['update:loadingUser'])
+const emit = defineEmits(['update:loadingUser', 'onSubmit'])
 
 const loadingUser = computed({
   get() {
@@ -128,6 +128,7 @@ const saveUser = async () => {
   } else {
     await createUser()
   }
+  emit('onSubmit')
 }
 
 const validateUser = (props: FormItemProp, isValid: boolean, message: string) => {

@@ -43,7 +43,8 @@ declare global {
     isActive: boolean,
     password: string,
     group?: Group,
-    profile: Profile
+    profile: Profile,
+    ability: string[],
   }
   interface Category extends Base {
     brands: Brand[],
@@ -131,8 +132,8 @@ declare global {
     code: string
     parent?: Group
     manager?: User
-    parentId: number
-    managerId: number
+    parentId?: number
+    managerId?: number
   }
   interface Product extends Base {
     price: string,

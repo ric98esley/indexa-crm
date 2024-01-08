@@ -1,6 +1,7 @@
 <script setup lang="ts" >
 import { FormInstance, FormRules } from 'element-plus';
 import { useAuthStore } from '@/stores/authStore'
+import { Console } from 'console';
 const auth = useAuthStore();
 
 const formUser = ref<FormInstance>()
@@ -64,8 +65,14 @@ const login = async (formEl: FormInstance | undefined) => {
     const user = data.value?.user;
 
     const userRoles = useRoles();
+    const userPermissions = usePermissions();
+
+    console.log(user)
 
     userRoles.value = [user!.role];
+    userPermissions.value = data.value?.ability || ['user:self'];
+
+
 
     auth.setAuthState(token, user);
     loading.value = false;

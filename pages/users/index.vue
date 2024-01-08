@@ -40,22 +40,18 @@
                 <el-input v-model="filters.group" placeholder="Grupo" clearable />
               </template>
             </el-table-column>
-            <el-table-column label="Activar" :min-width="minWidth">
+            <el-table-column label="Acciones" width="140">
               <template #default="{ row }">
-                <el-switch v-model="row.isActive" class="ml-2"
-                  @change="(val) => (updateUserStatus({ active: val || false, userId: row.id }))" />
-              </template>
-            </el-table-column>
-            <el-table-column label="Acciones" width="180">
-              <template #default="{ row }">
-                <el-row>
-                  <el-button type="info" circle @click="editUser(row)">
+                <el-row justify="space-between">
+                  <el-button type="info" circle @click="editUser(row)" v-can="['users:update']">
                     <Icon name="ep:edit" />
                   </el-button>
-                  <el-button type="primary" circle @click="editUser(row)">
-                    <Icon name="ep:view" />
-                  </el-button>
-                  <el-button type="danger" circle @click="removeUser(row.id)">
+                  <NuxtLink :to="`/users/${row.id}`">
+                    <el-button type="primary" circle>
+                      <Icon name="ep:view" />
+                    </el-button>
+                  </NuxtLink>
+                  <el-button type="danger" circle @click="removeUser(row.id)" v-can="['users:delete']">
                     <Icon name="ep:delete" />
                   </el-button>
                 </el-row>
@@ -71,7 +67,7 @@
             <h2 class="text-xl">{{ edit == true ? 'Editar el usuario ' : 'Crear Usuario' }}</h2>
           </template>
           <template #default>
-            <UserFormSave v-model:loading-user="loadingUser" v-model:edit-user="edit" />
+            <UserFormSave v-model:loading-user="loadingUser" v-model:edit-user="edit" :on-submit="setUsers()" />
           </template>
         </el-dialog>
       </el-col>
@@ -98,7 +94,12 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor', 'receptor'],
+  permissions: [
+    'users:read',
+    'users:create',
+    'users:update',
+    'users:delete',
+  ]
 });
 
 const loadingUser = ref(false);
@@ -161,7 +162,9 @@ const setUsers = async () => {
       code: filters.lastName,
       limit: filters.limit,
       offset: filters.offset,
-      parent: filters.username
+      username: filters.username,
+      role: filters.role,
+      group: filters.group,
     }
 
     const rta = await userService.getUsers(query);

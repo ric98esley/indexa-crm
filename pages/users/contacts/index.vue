@@ -32,7 +32,7 @@
                 <!-- <el-button type="primary" circle @click="editUser(row)">
                   <Icon name="ep:view" />
                 </el-button> -->
-                <el-button type="danger" circle @click="removeContact(row.id)">
+                <el-button type="danger" circle @click="removeContact(row.id)" v-can="['customer:delete']">
                   <Icon name="ep:delete" />
                 </el-button>
               </el-row>
@@ -57,7 +57,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor', 'receptor'],
+  permissions: ['customers:read', 'customers:update', 'customers:delete', 'customers:create']
 });
 
 const addModal = ref(false)

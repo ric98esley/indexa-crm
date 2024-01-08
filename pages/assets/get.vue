@@ -74,7 +74,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'tecnico', 'receptor', 'auditor'],
+  permissions: ['assets:checking']
 })
 
 const loadingAssets = ref(true)

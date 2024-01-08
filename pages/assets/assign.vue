@@ -155,7 +155,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'tecnico', 'receptor', 'auditor'],
+  permissions: ['assets:checkout']
 });
 
 const AssetsServices = useAssets();

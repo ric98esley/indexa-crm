@@ -4,12 +4,12 @@
       <PageHeader name="Activos">
         <template #buttons>
           <div class="sm:flex items-center hidden">
-            <el-button type="default" class="ml-2" @click="getExcel()">Exportar a excel</el-button>
+            <el-button type="default" class="ml-2" @click="getExcel()" v-can="['assets:export']">Exportar a excel</el-button>
             <el-button type="primary" class="ml-2" @click="printDiv('area')">Imprimir</el-button>
           </div>
         </template>
       </PageHeader>
-      <el-col>
+      <el-col v-can="['assets:read']">
         <el-table :data="response.assets" v-loading="loading" :row-class-name="assetStatus" id="area">
           <el-table-column type="index" width="50" />
           <el-table-column type="expand" width="50">
@@ -61,16 +61,18 @@
               <el-input v-model="filters.model" placeholder="Modelo" clearable />
             </template>
           </el-table-column>
-          <el-table-column v-role:not="'receptor'" :min-width="144">
+          <el-table-column v-role:not="'receptor'" width="140">
             <template #default="{ row }">
-              <el-row>
-                <el-button type="info" circle @click="getAsset(row)">
+              <el-row justify="space-around">
+                <el-button type="info" circle @click="getAsset(row)" v-can="['assets:update']" >
                   <Icon name="ep:edit" />
                 </el-button>
-                <el-button type="primary" circle @click="viewDetails(row.id)">
-                  <Icon name="ep:view" />
-                </el-button>
-                <el-button type="danger" circle @click="removeAsset(row.id)" v-role="['auditor', 'superuser']">
+                <NuxtLink :to="`/assets/${row.id}`" v-can="['assets:read']">
+                  <el-button type="primary" circle>
+                    <Icon name="ep:view" />
+                  </el-button>
+                </NuxtLink>
+                <el-button type="danger" circle @click="removeAsset(row.id)" v-can="['assets:delete']">
                   <Icon name="ep:delete" />
                 </el-button>
               </el-row>
@@ -79,7 +81,6 @@
         </el-table>
         <Pagination v-model:offset="filters.offset" v-model:limit="filters.limit" :total="response.total" />
       </el-col>
-      <!-- editar activo -->
       <el-container>
         <AssetsFormGet :id="toEdit" v-model:open="editModal"></AssetsFormGet>
       </el-container>

@@ -53,22 +53,19 @@ const menusA = reactive([
   {
     title: 'Activos',
     icon: 'ep:files',
-    roles: [
-      'superuser',
-      'auditor',
-      'tecnico',
-      'receptor'
+    ability: [
+      'assets:read',
+      'assets:checkout',
+      'assets:checking',
+      'assets:create',
     ],
     groups: [
       {
         title: 'Lista de activos',
         items: [
           {
-            roles: [
-              'superuser',
-              'auditor',
-              'tecnico',
-              'receptor'
+            ability: [
+              'assets:read'
             ],
             title: 'Todos los activos',
             route: { path: '/assets' }
@@ -80,36 +77,32 @@ const menusA = reactive([
       {
         title: 'Acciones',
         icon: 'ep:element-plus',
-        roles: [
-          'superuser',
-          'auditor',
-          'receptor'
+        ability: [
+          'assets:read',
+          'assets:checkout',
+          'assets:checking',
+          'assets:create',
         ],
         items: [
           {
             title: 'Agregar',
             route: { path: '/assets/add' },
-            roles: [
-              'superuser',
-              'auditor',
+            ability: [
+              'assets:create',
             ],
           },
           {
             title: 'Asignar',
             route: { path: '/assets/assign' },
-            roles: [
-              'superuser',
-              'auditor',
-              'receptor'
+            ability: [
+              'assets:checkout',
             ],
           },
           {
             title: 'Recibir',
             route: { path: '/assets/get' },
-            roles: [
-              'superuser',
-              'auditor',
-              'receptor'
+            ability: [
+              'assets:checking',
             ],
           },
         ]
@@ -119,29 +112,26 @@ const menusA = reactive([
   {
     title: 'Usuarios',
     icon: 'ep:user',
-    roles: [
-      'superuser',
-      'auditor',
-      'receptor'
+    ability: [
+      'users:read',
+      'users:create',
     ],
     groups: [
       {
         title: 'Ver y crear usuarios',
         items: [
           {
-            roles: [
-              'superuser',
-              'auditor',
-              'receptor'
+            ability: [
+              'users:read',
+              'users:create',
             ],
             title: 'Usuarios',
             route: { path: '/users' }
           },
           {
-            roles: [
-              'superuser',
-              'auditor',
-              'receptor'
+            ability: [
+              'customers:read',
+              'customers:create',
             ],
             title: 'Contactos',
             route: { path: '/users/contacts' }
@@ -153,38 +143,34 @@ const menusA = reactive([
   {
     title: 'Consumibles',
     icon: 'ep:brush',
-    roles: [
-      'superuser',
-      'auditor',
-      'receptor'
+    ability: [
+      'consumables:read',
+      'consumables:create',
     ],
     groups: [
       {
         title: 'Ver y crear',
         items: [
           {
-            roles: [
-              'superuser',
-              'auditor',
-              'receptor'
+            ability: [
+              'consumables:read',
+              'consumables:create',
             ],
             title: 'Inventario',
             route: { path: '/consumables' }
           },
           {
-            roles: [
-              'superuser',
-              'auditor',
-              'receptor'
+            ability: [
+              'consumables:read',
+              'consumables:create',
             ],
             title: 'Productos',
             route: { path: '/consumables/products' }
           },
           {
-            roles: [
-              'superuser',
-              'auditor',
-              'receptor'
+            ability: [
+              'consumables:read',
+              'consumables:create',
             ],
             title: 'Historial',
             route: { path: '/consumables/history' }
@@ -196,36 +182,34 @@ const menusA = reactive([
   {
     title: 'Agencias',
     icon: 'ep:school',
-    roles: [
-      'superuser',
-      'auditor',
-      'receptor'
+    ability: [
+      'locations:read',
+      'locations:create',
     ],
     groups: [
       {
         title: 'Ver y crear agencias',
         items: [
           {
-            roles: [
-              'superuser',
-              'auditor',
-              'receptor'
+            ability: [
+              'locations:read',
+              'locations:create',
             ],
             title: 'Agencias',
             route: { path: '/places' }
           },
           {
-            roles: [
-              'superuser',
-              'auditor',
+            ability: [
+              'locations_types:read',
+              'locations_types:create',
             ],
             title: 'Tipos',
             route: { path: '/places/type' }
           },
           {
-            roles: [
-              'superuser',
-              'auditor',
+            ability: [
+              'zones:read',
+              'zones:create',
             ],
             title: 'Zonas',
             route: { path: '/places/zone' }
@@ -237,20 +221,18 @@ const menusA = reactive([
   {
     title: 'Reportes',
     icon: 'ep:document-copy',
-    roles: [
-      'superuser',
-      'auditor',
-      'receptor'
+    ability: [
+      'movements:read',
+      'movements:create',
     ],
     groups: [
       {
         title: 'Ver',
         items: [
           {
-            roles: [
-              'superuser',
-              'auditor',
-              'receptor'
+            ability: [
+              'movements:read',
+              'movements:create',
             ],
             title: 'Salidas',
             route: {
@@ -261,10 +243,9 @@ const menusA = reactive([
             }
           },
           {
-            roles: [
-              'superuser',
-              'auditor',
-              'receptor'
+            ability: [
+              'movements:read',
+              'movements:create',
             ],
             title: 'Entradas',
             route: {
@@ -281,18 +262,25 @@ const menusA = reactive([
   {
     title: 'Configuración',
     icon: 'ep:setting',
-    roles: [
-      'superuser',
-      'auditor',
-      'receptor'
+    ability: [
+      'categories:read',
+      'categories:create',
+      'brands:read',
+      'brands:create',
+      'models:read',
+      'models:create',
+      'warehouses:read',
+      'warehouses:create',
+      'groups:read',
+      'groups:create',
     ],
     submenus: [
       {
         title: 'Categorías',
         icon: 'ep:memo',
-        roles: [
-          'superuser',
-          'auditor'
+        ability: [
+          'categories:read',
+          'categories:create',
         ],
         items: [
           {
@@ -308,9 +296,9 @@ const menusA = reactive([
       {
         title: 'Marcas',
         icon: 'ep:collection',
-        roles: [
-          'superuser',
-          'auditor'
+        ability: [
+          'brands:read',
+          'brands:create',
         ],
         items: [
           {
@@ -322,9 +310,9 @@ const menusA = reactive([
       {
         title: 'Modelos',
         icon: 'ep:coin',
-        roles: [
-          'superuser',
-          'auditor'
+        ability: [
+          'models:read',
+          'models:create',
         ],
         items: [
           {
@@ -336,10 +324,9 @@ const menusA = reactive([
       {
         title: 'Depósitos',
         icon: 'ep:house',
-        roles: [
-          'superuser',
-          'auditor',
-          'admin'
+        ability: [
+          'warehouses:read',
+          'warehouses:create',
         ],
         items: [
           {
@@ -351,11 +338,9 @@ const menusA = reactive([
       {
         title: 'Grupos',
         icon: 'ep:connection',
-        roles: [
-          'superuser',
-          'auditor',
-          'admin',
-          'receptor'
+        ability: [
+          'groups:read',
+          'groups:create',
         ],
         items: [
           {

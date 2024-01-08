@@ -47,7 +47,7 @@ onMounted(async () => {
 })
 </script>
 <template>
-  <el-col>
+  <el-col v-can="['assets:read']">
     <PageHeader class="mb-4">
       <template #title>
         <div class="flex items-center">
@@ -59,16 +59,16 @@ onMounted(async () => {
       </template>
       <template #buttons>
         <div class="sm:flex items-center hidden">
-          <el-button type="danger" @click="getModal = true">Recibir</el-button>
-          <el-button type="warning" class="hidden" @click="editModal = true">Editar</el-button>
+          <el-button type="danger" @click="getModal = true" v-can="['assets:checking']">Recibir</el-button>
+          <el-button type="warning" class="hidden" @click="editModal = true" v-can="['assets:update']">Editar</el-button>
         </div>
       </template>
     </PageHeader>
-    <el-row>
+    <el-row >
       <el-col :span="24">
         <div class="sm:hidden items-center justify-end flex w-full">
-          <el-button type="danger" @click="getModal = true">Recibir</el-button>
-          <el-button type="warning" class="hidden" @click="editModal = true">Editar</el-button>
+          <el-button type="danger" @click="getModal = true" v-can="['assets:checking']">Recibir</el-button>
+          <el-button type="warning" class="hidden" @click="editModal = true" v-can="['assets:update']">Editar</el-button>
         </div>
         <h2> Datos del activo</h2>
         <el-descriptions :column="width > 768 ? 3 : 1" border>

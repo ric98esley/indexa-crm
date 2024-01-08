@@ -3,7 +3,7 @@
     <el-row class="p-2 w-full">
       <!-- Esta componente tiene el PageHeader -->
       <AssetsDescription :id="Number(route.params.id)"></AssetsDescription>
-      <el-col>
+      <el-col v-can="['movements:read']">
         <h2 class="m-4">Historial de prestamos</h2>
         <el-row>
           <el-table :data="movements.rows" v-loading="loadingAssignments">
@@ -51,7 +51,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor', 'receptor'],
+  permissions: ['assets:read']
 });
 
 

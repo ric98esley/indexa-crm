@@ -10,7 +10,7 @@
           <el-form-item label="Serial">
             <el-input placeholder="Serial" v-model="asset.serial" clearable>
               <template #append>
-                <el-button @click="getTag('gana')">
+                <el-button @click="getTag('gana')" v-can="['assets:read']">
                   <Icon name="ep:refresh" />
                 </el-button>
               </template>
@@ -142,7 +142,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor', 'auditor'],
+  permissions:  ['assets:create']
 })
 
 const ruleFormRef = ref<FormInstance>();
@@ -282,7 +282,7 @@ const addAsset = () => {
   }
 
   asset.serial = '';
-  toAdd.assets.push(newAsset);
+  toAdd.assets.unshift(newAsset);
 }
 
 const removeAsset = (row: NewAsset) => {

@@ -4,7 +4,7 @@ import { PropType } from 'nuxt/dist/app/compat/capi';
 interface Menu {
   icon: string;
   title: string;
-  roles?: string[];
+  ability?: string[];
   submenus?: Submenu[];
   groups?: Group[];
 }
@@ -14,20 +14,20 @@ interface MenuItem {
     path: string,
     query?: {}
   };
-  roles?: string[];
+  ability?: string[];
   title: string;
 }
 
 interface Submenu {
   title: string;
-  roles?: string[];
+  ability?: string[];
   icon: string;
   items: MenuItem[];
 }
 
 interface Group {
   title: string;
-  roles?: string[];
+  ability?: string[];
   items: MenuItem[];
 }
 const props = defineProps({
@@ -39,7 +39,7 @@ const props = defineProps({
 
 <template>
   <el-menu :router="false" :collapse="props.collapse" unique-opened>
-    <el-sub-menu v-for="(menu, indexMenu) in props.menus" :index="`${indexMenu}`" v-role="menu.roles">
+    <el-sub-menu v-for="(menu, indexMenu) in props.menus" :index="`${indexMenu}`" v-can="menu.ability">
       <template #title>
         <p class="underline underline-offset-8 font-black decoration-green-500">
           <el-icon>
@@ -49,26 +49,26 @@ const props = defineProps({
         </p>
       </template>
       <el-menu-item-group v-for="(group, indexGroup) in menu.groups" :index="`g-${indexMenu}-${indexGroup}`"
-        v-role="group.roles">
+        v-can="group.ability">
         <template #title>
           {{ group.title }}
         </template>
         <NuxtLink :to="Item.route" v-for="(Item, indexItem) in group.items">
-          <el-menu-item :index="`${indexMenu}-${indexGroup}-${indexItem}`" :route="Item.route" v-role="Item.roles">
+          <el-menu-item :index="`${indexMenu}-${indexGroup}-${indexItem}`" :route="Item.route" v-can="Item.ability">
             {{ Item.title }}
           </el-menu-item>
         </NuxtLink>
 
       </el-menu-item-group>
       <el-sub-menu v-if="menu.submenus" v-for="(submenu, indexSubmenu) in menu.submenus"
-        :index="`${indexMenu}-${indexSubmenu}`" v-role="submenu.roles">
+        :index="`${indexMenu}-${indexSubmenu}`" v-can="submenu.ability">
         <template #title>
           <p class="underline underline-offset-8 font-black decoration-green-500">
             <Icon :name="submenu.icon" class="mx-1 text-lg" />{{ submenu.title }}
           </p>
         </template>
         <NuxtLink :to="item.route" v-for="(item, indexItem) in submenu.items">
-          <el-menu-item :index="`sub-${indexMenu}-${indexSubmenu}-${indexItem}`" :route="item.route" v-role="item.roles">
+          <el-menu-item :index="`sub-${indexMenu}-${indexSubmenu}-${indexItem}`" :route="item.route" v-can="item.ability">
             {{ item.title }}
           </el-menu-item>
         </NuxtLink>

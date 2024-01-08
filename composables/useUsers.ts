@@ -5,6 +5,7 @@ export const useUsers = () => {
   return class UsersService {
     async getUsers({
       username,
+      group,
       search,
       sort,
       order,
@@ -23,6 +24,7 @@ export const useUsers = () => {
       endDate,
     }: {
       username?: string,
+      group?: string,
       search?: string,
       sort?: string,
       order?: string,
@@ -49,6 +51,9 @@ export const useUsers = () => {
               }),
               ...(name != '' && name && {
                 name
+              }),
+              ...(group != '' && group && {
+                group
               }),
               ...(lastName != '' && lastName && {
                 lastName
