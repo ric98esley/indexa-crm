@@ -41,7 +41,7 @@
           <el-table-column label="Acciones" width="150">
             <template #default="{ row }">
               <el-row justify="space-around">
-                <el-button type="info" circle @click="editPlace(row)">
+                <el-button type="info" circle @click="editPlace(row)" v-can="['locations:update']">
                   <Icon name="ep:edit" />
                 </el-button>
                 <NuxtLink :href="`/places/${row.id}`">
@@ -49,7 +49,7 @@
                     <Icon name="ep:view" />
                   </el-button>
                 </NuxtLink>
-                <el-button type="danger" circle @click="removePlace(row.id)" v-role="['superuser', 'auditor']">
+                <el-button type="danger" circle @click="removePlace(row.id)" v-can="['locations:update']">
                   <Icon name="ep:delete" />
                 </el-button>
               </el-row>
@@ -78,7 +78,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor', 'receptor'],
+  permissions: ['locations:read', 'locations:update', 'locations:delete', 'locations:create']
 });
 
 const LocationsServices = useLocation();

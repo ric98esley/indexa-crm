@@ -137,7 +137,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor'],
+  permissions: ['categories:read', 'categories:update', 'categories:delete', 'categories:create'],
 });
 
 const CategoriesService = useCategories();

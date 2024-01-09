@@ -60,7 +60,7 @@
           </template>
         </el-dialog>
       </el-container>
-      <el-row justify="end" :span="24">
+      <el-row justify="end" :span="24" v-can="['specifications:create']">
         <div
           class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
           @click="modals.create = true">
@@ -77,7 +77,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor'],
+  permissions: ['specifications:read', 'specifications:update', 'specifications:delete', 'specifications:create'],
 });
 const SpecificationService = useSpecifications();
 const specificationsService = new SpecificationService()

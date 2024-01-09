@@ -91,7 +91,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor', 'receptor'],
+  permissions: ['movements:read', 'movements:update', 'movements:delete', 'movements:create'],
 });
 
 const MovementServices = useMovements();

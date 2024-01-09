@@ -26,13 +26,13 @@
           <el-table-column label="Acciones" width="180">
             <template #default="{ row }">
               <el-row>
-                <el-button type="info" circle @click="editUser(row)">
+                <el-button type="info" circle @click="editUser(row)" v-can="['customers:update']">
                   <Icon name="ep:edit" />
                 </el-button>
                 <!-- <el-button type="primary" circle @click="editUser(row)">
                   <Icon name="ep:view" />
                 </el-button> -->
-                <el-button type="danger" circle @click="removeContact(row.id)" v-can="['customer:delete']">
+                <el-button type="danger" circle @click="removeContact(row.id)" v-can="['customers:delete']">
                   <Icon name="ep:delete" />
                 </el-button>
               </el-row>

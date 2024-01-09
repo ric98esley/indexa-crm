@@ -24,13 +24,13 @@
         <el-table-column label="Acciones" width="150">
           <template #default="props">
             <el-row>
-              <el-button type="info" circle @click="editZone(props.row)">
+              <el-button type="info" circle @click="editZone(props.row)" v-can="['zones:delete']">
                 <Icon name="ep:edit" />
               </el-button>
               <el-button type="primary" circle>
                 <Icon name="ep:view" />
               </el-button>
-              <el-button type="danger" circle @click="removeZone(props.row.id)" v-role="['superuser', 'auditor']">
+              <el-button type="danger" circle @click="removeZone(props.row.id)" v-can="['zones:read']">
                 <Icon name="ep:delete" />
               </el-button>
             </el-row>
@@ -49,7 +49,7 @@
         </template>
       </el-dialog>
     </el-container>
-    <LeftButton @click="modals.create = true" />
+    <LeftButton @click="modals.create = true"  v-can="['zones:read']"/>
   </el-container>
 </template>
 
@@ -58,7 +58,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor', 'receptor'],
+  permissions: ['zones:read', 'zones:update', 'zones:delete', 'zones:create']
 });
 
 const loadingZone = ref(false);

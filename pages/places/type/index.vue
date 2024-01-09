@@ -23,13 +23,13 @@
         <el-table-column label="Acciones">
           <template #default="props">
             <el-row>
-              <el-button type="info" circle @click="editType(props.row)">
+              <el-button type="info" circle @click="editType(props.row)" v-can="['location_t ypes:delete']">
                 <Icon name="ep:edit" />
               </el-button>
               <el-button type="primary" circle>
                 <Icon name="ep:view" />
               </el-button>
-              <el-button type="danger" circle @click="removeType(props.row.id)" v-role="['superuser', 'auditor']">
+              <el-button type="danger" circle @click="removeType(props.row.id)" v-can="['locations_types:delete']">
                 <Icon name="ep:delete" />
               </el-button>
             </el-row>
@@ -89,7 +89,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor', 'receptor'],
+  permissions: ['locations_types:read', 'locations_types:update', 'locations_types:delete', 'locations_types:create'],
 });
 
 const loadingType = ref(false);

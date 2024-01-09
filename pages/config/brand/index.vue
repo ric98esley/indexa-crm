@@ -37,7 +37,7 @@
         <Pagination v-model:offset="filters.offset" v-model:limit="filters.limit" :total="response.total" />
 
       </el-col>
-      <el-row justify="end" :span="24">
+      <el-row justify="end" :span="24" v-can="['brands:create']">
         <div
           class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
           @click="modals.create = true">
@@ -87,7 +87,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor'],
+  permissions: ['brands:read', 'brands:update', 'brands:delete', 'brands:create'],
 });
 
 const BrandService = useBrands();
