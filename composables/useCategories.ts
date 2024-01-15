@@ -15,7 +15,7 @@ export const useCategories = () => {
         const { data, error } = await useFetch<{ total: number, rows: Category[] }>('/categories',
           {
             params: {
-              ...(name != '' && name && {
+              ...(name && {
                 name
               }),
               ...(offset && {

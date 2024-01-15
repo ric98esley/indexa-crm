@@ -2,30 +2,28 @@ export const useMovements = () => {
   return class MovementsService {
     async getMovements ({
       paranoid = false,
-      current,
       all = false,
       orderType,
       movementType,
+      current,
       location,
       group,
       serial,
       category,
       model,
-      groupId,
       brand,
-      limit = 10,
-      offset = 0,
+      limit,
+      offset,
       sort,
       order,
       startDate,
-      endDate
+      endDate,
     }: {
       paranoid?: boolean,
-      current?: boolean,
       all?: boolean,
       orderType?: string,
       movementType?: string,
-      groupId?: number,
+      current?: boolean,
       location?: string,
       group?: string,
       serial?: string,
@@ -36,61 +34,32 @@ export const useMovements = () => {
       offset?: number,
       sort?: string,
       order?: string,
+      type?: string,
       startDate?: string,
-      endDate?: string
+      endDate?: string,
     }) {
       try {
+        const params = useFilterObject({
+          paranoid,
+          all,
+          orderType,
+          movementType,
+          current,
+          location,
+          group,
+          serial,
+          category,
+          model,
+          brand,
+          limit,
+          offset: (offset - 1) * Number(limit),
+          sort,
+          order,
+          startDate,
+          endDate,
+        })
         const { data, error } = await useFetch<{ total: number, rows: Assignments[] }>(`/movements`, {
-          params: {
-            ...(groupId && {
-              groupId,
-            }),
-            ...(serial != '' && serial && {
-              serial
-            }),
-            ...(orderType != '' && orderType && {
-              orderType: orderType
-            }),
-            ...(model != '' && model && {
-              model
-            }),
-            ...(category != '' && category && {
-              category
-            }),
-            ...(brand != '' && brand && {
-              brand
-            }),
-            ...(offset && {
-              offset: (offset - 1) * Number(limit)
-            }),
-            ...(limit && {
-              limit
-            }),
-            ...(endDate && startDate && {
-              startDate,
-              endDate
-            }),
-            ...(location && location !== '' && {
-              location
-            }),
-            all,
-            paranoid,
-            ...(current != undefined && {
-              current
-            }),
-            ...(movementType && {
-              movementType
-            }),
-            ...(group && {
-              group
-            }),
-            ...(sort && {
-              sort
-            }),
-            ...(order && {
-              order
-            })
-          }
+          params
         });
 
         if(error.value) {

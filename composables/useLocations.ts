@@ -265,6 +265,87 @@ class LocationsService {
       })
     }
   }
+
+  async getLocationAssets({ 
+    id,
+    limit = 10,
+    offset = 1,
+    paranoid,
+    current,
+    all,
+    orderType,
+    movementType,
+    location,
+    group,
+    serial,
+    category,
+    model,
+    brand,
+    sort,
+    order,
+    startDate,
+    endDate,
+  }:{
+    id: number,
+    limit?: number,
+    offset?: number,
+    paranoid?: boolean,
+    current?: boolean,
+    all?: boolean,
+    orderType?: string,
+    movementType?: string,
+    location?: string,
+    group?: string,
+    serial?: string,
+    category?: string,
+    model?: string,
+    brand?: string,
+    sort?: string,
+    order?: string,
+    startDate?: string,
+    endDate?: string,
+  }) {
+    try {
+      if(offset < 1) offset = 1;
+      const query = useFilterObject({
+        limit,
+        offset: (offset - 1) * limit,
+        paranoid,
+        current,
+        all,
+        orderType,
+        movementType,
+        location,
+        group,
+        serial,
+        category,
+        model,
+        brand,
+        sort,
+        order,
+        startDate,
+        endDate,
+      });
+
+      const { data, error } = await useFetch<{ total: number, rows: Assignments[] }>(`/locations/${id}/assets`,
+        {
+          params: query
+        }
+      );
+
+      if (error.value) {
+        throw new Error(error.value.data.message);
+      }
+
+      return data.value
+    } catch (error) {
+      ElNotification({
+        title: 'Error al obtener los activos de la agencia intente de nuevo mas tarde',
+        message: error.message,
+        type: 'error'
+      })
+    }
+  }
 }
 
 export const useLocation = () => {

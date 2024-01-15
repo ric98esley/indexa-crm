@@ -20,7 +20,7 @@
         </el-row>
         <br />
         <el-row class="text-xs">
-          <el-col :span="8">
+          <el-col :span="7">
             <strong>Datos de la orden</strong>
             <br />
             {{
@@ -29,13 +29,14 @@
               : "Reporte de entrada"
             }}
             <br />
-            Fecha de impresión: {{ new Date().toLocaleString() }} <br />
-            Creado el: {{ new Date(order.createdAt || '').toLocaleString() }} <br />
             Realizado por:
             <b> {{ order.createdBy?.username }} </b>
+            <br />
+            Fecha de impresión: {{ new Date().toLocaleString() }} <br />
+            Creado el: {{ new Date(order.createdAt || '').toLocaleString() }}
           </el-col>
 
-          <el-col :span="10" v-if="order.type == 'checkout'">
+          <el-col :span="9" v-if="order.type == 'checkout'">
             <strong>Datos de la {{ order.location?.type?.name }}</strong> <br />
             {{ order.location?.code }} - {{ order.location?.name }} | Grupo:
             {{ order.location?.group?.code }} - {{ order.location?.group?.name }}
@@ -73,16 +74,16 @@
               {{ assignment.asset.model?.name || '' }}
             </td>
             <td v-if="order.type == 'checking'">
-              <template v-if="assignment.to">
+              <template v-if="assignment.from">
                 <b>
-                  {{ assignment.to?.code }}
+                  {{ assignment.from?.code }}
                 </b> -
-                {{ assignment.to?.name }}
+                {{ assignment.from?.name }}
               </template>
             </td>
           </tr>
           <tr>
-            <th colspan="4">
+            <th colspan="4" class="text-center">
               <b>
                 Cantidad de activos asignados: {{ assignments.length }}
               </b>
@@ -90,9 +91,10 @@
           </tr>
         </table>
 
-        <table class="w-full signs mt-5">
-          <tr class="mt-5">
-            <th>Firma del cliente</th>
+        <table class="w-full signs mt-20">
+          <tr>
+            <th v-if="order.type == 'checking'">Recibido por:</th>
+            <th v-else>Firma del cliente</th>
             <th>Firma del técnico</th>
           </tr>
         </table>
@@ -198,7 +200,7 @@ onMounted(async () => {
 }
 
 .table-print {
-  text-align: center;
+  text-align: left;
   padding: 3px 2px;
 }
 

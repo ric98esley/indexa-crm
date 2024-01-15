@@ -56,127 +56,17 @@
       <el-container>
         <el-dialog v-model="modals.create">
           <template #header>
-            <h2>Crear nuevo agencia</h2>
+            <h2>Crear nuevo deposito</h2>
           </template>
           <template #default>
-            <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="place"
-              @submit.prevent="createPlace()">
-              <el-row :gutter="20">
-                <el-col :span="18">
-                  <el-form-item label="Código">
-                    <el-input v-model="place.code" placeholder="Ingrese el código de la agencia"></el-input>
-                  </el-form-item>
-                </el-col>
-                <el-col :span="4">
-                  <el-form-item label="Activar">
-                    <el-switch v-model="place.isActive" class="ml-2" />
-                  </el-form-item>
-                </el-col>
-              </el-row>
-              <el-form-item label="Nombre">
-                <el-input v-model="place.name" placeholder="Ingrese el nombre"></el-input>
-              </el-form-item>
-              <el-form-item label="Zona">
-                <el-select class="w-full" v-model="place.zoneId" filterable remote placeholder="Elige una zona"
-                  :loading="loadingZone" :remote-method="setZone">
-                  <el-option v-for="item in zones.rows" :key="item.id" :label="item.name" :value="item.id!">
-                    <span style="float: left">{{ item.name }}</span>
-                  </el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item label="Teléfono">
-                <el-input v-model="place.phone" placeholder="Ingrese el teléfono"></el-input>
-              </el-form-item>
-              <el-form-item label="Tipo de agencia">
-                <el-select class="w-full" v-model="place.typeId" filterable remote placeholder="Elige un tipo"
-                  :loading="loadingType" :remote-method="setTypes">
-                  <el-option v-for="item in types.rows" :key="item.id" :label="item.name" :value="item.id!">
-                    <span style="float: left">{{ item.name }}</span>
-                  </el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item label="Grupo">
-                <el-select class="w-full" v-model="place.groupId" filterable remote placeholder="Elige un grupo"
-                  :loading="loadingGroup" :remote-method="setGroup">
-                  <el-option v-for="item in groups.rows" :key="item.id" :label="`${item.code} - ${item.name}`"
-                    :value="item.id!">
-                    <span style="float: left">{{ item.code }}</span>
-                    <span style="
-                        float: right;
-                        color: var(--el-text-color-secondary);
-                        font-size: 13px;
-                    ">{{ item.name }}</span> </el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item label="Responsable">
-                <el-select class="w-full" v-model="place.managerId" filterable remote effect="dark"
-                  placeholder="Elige un responsable" :loading="loadingUser" :remote-method="setUser">
-                  <el-option v-for="item in users.rows" :key="item.id"
-                    :label="`${item.username} - ${item.name} ${item.lastName} - ${item.cardId}`" :value="item.id!">
-                    <span style="float: left">{{ item.name }} {{ item.lastName }}</span>
-                    <span style="
-                        float: right;
-                        color: var(--el-text-color-secondary);
-                        font-size: 13px;
-                    ">{{ item.username }}</span> </el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item label="RIF">
-                <el-input v-model="place.rif" placeholder="RIF"></el-input>
-              </el-form-item>
-              <el-form-item label="Dirección">
-                <el-input v-model="place.address" placeholder="Dirección"></el-input>
-              </el-form-item>
-              <el-form-item>
-                <el-button :loading="loadingPlace" type="primary"
-                  :disabled="!place.name && !place.code && !place.zoneId && !place.typeId"
-                  native-type="submit">Crear</el-button>
-              </el-form-item>
-            </el-form>
-          </template>
-        </el-dialog>
-        <el-dialog v-model="modals.edit">
-          <template #header>
-            <h2>Editar deposito</h2>
-          </template>
-          <template #default>
-            <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="deposit"
-              @submit.prevent="patchDeposit()">
-              <el-form-item label="Nombre">
-                <el-input v-model="deposit.name" placeholder="Ingrese aqui el nombre"></el-input>
-              </el-form-item>
-              <el-form-item label="Status">
-                <el-input v-model="deposit.state" placeholder="Ingrese aqui el status"></el-input>
-              </el-form-item>
-              <el-form-item label="Grupo">
-                <el-select class="w-full" v-model="deposit.groupId" filterable remote placeholder="Elige un grupo"
-                  :loading="loadingGroup" :remote-method="setGroup">
-                  <el-option v-for="item in groups.rows" :key="item.id" :label="item.name" :value="item.id!">
-                    <span style="float: left">{{ item.name }}</span>
-                    <span style="
-                          float: right;
-                          color: var(--el-text-color-secondary);
-                          font-size: 13px;
-                      ">{{ item.name }}</span> </el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" :disabled="!deposit.name && !deposit.state"
-                  native-type="submit">Editar</el-button>
-              </el-form-item>
-            </el-form>
+            <LocationFormSave :status="['desplegable', 'archivado', 'pendiente']" @submit="setWarehouses"></LocationFormSave>
           </template>
         </el-dialog>
       </el-container>
-      <el-col justify="end" :span="24" v-can="['locations:create']">
-        <div
-          class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
-          @click="modals.create = true">
-          <Icon name="ep:plus" size="2rem" color="white" />
-        </div>
-      </el-col>
+      <LeftButton v-can="['locations:create']" @click="modals.create = true">
+        <Icon name="ep:plus" size="2rem" color="white" />
+      </LeftButton>
     </el-row>
-
   </el-container>
 </template>
 

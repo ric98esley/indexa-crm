@@ -4,6 +4,10 @@ import type { FormInstance } from 'element-plus'
 const props = defineProps({
   id: {
     type: Number || String || undefined
+  },
+  status: {
+    type: Array || String || undefined,
+    default: ['asignado']
   }
 })
 
@@ -109,7 +113,7 @@ const setZone = async (query?: string) => {
 const setTypes = async (query?: string) => {
   const search = {
     name: query,
-    status: 'asignado'
+    status: props.status
   }
   const rta = await typeServices.getTypes(search);
   types.rows = rta?.rows || []
@@ -236,14 +240,16 @@ const rules = {
 
 const submitPlace = () => {
   savePlace.value?.validate(async (valid) => {
+    console.log(valid)
     if (!valid) return;
+    console.log('submit')
     if (props.id) {
       await updatePlace();
     } else {
       await createPlace();
     }
+    savePlace.value?.resetFields();
   })
-  savePlace.value?.resetFields();
 }
 watch(() => props.id, async () => {
   await setPlace();

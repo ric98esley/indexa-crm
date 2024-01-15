@@ -142,7 +142,7 @@ const type = reactive<{
 const getProducts = async () => {
   try {
     loadingProduct.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Product[] }>('/consumables/products',
+    const { data, error } = await useFetch<{ total: number, rows: Product[] }>('/products',
       {
         params: {
           ...(filters.name != '' && filters.name && {
@@ -179,7 +179,7 @@ const createProduct = async () => {
   try {
     loadingProduct.value = true;
 
-    const { data, error } = await useFetch<Product>('/locations/types',
+    const { data, error } = await useFetch<Product>('/products',
       {
         method: 'post',
         body: {

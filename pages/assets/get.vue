@@ -12,6 +12,15 @@
       <el-col class="lg:p-4">
         <el-card class="w-full">
           <el-form label-position="top" @submit.prevent="() => { }">
+            <el-form-item label="Deposito (Por defecto)">
+              <el-select class="w-full" v-model="assignments.place" filterable remote
+                placeholder="Elige un deposito" :loading="loadingPlace" :remote-method="setPlaces">
+                <el-option v-for="item in places.rows" :key="item.id" :label="`${item.id} - ${item.name}`"
+                  :value="item.id!">
+                  {{ item.id }} - {{ item.name }}
+                </el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item label="Serial">
               <el-autocomplete v-model="filters.serial" value-key="serial" :fetch-suggestions="getAssets"
                 @select="handleSelectAsset" class="w-full">
@@ -21,15 +30,6 @@
                       item.model.name }}</li>
                 </template>
               </el-autocomplete>
-            </el-form-item>
-            <el-form-item label="Deposito (Por defecto)">
-              <el-select class="w-full" v-model="assignments.place" filterable remote
-                placeholder="Elige un deposito" :loading="loadingPlace" :remote-method="setPlaces">
-                <el-option v-for="item in places.rows" :key="item.id" :label="`${item.id} - ${item.name}`"
-                  :value="item.id!">
-                  {{ item.id }} - {{ item.name }}
-                </el-option>
-              </el-select>
             </el-form-item>
           </el-form>
         </el-card>

@@ -4,16 +4,31 @@ const props = defineProps({
     type: Array,
     default: []
   },
-  loadingAssignments: {
+  loading: {
     type: Boolean,
     default: true
   },
-  filters: {
-    type: Object
+  allowChecking: {
+    type: Boolean,
+    default: false
   },
   total: {
-    type: Number
+    type: Number,
+    default: 0
   },
+  filters: {
+    type: Object,
+    default: () => ({
+      limit: 10,
+      offset: 0,
+      serial: '',
+      category: '',
+      brand: '',
+      model: '',
+      location: '',
+      group: ''
+    })
+  }
 })
 
 const orderId = ref(0);
@@ -21,7 +36,8 @@ const minWidth = ref(150);
 
 
 const modals = reactive({
-  order: false
+  order: false,
+  checking: false
 });
 
 const emit = defineEmits(['update:filters']);
@@ -49,7 +65,7 @@ const filters = computed({
 
 <template>
   <el-row>
-    <el-table :data="props.assignments" v-loading="loadingAssignments">
+    <el-table :data="props.assignments" v-loading="loading">
       <el-table-column type="index" width="50" />
       <el-table-column type="expand" width="50">
         <template #default="{ row }">
@@ -72,7 +88,7 @@ const filters = computed({
           <Copy :text="row.asset?.serial" />
         </template>
       </el-table-column>
-      <el-table-column label="Categoría" prop="asset.model.category.name" :min-width="minWidth">
+      <el-table-column label="Categoría" prop="asset.model.category.name" :min-width="minWidth" sorteable>
         <template #header>
           <el-input v-model="filters.category" placeholder="Categoría" clearable />
         </template>
@@ -106,7 +122,7 @@ const filters = computed({
           <b>
             {{ row.to?.group.code }}
           </b>
-          -{{ row.to?.group.name }}
+          - {{ row.to?.group.name }}
         </template>
       </el-table-column>
       <el-table-column width="120">
@@ -122,6 +138,7 @@ const filters = computed({
     <Pagination v-model:limit="filters.limit" v-model:offset="filters.offset" :total="props.total" />
     <el-container>
       <OrderTableView v-model:open="modals.order" :id="orderId" />
+
     </el-container>
   </el-row>
 </template>

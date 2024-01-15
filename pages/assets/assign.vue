@@ -5,6 +5,34 @@
         <PageHeader name="Asignar" class="mb-4" />
         <el-col>
           <el-card class="w-full">
+            <el-form label-width="120px" @submit.prevent="() => { }" label-position="top">
+              <el-form-item label="Grupo">
+                <el-select class="w-full" v-model="assignments.groupId" filterable remote placeholder="Elige un grupo"
+                  :loading="loadingGroup" :remote-method="setGroup">
+                  <el-option v-for="item in groups.rows" :key="item.id" :label="`${item.code} - ${item.name}`"
+                    :value="item.id!">
+                    <span style="float: left">{{ item.code }}</span>
+                    <span style="
+                      float: right;
+                      color: var(--el-text-color-secondary);
+                      font-size: 13px;
+                  ">{{ item.name }}</span> </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="Agencia" v-if="assignments.groupId">
+                <el-autocomplete v-model="assignments.location" value-key="name" :fetch-suggestions="setPlaces"
+                  @select="handleSelectPlace" class="w-full">
+                  <template #default="{ item }">
+                    <span style="float: left">{{ item.code }} {{ item.name }}</span>
+                    <span style="
+                      float: right;
+                      color: var(--el-text-color-secondary);
+                      font-size: 13px;
+                  ">{{ item.group?.code }}</span>
+                  </template>
+                </el-autocomplete>
+              </el-form-item>
+            </el-form>
             <el-form label-position="top" @submit.prevent="() => { }">
               <el-form-item label="Serial">
                 <el-autocomplete v-model="filters.serial" value-key="serial" :fetch-suggestions="getAssets"
@@ -27,7 +55,6 @@
           </template>
           <template #extra>
             <el-row justify="end" class="gap-y-4">
-              <el-button @click="modals.assign = true">Elige la agencia</el-button>
               <el-button type="primary" v-if="assignments.place" :disabled="assetsCount == 0"
                 @click="checkout()">Asignar</el-button>
             </el-row>
@@ -109,43 +136,6 @@
           </el-table-column>
         </el-table>
       </el-col>
-      <el-container>
-        <el-dialog v-model="modals.assign">
-          <template #header>
-            <h2>Buscar </h2>
-          </template>
-          <template #default>
-            <el-form label-width="120px" @submit.prevent="() => { }">
-              <el-form-item label="Grupo">
-                <el-select class="w-full" v-model="assignments.groupId" filterable remote placeholder="Elige un grupo"
-                  :loading="loadingGroup" :remote-method="setGroup">
-                  <el-option v-for="item in groups.rows" :key="item.id" :label="`${item.code} - ${item.name}`"
-                    :value="item.id!">
-                    <span style="float: left">{{ item.code }}</span>
-                    <span style="
-                      float: right;
-                      color: var(--el-text-color-secondary);
-                      font-size: 13px;
-                  ">{{ item.name }}</span> </el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item label="Agencia" v-if="assignments.groupId">
-                <el-autocomplete v-model="assignments.location" value-key="name" :fetch-suggestions="setPlaces"
-                  @select="handleSelectPlace" class="w-full">
-                  <template #default="{ item }">
-                    <span style="float: left">{{ item.code }} {{ item.name }}</span>
-                    <span style="
-                      float: right;
-                      color: var(--el-text-color-secondary);
-                      font-size: 13px;
-                  ">{{ item.group?.code }}</span>
-                  </template>
-                </el-autocomplete>
-              </el-form-item>
-            </el-form>
-          </template>
-        </el-dialog>
-      </el-container>
     </el-row>
   </el-container>
 </template>
@@ -211,7 +201,7 @@ const filters = reactive({
 const handleSelectAsset = (row: Asset) => {
   if (targets.value.some(e => e.assetId === row.id)) return;
 
-  assignments.assets.push(row);
+  assignments.assets.unshift(row);
   filters.serial = '';
 }
 

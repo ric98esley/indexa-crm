@@ -84,7 +84,7 @@
               </el-form-item>
               <el-form-item label="Categoría del producto">
                 <el-select v-model="product.categoryId" class="select-success" placeholder="Selecciona un deposito"
-                  label="Deposito" style="width: 100%" filterable clearable>
+                  label="Deposito" style="width: 100%" filterable clearable remote :remote-method="getCategories">
                   <el-option v-for="option in response.categories" :key="option.id" :value="option.id!"
                     :label="`${option.name}`">
                     {{ option.name }}
@@ -181,8 +181,13 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor', 'receptor'],
+  permission: ['consumables:read', 'consumables:create', 'consumables:update', 'consumables:delete'],
 });
+
+const CategoryService = useCategories();
+const categoryService = new CategoryService();
+const LocationService = useLocation();
+const locationService = new LocationService();
 
 const createFormRef = ref<FormInstance>()
 const addFormRef = ref<FormInstance>()
@@ -194,7 +199,7 @@ const productSwitch = ref(false);
 
 const filters = reactive({
   limit: 10,
-  offset: 0,
+  offset: 1,
   search: '',
   category: '',
   deposit: ''
@@ -276,14 +281,13 @@ const rules = reactive<FormRules<{
 
 
 
-const getDeposit = async ({ name }: { name?: string }) => {
+const getWarehouse = async ({ name }: { name?: string }) => {
   try {
-    const { data } = await useFetch<{ total: number, rows: Warehouse[] }>('/assets/deposits', {
-      params: {
-        ...(name != '' && name && {
-          name
-        })
-      }
+    const { data } = await locationService.getLocations({
+      name,
+      limit: 10,
+      offset: 0,
+      status: ['desplegable']
     });
     return data.value;
   } catch (error) {
@@ -358,15 +362,15 @@ const getProducts = async (search?: string) => {
 }
 
 
-const getCategories = async () => {
+const getCategories = async (query: string) => {
   try {
-    const { data } = await useFetch<{ count: number, rows: Category[] }>('/assets/categories', {
-      query: {
-        type: 'consumable'
-      }
+    const { data } = await categoryService.getCategories({
+      name: query,
+      limit: 10,
+      offset: 0,
+      type: 'consumable'
     });
-
-    response.categories = data.value?.rows || [];
+    response.categories = data.value.rows;
   } catch (error) {
     console.log(error);
   }
@@ -517,7 +521,7 @@ const setDeposit = async (query?: string) => {
   const search = {
     name: query,
   }
-  const rta = await getDeposit(search);
+  const rta = await getWarehouse(search);
   response.deposits = rta?.rows || []
 }
 
@@ -541,7 +545,6 @@ watch(filters, useDebounce(async () => {
 
 onMounted(async () => {
   await setInventory();
-  await getCategories();
   await setDeposit();
 });
 </script>

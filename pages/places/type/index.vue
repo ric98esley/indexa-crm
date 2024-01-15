@@ -20,6 +20,14 @@
             <el-input :debounce="2000" v-model="filters.name" placeholder="Nombre" clearable />
           </template>
         </el-table-column>
+        <el-table-column prop="status" label="Estatus">
+          <template #default="props">
+            <el-tag v-if="props.row.status === 'asignado'" type="success">Asignado</el-tag>
+            <el-tag v-if="props.row.status === 'desplegable'" type="warning">Disponible</el-tag>
+            <el-tag v-if="props.row.status === 'pendiente'" type="info">Pendiente</el-tag>
+            <el-tag v-if="props.row.status === 'archivado'" type="danger">Archivado</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="Acciones">
           <template #default="props">
             <el-row>
@@ -52,6 +60,12 @@
               <el-input v-model="type.name" placeholder="Ingrese aquí el nombre"></el-input>
             </el-form-item>
             <el-form-item>
+              <el-select v-model="type.status" placeholder="Seleccione el estatus" class="w-full">
+                <el-option v-for="status of statusEnum" :label="status.label" :value="status.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item>
               <el-button type="primary" :disabled="!type.name" native-type="submit">Crear</el-button>
             </el-form-item>
           </el-form>
@@ -68,19 +82,23 @@
               <el-input v-model="type.name" placeholder="Ingrese aquí el nombre"></el-input>
             </el-form-item>
             <el-form-item>
+              <el-select v-model="type.status" placeholder="Seleccione el estatus">
+                <el-option v-for="status of statusEnum" :label="status.label" :value="status.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item>
               <el-button type="primary" :disabled="!type.name" native-type="submit">Editar</el-button>
             </el-form-item>
           </el-form>
         </template>
       </el-dialog>
     </el-container>
-    <el-row justify="end" :span="24">
-      <div
-        class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
-        @click="modals.create = true">
+    <LeftButton @click="modals.create = true">
+      <template #icon>
         <Icon name="ep:plus" size="2rem" color="white" />
-      </div>
-    </el-row>
+      </template>
+    </LeftButton>
   </el-container>
 </template>
 
@@ -115,13 +133,33 @@ const modals = reactive({
   menu: false
 });
 
+const statusEnum = [
+  {
+    value: 'asignado',
+    label: 'Asignado'
+  },
+  {
+    value: 'desplegable',
+    label: 'Disponible'
+  },
+  {
+    value: 'pendiente',
+    label: 'Pendiente'
+  },
+  {
+    value: 'archivado',
+    label: 'Archivado'
+  }
+]
 
 const type = reactive<{
   id?: number,
-  name: string
+  name: string,
+  status: string
 }>({
   id: undefined,
-  name: ''
+  name: '',
+  status: 'asignado'
 });
 
 
@@ -166,6 +204,7 @@ const createType = async () => {
         method: 'post',
         body: {
           name: type.name,
+          status: type.status
         }
       },
     )
@@ -200,6 +239,7 @@ const patchType = async () => {
 
     const body = {
       name: type.name,
+      status: type.status
     }
 
     const { data, error } = await useFetch<Type>(`/locations/types/${type.id}`,
