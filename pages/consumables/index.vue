@@ -109,7 +109,7 @@
               <el-input v-model="warehouse.min" placeholder="10"></el-input>
             </el-form-item>
             <el-form-item label="Almacén del producto">
-              <el-select v-model="warehouse.depositId" class="select-success" placeholder="Selecciona un deposito"
+              <el-select v-model="warehouse.locationId" class="select-success" placeholder="Selecciona un deposito"
                 label="Deposito" style="width: 100%" filterable clearable>
                 <el-option v-for="option in response.deposits" :key="option.id" :value="option.id!"
                   :label="`${option.id} - ${option.name}`">
@@ -119,7 +119,7 @@
             </el-form-item>
             <el-form-item>
               <el-button type="primary"
-                :disabled="!((warehouse.productId && warehouse.depositId) || (product.code && product.categoryId))"
+                :disabled="!((warehouse.productId && warehouse.locationId) || (product.code && product.categoryId))"
                 native-type="submit">Crear</el-button>
             </el-form-item>
           </el-form>
@@ -261,12 +261,12 @@ const product = reactive<{
 });
 
 const warehouse = reactive<{
-  depositId?: number,
+  locationId?: number,
   quantity: string,
   productId?: number,
   min: number
 }>({
-  depositId: undefined,
+  locationId: undefined,
   quantity: '',
   productId: undefined,
   min: 0
@@ -336,7 +336,7 @@ const getInventory = async () => {
 const getProducts = async (search?: string) => {
   try {
     loadingProduct.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Product[] }>('/consumables/products',
+    const { data, error } = await useFetch<{ total: number, rows: Product[] }>('/products',
       {
         params: {
           ...(search && search != '' && {
@@ -399,7 +399,7 @@ const createInventory = async () => {
           }),
           min: warehouse.min,
           quantity: warehouse.quantity,
-          depositId: warehouse.depositId,
+          locationId: warehouse.locationId,
         }
       },
     )
