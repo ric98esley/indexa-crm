@@ -67,7 +67,7 @@ export const useCategories = () => {
       type,
     }: {
       name?: string,
-      customFields?: Specification[],
+      customFields?: number[],
       description?: string,
       type?: string
     }) {
@@ -116,8 +116,8 @@ export const useCategories = () => {
     {
       id?: number,
       name?: string,
-      customFields?: Specification[],
-      removeFields?: Specification[],
+      customFields?: number[],
+      removeFields?: number[],
       type?: string,
       description?: string
     }) {

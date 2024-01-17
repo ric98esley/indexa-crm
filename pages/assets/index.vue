@@ -38,11 +38,8 @@
               <el-input v-model="filters.location" placeholder="Estado" clearable />
             </template>
             <template #default="{ row }">
-              <div v-if="row.assignment">
-                {{ row.assignment?.location?.code }} - {{ row.assignment?.location?.name }}
-              </div>
-              <div v-else>
-                {{ row.location.name }}
+              <div>
+                {{ row.location?.code }} - {{ row.location?.name }}
               </div>
             </template>
           </el-table-column>

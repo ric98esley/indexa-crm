@@ -69,7 +69,7 @@
             <h2>Crear nuevo grupo</h2>
           </template>
           <template #default>
-            <GroupFormSave :id="groupToEdit" />
+            <GroupFormSave :id="groupToEdit" @on-submit="setGroups"/>
           </template>
         </el-dialog>
       </el-container>
@@ -201,47 +201,6 @@ const getGroups = async ({
     })
   }
 }
-const getUser = async ({
-  search,
-  limit = 10,
-  offset = 0
-}: {
-  search?: string,
-  limit?: number,
-  offset?: number
-}) => {
-  try {
-    loadingUser.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: User[] }>('/users',
-      {
-        params: {
-          ...(search != '' && search && {
-            search
-          }),
-          role: 'receptor',
-          ...(offset && {
-            offset: (offset - 1) * limit
-          }),
-          ...(limit && {
-            limit
-          })
-        }
-      }
-    );
-    if (error.value) {
-      throw new Error()
-    }
-
-    loadingUser.value = false;
-    return data.value
-  } catch (error) {
-    loadingGroup.value = false;
-    ElNotification({
-      title: 'Error al obtener las marcas intente de nuevo mas tarde'
-    })
-  }
-}
-
 const editGroup = (row: Group) => {
   modals.create = true;
   groupToEdit.value = row.id;

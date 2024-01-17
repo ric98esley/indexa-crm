@@ -22,9 +22,15 @@
               <el-input v-model="filters.name" placeholder="Nombre" clearable />
             </template>
           </el-table-column>
-          <el-table-column label="Estatus" prop="type.status" min-width="120">
+          <el-table-column label="Estatus" min-width="120">
             <template #header>
               <el-input v-model="filters.status" placeholder="Estatus" clearable />
+            </template>
+            <template #default="{ row }">
+              <el-tag v-if="row.type.status === 'asignado'" type="info">Asignado</el-tag>
+              <el-tag v-if="row.type.status === 'desplegable'" type="success">Disponible</el-tag>
+              <el-tag v-if="row.type.status === 'pendiente'" type="warning">Pendiente</el-tag>
+              <el-tag v-if="row.type.status === 'archivado'" type="danger">Archivado</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="Grupo" prop="group.name" min-width="120">
@@ -38,13 +44,13 @@
           <el-table-column label="Acciones" width="180">
             <template #default="props">
               <el-row>
-                <el-button type="info" circle @click="editDeposit(props.row)">
+                <el-button type="info" circle @click="editDeposit(props.row)" v-can="['locations:update']">
                   <Icon name="ep:edit" />
                 </el-button>
                 <el-button type="primary" circle>
                   <Icon name="ep:view" />
                 </el-button>
-                <el-button type="danger" circle @click="removeDeposit(props.row.id)">
+                <el-button type="danger" circle @click="removeWarehouse(props.row.id)" v-can="['locations:delete']">
                   <Icon name="ep:delete" />
                 </el-button>
               </el-row>
@@ -59,7 +65,8 @@
             <h2>Crear nuevo deposito</h2>
           </template>
           <template #default>
-            <LocationFormSave :status="['desplegable', 'archivado', 'pendiente']" @submit="setWarehouses"></LocationFormSave>
+            <LocationFormSave :status="['desplegable', 'archivado', 'pendiente']" @submit="setWarehouses" :id="locationToEdit">
+            </LocationFormSave>
           </template>
         </el-dialog>
       </el-container>
@@ -75,16 +82,16 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor'],
+  permissions: ['locations:read', 'locations:create', 'locations:update', 'locations:delete']
 });
 
 const LocationsServices = useLocation();
 const locationsServices = new LocationsServices();
 
+const locationToEdit = ref<number>(0);
 
 const loadingWarehouse = ref(false);
 const loadingGroup = ref(false);
-const loadingUser = ref(false);
 
 const filters = reactive({
   limit: 10,
@@ -117,22 +124,6 @@ const modals = reactive({
   menu: false
 });
 
-
-const place = reactive<Place>({
-  id: undefined,
-  name: '',
-  code: '',
-  isActive: true,
-  zoneId: undefined,
-  typeId: undefined,
-  managerId: undefined,
-  groupId: undefined,
-  rif: '',
-  phone: '',
-  address: '',
-});
-
-
 const deposit = reactive<{
   id?: number,
   name: string,
@@ -144,12 +135,6 @@ const deposit = reactive<{
   state: '',
   groupId: undefined,
 });
-
-const status = [
-  { label: "Desplegable", value: "desplegable" },
-  { label: "Archivado", value: "archivado" },
-  { label: "Pendiente", value: "pendiente" },
-];
 
 
 const setWarehouses = async () => {
@@ -163,11 +148,7 @@ const setWarehouses = async () => {
       group: filters.group,
       status: ['desplegable', 'pendiente', 'archivado']
     }
-    const { data, error } = await locationsServices.getLocations(query);
-
-    if (error.value) {
-      throw new Error('Error al cargar los agencias')
-    }
+    const { data } = await locationsServices.getLocations(query);
 
     loadingWarehouse.value = false;
     const rta = data.value;
@@ -178,160 +159,18 @@ const setWarehouses = async () => {
     console.error(error);
   }
 }
-const getUser = async ({
-  id,
-  name,
-  code,
-  parent,
-  limit = 10,
-  offset = 0
-}: {
-  id?: number,
-  name?: string,
-  code?: string,
-  parent?: string,
-  limit?: number,
-  offset?: number
-}) => {
-  try {
-    loadingWarehouse.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Warehouse[] }>('/warehouse',
-      {
-        params: {
-          ...(name != '' && !name && id && {
-            id
-          }),
-          ...(name != '' && name && {
-            name
-          }),
-          ...(code != '' && code && {
-            code
-          }),
-          ...(parent != '' && parent && {
-            parent
-          }),
-          ...(offset && {
-            offset: (offset - 1) * limit
-          }),
-          ...(limit && {
-            limit
-          })
-        }
-      }
-    );
-    if (error.value) {
-      ElNotification({
-        message: 'Error al obtener las marcas intente de nuevo mas tarde'
-      })
-    }
 
-    loadingWarehouse.value = false;
-    return data.value
-  } catch (error) {
-    loadingWarehouse.value = false;
-    ElNotification({
-      message: 'Error al obtener las marcas intente de nuevo mas tarde'
-    })
-  }
+
+const editDeposit = (row: Place) => {
+  if (!row) return;
+  locationToEdit.value = row.id || 0 ;
+  modals.create = true;
 }
 
-const createWarehouse = async () => {
-  try {
-    loadingWarehouse.value = true;
-
-    const { data, error } = locationsServices.createLocation(place);
-    loadingWarehouse.value = false;
-
-    await setPlaces()
-
-    place.id = undefined;
-    place.name = '';
-    place.phone = '';
-    place.isActive = false
-    return data.value
-  } catch (error) {
-    loadingWarehouse.value = false;
-    ElNotification({
-      title: 'Error al crear agencia intente de nuevo mas tarde',
-    })
-  }
+const removeWarehouse = async (id: number) => {
+  await locationsServices.removePlace(id);
+  await setWarehouses();
 }
-
-const patchDeposit = async () => {
-  try {
-    loadingWarehouse.value = true;
-
-    const body = {
-      name: deposit.name,
-      state: deposit.state,
-      groupId: deposit.groupId
-    }
-
-    const { data, error } = await useFetch<Warehouse>(`/assets/warehouse/${deposit.id}`,
-      {
-        method: 'PATCH',
-        body
-      }
-    );
-    loadingWarehouse.value = false;
-
-
-    if (error.value) {
-      throw error
-    }
-    await setWarehouses()
-    ElNotification({
-      title: 'Categoria modificada correctamente',
-      message: `${data.value?.name}`
-    })
-
-    deposit.id = undefined;
-    deposit.name = '';
-    deposit.groupId = undefined;
-
-    return data.value
-  } catch (error) {
-    loadingWarehouse.value = false;
-    ElNotification({
-      title: 'Error al modificar la deposito intente de nuevo mas tarde',
-    })
-    console.log(error)
-  }
-}
-
-const editDeposit = (row: Warehouse) => {
-  modals.edit = true;
-  deposit.id = row.id;
-  deposit.name = row.name || '';
-  deposit.state = row.state || '';
-  deposit.groupId = row.group?.id;
-}
-
-const removeDeposit = async (id: number) => {
-  try {
-    const { data, error } = await useFetch<Warehouse>(`/assets/warehouse/${id}`, {
-      method: 'delete'
-    })
-
-    if (error.value) {
-      loadingWarehouse.value = false;
-      ElNotification({
-        message: 'Error al borrar la deposito intente de nuevo mas tarde.'
-      });
-      return
-    }
-
-    ElNotification({
-      message: 'La deposito ha sido borrada.'
-    })
-    await setWarehouses()
-  } catch (error) {
-    ElNotification({
-      message: 'Error al borrar la deposito intente de nuevo mas tarde.'
-    })
-  }
-}
-
 
 const getGroups = async ({
   id,

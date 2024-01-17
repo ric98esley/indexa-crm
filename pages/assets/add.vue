@@ -37,17 +37,28 @@
             </el-select>
           </el-form-item>
           <el-form-item label="Modelo">
-            <el-select v-model="asset.modelId" class="select-success" placeholder="Selecciona un modelo" label="Deposito"
-              style="width: 100%" filterable remote :remote-method="getModels">
-              <el-option v-for="option in response.models" :key="option.id" :value="option.id!"
-                :label="`${option.id} - ${option.name}`">
-                {{ option.id }} - {{ option.name }}
-              </el-option>
-            </el-select>
+            <el-row justify="space-between" class="w-full">
+              <el-col :span="20" :lg="22">
+                <el-select v-model="asset.modelId" class="select-success" placeholder="Selecciona un modelo"
+                  label="Deposito" style="width: 100%" filterable remote :remote-method="getModels">
+                  <el-option v-for="option in response.models" :key="option.id" :value="option.id!"
+                    :label="`${option.id} - ${option.name}`">
+                    {{ option.id }} - {{ option.name }}
+                  </el-option>
+                </el-select>
+              </el-col>
+              <el-col :span="4" :lg="2">
+                <el-row justify="end">
+                  <el-button type="info" @click="modals.addModel = true">
+                    <Icon name="ep:plus" />
+                  </el-button>
+                </el-row>
+              </el-col>
+            </el-row>
           </el-form-item>
           <el-form-item label="Almacén del activo">
             <el-select v-model="asset.locationId" class="select-success" placeholder="Selecciona un deposito"
-              label="Deposito" style="width: 100%" filterable>
+              label="Deposito" style="width: 100%" filterable clearable remote :remote-method="setWarehouses">
               <el-option v-for="option in response.warehouses" :key="option.id" :value="option.id!"
                 :label="`${option.id} - ${option.name}`">
                 {{ option.id }} - {{ option.name }}
@@ -57,7 +68,7 @@
           <el-row justify="space-between" align="middle">
             <el-form-item>
               <el-button type="primary" :disabled="!asset.serial || !asset.modelId || !asset.locationId"
-              native-type="submit">Agregar</el-button>
+                native-type="submit">Agregar</el-button>
             </el-form-item>
             <el-form-item>
               <el-button @click="addAssets()" type="warning" :disabled="toAdd.assets.length < 1">Guardar</el-button>
@@ -132,6 +143,12 @@
         </el-table>
       </el-card>
     </el-col>
+    <el-dialog v-model="modals.addModel">
+      <template #header>
+        <h2>Agregar modelo</h2>
+      </template>
+      <ModelFormSave @submit=""></ModelFormSave>
+    </el-dialog>
   </el-row>
 </template>
 
@@ -142,7 +159,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  permissions:  ['assets:create']
+  permissions: ['assets:create']
 })
 
 const ruleFormRef = ref<FormInstance>();
@@ -175,6 +192,7 @@ const asset = reactive<NewAsset>({
 const modals = reactive({
   invoice: false,
   confirm: false,
+  addModel: false,
 })
 
 
@@ -197,6 +215,7 @@ const toAdd = reactive<{
   assets: [],
   locationId: undefined,
 });
+
 const rules = reactive<FormRules<NewAsset>>({
   serial: [
     {
@@ -263,6 +282,7 @@ const getModels = async (name?: string) => {
 const getWarehouses = async ({ name }: { name?: string }) => {
   try {
     const { data } = await locationsServices.getLocations({
+      name,
       status: ['desplegable', 'archivado', 'pendiente']
     })
     return data.value;
@@ -353,7 +373,16 @@ const addAssets = async () => {
   }
 }
 
+const resetModel = async () => {
+  response.models = [];
+  asset.modelId = undefined;
+  await getModels();
+}
+
+watch
+
 watch(() => modelSelected.categoryId, async () => {
+  await resetModel();
   if (!modelSelected.categoryId) return []
   const foundCategory = response.categories.find((elemento) => {
     return elemento.id == modelSelected.categoryId
@@ -365,6 +394,10 @@ watch(() => modelSelected.categoryId, async () => {
     value: ''
   }));
   asset.customFields = toReturn;
+});
+
+watch(() => modelSelected.brandId, async () => {
+  await resetModel();
 });
 
 const setWarehouses = async (query?: string) => {

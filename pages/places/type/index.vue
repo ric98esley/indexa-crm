@@ -22,9 +22,9 @@
         </el-table-column>
         <el-table-column prop="status" label="Estatus">
           <template #default="props">
-            <el-tag v-if="props.row.status === 'asignado'" type="success">Asignado</el-tag>
-            <el-tag v-if="props.row.status === 'desplegable'" type="warning">Disponible</el-tag>
-            <el-tag v-if="props.row.status === 'pendiente'" type="info">Pendiente</el-tag>
+            <el-tag v-if="props.row.status === 'asignado'" type="info">Asignado</el-tag>
+            <el-tag v-if="props.row.status === 'desplegable'" type="success">Disponible</el-tag>
+            <el-tag v-if="props.row.status === 'pendiente'" type="warning">Pendiente</el-tag>
             <el-tag v-if="props.row.status === 'archivado'" type="danger">Archivado</el-tag>
           </template>
         </el-table-column>

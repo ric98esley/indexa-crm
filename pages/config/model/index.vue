@@ -4,10 +4,6 @@
       <PageHeader name="Modelos" />
       <el-col :span="24">
         <el-table :data="models.rows" stripe v-loading="loadingModels">
-          <el-table-column type="expand" width="50">
-            <template #default="props">
-            </template>
-          </el-table-column>
           <el-table-column type="index" width="50" />
           <el-table-column prop="name" label="Nombre" min-width="120">
             <template #header>
@@ -46,70 +42,15 @@
       </el-col>
     </el-row>
     <el-container>
-      <el-dialog v-model="modals.edit">
-        <template #header>
-          <h2>Editar modelo</h2>
-        </template>
-        <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon @submit.prevent="patchModel()">
-            <el-form-item label="Nombre">
-              <el-input v-model="model.name" placeholder="Ingrese aquí el nombre"></el-input>
-            </el-form-item>
-            <el-form-item label="Categoría">
-              <el-select class="w-full" v-model="model.categoryId" filterable remote
-                placeholder="Por favor escoge una categoría" :loading="loadingCategories" :remote-method="searchCategory">
-                <el-option v-for="item in categories.rows" :key="item.id" :label="item.name" :value="item.id!" />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="Fabricante">
-              <el-select class="w-full" v-model="model.brandId" filterable remote placeholder="Por favor escoge una marca"
-                :loading="loadingBrands" :remote-method="searchBrand">
-                <el-option v-for="item in brands.rows" :key="item.id" :label="item.name" :value="item.id!" />
-              </el-select>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :disabled="!model.name && !model.categoryId && !model.brandId"
-                native-type="submit">Editar</el-button>
-            </el-form-item>
-          </el-form>
-        </template>
-      </el-dialog>
       <el-dialog v-model="modals.create">
         <template #header>
-          <h2>Crear nuevo modelo</h2>
+          <h2>Guardar modelo</h2>
         </template>
         <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="model"
-            @submit.prevent="createModel()">
-            <el-form-item label="Nombre">
-              <el-input v-model="model.name" placeholder="Ingrese aquí el nombre"></el-input>
-            </el-form-item>
-            <el-form-item label="Categoría">
-              <el-select class="w-full" v-model="model.categoryId" filterable remote
-                placeholder="Por favor escoge una categoría" :loading="loadingCategories" :remote-method="searchCategory">
-                <el-option v-for="item in categories.rows" :key="item.id" :label="item.name" :value="item.id!" />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="Fabricante">
-              <el-select class="w-full" v-model="model.brandId" filterable remote placeholder="Por favor escoge una marca"
-                :loading="loadingBrands" :remote-method="searchBrand">
-                <el-option v-for="item in brands.rows" :key="item.id" :label="item.name" :value="item.id!" />
-              </el-select>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :disabled="!model.name && !model.categoryId && !model.brandId"
-                native-type="submit">Crear</el-button>
-            </el-form-item>
-          </el-form>
+          <ModelFormSave :id="modelToEdit" @submit="setModels"></ModelFormSave>
         </template>
       </el-dialog>
-      <el-row justify="end" :span="24" v-can="['models:create']">
-        <div
-          class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
-          @click="modals.create = true">
-          <Icon name="ep:plus" size="2rem" color="white" />
-        </div>
-      </el-row>
+      <LeftButton @click="modals.create = true" />
     </el-container>
   </el-container>
 </template>
@@ -126,6 +67,8 @@ definePageMeta({
 const loadingCategories = ref(false);
 const loadingModels = ref(false);
 const loadingBrands = ref(false);
+
+const modelToEdit = ref<number>(0);
 
 const ModelsServices = useModels();
 const modelsServices = new ModelsServices();
@@ -180,70 +123,6 @@ const model = reactive<{
 });
 
 
-const getCategories = async (name: string) => {
-  try {
-    loadingCategories.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Category[] }>('/categories',
-      {
-        params: {
-          ...(name != '' && name && {
-            name
-          }),
-          ...(name == '' && !name && model.categoryId && {
-            id: model.categoryId
-          }),
-          limit: 20
-        }
-      }
-    );
-    if (error.value) {
-      ElNotification({
-        message: 'Error al obtener las categorías intente de nuevo mas tarde'
-      })
-    }
-
-    loadingCategories.value = false;
-    return data.value
-  } catch (error) {
-    loadingCategories.value = false;
-    ElNotification({
-      message: 'Error al obtener las categorías intente de nuevo mas tarde'
-    })
-  }
-}
-
-const getBrands = async (name: string) => {
-  try {
-    loadingBrands.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Brand[] }>('/brands',
-      {
-        params: {
-          ...(name != '' && name && {
-            name
-          }),
-          ...(name == '' && !name && model.brandId && {
-            id: model.brandId
-          }),
-          limit: 20
-        }
-      }
-    );
-    if (error.value) {
-      ElNotification({
-        message: 'Error al obtener las marcas intente de nuevo mas tarde'
-      })
-    }
-
-    loadingBrands.value = false;
-    return data.value
-  } catch (error) {
-    loadingBrands.value = false;
-    ElNotification({
-      message: 'Error al obtener las marcas intente de nuevo mas tarde'
-    })
-  }
-}
-
 const getModels = async () => {
   try {
 
@@ -265,96 +144,9 @@ const getModels = async () => {
   }
 }
 
-const createModel = async () => {
-  try {
-    loadingModels.value = true;
-
-    const { data, error } = await useFetch<Model>('/assets/models',
-      {
-        method: 'post',
-        body: {
-          name: model.name,
-          categoryId: model.categoryId,
-          brandId: model.brandId
-        }
-      },
-    )
-    loadingModels.value = false;
-
-    if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
-      ElNotification({
-        title: 'Error al crear Modelo intente de nuevo mas tarde',
-        message: error.value?.data.message.message,
-      })
-      return
-    }
-    await setModels()
-    ElNotification({
-      title: 'Modelo creado correctamente',
-      message: `${data.value?.name}`
-    })
-    model.id = undefined;
-    model.name = '';
-    model.categoryId = 0;
-    model.brandId = 0;
-    return data.value
-  } catch (error) {
-    loadingModels.value = false;
-    ElNotification({
-      title: 'Error al crear modelo intente de nuevo mas tarde',
-    })
-  }
-}
-
-const patchModel = async () => {
-  try {
-    loadingModels.value = true;
-
-    const body = {
-      name: model.name,
-      categoryId: model.categoryId,
-      brandId: model.brandId
-    }
-
-    const { data, error } = await useFetch<Model>(`/assets/models/${model.id}`,
-      {
-        method: 'PATCH',
-        body
-      }
-    );
-    loadingModels.value = false;
-
-
-    if (error.value) {
-      throw error
-    }
-    await setModels()
-    ElNotification({
-      title: 'Modelo modificada correctamente',
-      message: `${data.value?.name}`
-    })
-
-    model.id = undefined;
-    model.name = '';
-    model.categoryId = 0;
-    model.brandId = 0
-    return data.value
-  } catch (error) {
-    loadingModels.value = false;
-    ElNotification({
-      title: 'Error al modificar el modelo intente de nuevo mas tarde',
-    })
-    console.log(error)
-  }
-}
-
 const editModel = (row: Model) => {
-  modals.edit = true;
-
-  model.id = row.id;
-  model.name = row.name || '';
-  model.categoryId = row.category.id!;
-  model.brandId = row.brand.id!;
+  modelToEdit.value = row.id || 0;
+  modals.create = true;
 }
 
 const removeCategory = async (id: number) => {
@@ -382,32 +174,11 @@ const removeCategory = async (id: number) => {
   }
 }
 
-const searchCategory = async (query: string) => {
-  loadingCategories.value = true;
-  await setCategories(query)
-
-}
-
-const searchBrand = async (query: string) => {
-  loadingBrands.value = true;
-  await setBrands(query)
-
-}
 
 const setModels = async () => {
   const rta = await getModels();
   models.rows = rta?.rows || []
   models.total = rta?.total || 0
-}
-const setCategories = async (name: string) => {
-  const rta = await getCategories(name);
-  categories.rows = rta?.rows || [];
-  categories.total = rta?.total || 0;
-}
-const setBrands = async (name: string) => {
-  const rta = await getBrands(name);
-  brands.rows = rta?.rows || [];
-  brands.total = rta?.total || 0;
 }
 
 watch(filters, useDebounce(async () => {
@@ -417,8 +188,6 @@ watch(filters, useDebounce(async () => {
 
 watch(() => modals.edit, async () => {
   if (modals.edit) {
-    await setCategories('')
-    await setBrands('')
   } else {
     model.id = undefined;
     model.brandId = undefined;
@@ -436,8 +205,6 @@ watch(() => modals.create, async () => {
 
 onMounted(async () => {
   await setModels();
-  await setCategories('');
-  await setBrands('');
 });
 
 </script>

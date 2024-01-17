@@ -178,7 +178,7 @@ onMounted(async () => {
       </el-select>
     </el-form-item>
     <el-form-item>
-      <el-button type="primary" :disabled="!group.name && !group.code" native-type="submit">Editar</el-button>
+      <el-button type="primary" :disabled="!group.name && !group.code" native-type="submit">Guardar</el-button>
     </el-form-item>
   </el-form>
 </template>

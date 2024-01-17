@@ -80,8 +80,6 @@ export const useBrands = () => {
           name,
         }
 
-        console.log(body)
-
         const { data, error } = await useFetch<Brand>(`/brands/${id}`,
           {
             method: 'PATCH',
@@ -122,6 +120,22 @@ export const useBrands = () => {
       } catch (error) {
         ElNotification({
           message: 'Error al borrar la marca intente de nuevo mas tarde.'
+        })
+      }
+    }
+
+    async getBrand(id: number) {
+      try {
+        const { data, error } = await useFetch<Brand>(`/brands/${id}`)
+
+        if (error.value) {
+          throw new Error();
+        }
+
+        return data.value
+      } catch (error) {
+        ElNotification({
+          message: 'Error al obtener la marca intente de nuevo mas tarde.'
         })
       }
     }

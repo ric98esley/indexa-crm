@@ -50,31 +50,7 @@
             <h2>Crear nueva marca</h2>
           </template>
           <template #default>
-            <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="brand"
-              @submit.prevent="createBrand()">
-              <el-form-item label="Nombre">
-                <el-input v-model="brand.name" placeholder="Ingrese aqui el nombre"></el-input>
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" :disabled="!brand.name" native-type="submit">Crear</el-button>
-              </el-form-item>
-            </el-form>
-          </template>
-        </el-dialog>
-        <el-dialog v-model="modals.edit">
-          <template #header>
-            <h2>Crear nueva marca</h2>
-          </template>
-          <template #default>
-            <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="brand"
-              @submit.prevent="patchBrand()">
-              <el-form-item label="Nombre">
-                <el-input v-model="brand.name" placeholder="Ingrese aqui el nombre"></el-input>
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" :disabled="!brand.name" native-type="submit">Editar</el-button>
-              </el-form-item>
-            </el-form>
+            <BrandFormSave :id="brandToEdit" @submit="setBrands"></BrandFormSave>
           </template>
         </el-dialog>
       </el-container>
@@ -94,6 +70,8 @@ const BrandService = useBrands();
 const brandService = new BrandService();
 
 const loadingBrand = ref(false);
+
+const brandToEdit = ref<number>(0);
 
 const filters = reactive({
   limit: 10,
@@ -117,19 +95,6 @@ const modals = reactive({
 });
 
 
-const brand = reactive<{
-  id?: number,
-  name: string,
-  customFields: number[],
-  removeFields: number[]
-}>({
-  id: undefined,
-  name: '',
-  customFields: [],
-  removeFields: []
-});
-
-
 const getBrands = async () => {
   try {
     loadingBrand.value = true;
@@ -149,54 +114,9 @@ const getBrands = async () => {
   }
 }
 
-const createBrand = async () => {
-  try {
-    loadingBrand.value = true;
-
-    const { data } = await brandService.createBrand({ name: brand.name })
-
-    loadingBrand.value = false;
-
-    await setBrands();
-
-    brand.id = undefined;
-    brand.name = '';
-    return data.value
-  } catch (error) {
-    loadingBrand.value = false;
-    ElNotification({
-      title: 'Error al crear marcas intente de nuevo mas tarde',
-    })
-  }
-}
-
-const patchBrand = async () => {
-  try {
-    loadingBrand.value = true;
-
-    const body = {
-      name: brand.name,
-      id: brand.id
-    }
-    const { data } = await brandService.patchBrand(body);
-
-    loadingBrand.value = false;
-
-    await setBrands()
-
-    brand.id = undefined;
-    brand.name = '';
-    return data.value
-  } catch (error) {
-    loadingBrand.value = false;
-    console.log(error)
-  }
-}
-
 const editBrand = (row: Brand) => {
-  modals.edit = true;
-  brand.id = row.id;
-  brand.name = row.name || '';
+  brandToEdit.value = row.id!;
+  modals.create = true;
 }
 
 const removeBrand = async (id: number) => {

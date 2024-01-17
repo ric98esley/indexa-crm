@@ -33,7 +33,7 @@
             {{ response.place?.group?.code }} - {{ response.place?.group?.name }}
             <br />
             Dirección: <b> {{ response.place?.address }} </b><br />
-            Numero de la {{ response.place?.type?.name }}:
+            Numero de {{ response.place?.type?.name }}:
             <b> {{ response.place?.phone }}</b>
           </el-col>
           <el-col :span="6">
@@ -55,11 +55,11 @@
           <tr v-for="(assignment, index) in response.rows" v-bind:key="index">
             <td>{{ index + 1 }}</td>
             <td>{{ new Date(assignment?.createdAt).toLocaleString() }}</td>
-            <td>{{ assignment.target?.serial }}</td>
+            <td>{{ assignment.asset?.serial }}</td>
             <td>
-              {{ assignment.target.model?.category.name || '' }} -
-              {{ assignment.target.model?.brand.name || '' }} -
-              {{ assignment.target.model?.name || '' }}
+              {{ assignment.asset.model?.category.name || '' }} -
+              {{ assignment.asset.model?.brand.name || '' }} -
+              {{ assignment.asset.model?.name || '' }}
             </td>
           </tr>
           <tr>
@@ -91,8 +91,11 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor', 'receptor'],
+  permissions: ['locations:read', 'locations:create', 'locations:update', 'locations:delete']
 })
+
+const LocationService = useLocation();
+const locationService = new LocationService();
 
 const response = reactive<{
   rows: Assignments[],
@@ -110,85 +113,9 @@ const response = reactive<{
   rows: []
 });
 
-const getAssignment = async (
-  {
-    locationId,
-    type = '',
-    serial = '',
-    deposit = '',
-    category = '',
-    brand = '',
-    all = 'false',
-    model = '',
-    limit = 10,
-    offset = 0,
-    endDate,
-    startDate
-  }: {
-    locationId?: number
-    serial: string,
-    all: string,
-    type: string,
-    deposit: string,
-    category: string,
-    brand: string,
-    model: string,
-    limit: number,
-    offset: number,
-    startDate: string,
-    endDate: string,
-  }
-) => {
-  try {
-    const { data: place } = await useFetch<Place>(`/locations/${locationId}`);
-    const { data } = await useFetch<{ total: number, rows: Assignments[] }>(`/locations/${locationId}/assets`, {
-      params: {
-        ...(type != '' && type && {
-          type
-        }),
-        ...(serial != '' && serial && {
-          serial
-        }),
-        ...(type != '' && type && {
-          type
-        }),
-        ...(model != '' && model && {
-          model
-        }),
-        ...(deposit != '' && deposit && {
-          deposit
-        }),
-        ...(category != '' && category && {
-          category
-        }),
-        ...(brand != '' && brand && {
-          brand
-        }),
-        ...(offset && {
-          offset: (offset - 1) * limit
-        }),
-        ...(limit && {
-          limit
-        }),
-        ...(startDate && endDate && {
-          startDate,
-          endDate
-        }),
-        ...(/^true$/i.test(all) && {
-          all,
-        }),
-        paranoid: true
-      }
-    });
-    return { place, data }
-  } catch (error) {
-    console.log(error);
-  }
-}
-
 const setAssignments = async () => {
   const queries = {
-    locationId: route.params.id,
+    id: route.params.id,
     type: route.query.type,
     serial: route.query.serial,
     deposit: route.query.deposit,
@@ -200,21 +127,24 @@ const setAssignments = async () => {
     endDate: route.query.endDate,
     all: route.query.all
   }
-  const res = await getAssignment(queries);
-  if (res) {
-    response.place = res.place.value;
-    response.rows = res.data.value?.rows || [];
-    response.total = res.data.value?.total
-  }
+  const assets = await locationService.getLocationAssets(queries);
 
+  response.rows = assets?.rows || [];
+  response.total = assets?.total || 0;
+}
+
+const setPlace = async () => {
+  const place = await locationService.getLocation({id: route.params.id});
+  response.place = place;
 }
 
 onMounted(async () => {
   await setAssignments()
-    .then(() => {
-      window.print();
-      setTimeout(window.close, 500);
-    });
+  await setPlace()
+  .then(() => {
+    window.print();
+    setTimeout(window.close, 500);
+  });
 })
 </script>
 
