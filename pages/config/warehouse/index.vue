@@ -17,9 +17,15 @@
             </template>
           </el-table-column>
           <el-table-column type="index" width="50" />
-          <el-table-column prop="name" label="Nombre" min-width="180">
+          <el-table-column label="Nombre" min-width="180">
             <template #header>
               <el-input v-model="filters.name" placeholder="Nombre" clearable />
+            </template>
+            <template #default="{ row }">
+              <NuxtLink :href="`/places/${row.id}`">
+                <span class="text-teal-500 underline">
+                  {{ row.name }} </span>
+              </NuxtLink>
             </template>
           </el-table-column>
           <el-table-column label="Estatus" min-width="120">
@@ -65,7 +71,17 @@
             <h2>Crear nuevo deposito</h2>
           </template>
           <template #default>
-            <LocationFormSave :status="['desplegable', 'archivado', 'pendiente']" @submit="setWarehouses" :id="locationToEdit">
+            <LocationFormSave :status="['desplegable', 'archivado', 'pendiente']" @submit="submitHandler">
+            </LocationFormSave>
+          </template>
+        </el-dialog>
+        <el-dialog v-model="modals.edit">
+          <template #header>
+            <h2>Editar deposito</h2>
+          </template>
+          <template #default>
+            <LocationFormSave :status="['desplegable', 'archivado', 'pendiente']" @submit="submitHandler"
+              :id="locationToEdit">
             </LocationFormSave>
           </template>
         </el-dialog>
@@ -163,8 +179,8 @@ const setWarehouses = async () => {
 
 const editDeposit = (row: Place) => {
   if (!row) return;
-  locationToEdit.value = row.id || 0 ;
-  modals.create = true;
+  locationToEdit.value = row.id || 0;
+  modals.edit = true;
 }
 
 const removeWarehouse = async (id: number) => {
@@ -226,6 +242,11 @@ const setGroup = async (query?: string) => {
   const rta = await getGroups(search);
   groups.rows = rta?.rows || []
   groups.total = rta?.total || 0
+}
+
+const submitHandler = async () => {
+  await setWarehouses()
+  locationToEdit.value = 0;
 }
 
 watch(filters, useDebounce(async () => {

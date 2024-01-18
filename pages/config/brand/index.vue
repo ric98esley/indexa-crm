@@ -50,7 +50,15 @@
             <h2>Crear nueva marca</h2>
           </template>
           <template #default>
-            <BrandFormSave :id="brandToEdit" @submit="setBrands"></BrandFormSave>
+            <BrandFormSave @submit="submitHandler"></BrandFormSave>
+          </template>
+        </el-dialog>
+        <el-dialog v-model="modals.edit">
+          <template #header>
+            <h2>edit marca</h2>
+          </template>
+          <template #default>
+            <BrandFormSave :id="brandToEdit" @submit="submitHandler"></BrandFormSave>
           </template>
         </el-dialog>
       </el-container>
@@ -116,7 +124,12 @@ const getBrands = async () => {
 
 const editBrand = (row: Brand) => {
   brandToEdit.value = row.id!;
-  modals.create = true;
+  modals.edit = true;
+}
+
+const submitHandler = async () => {
+  await setBrands()
+  brandToEdit.value = 0;
 }
 
 const removeBrand = async (id: number) => {
@@ -136,6 +149,7 @@ const removeBrand = async (id: number) => {
 
 const setBrands = async () => {
   const rta = await getBrands();
+  brandToEdit.value = 0;
   response.brands = rta?.rows || []
   response.total = rta?.total || 0
 }

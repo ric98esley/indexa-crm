@@ -124,8 +124,8 @@ const setPlace = async () => {
 
     group.code = data?.code || '';
     group.name = data?.name || '';
-    group.parentId = data?.parentId || undefined;
-    group.managerId = data?.managerId || undefined;
+    group.parentId = data?.parent?.id || undefined;
+    group.managerId = data?.manager?.id || undefined;
 
     loadingParent.value = false;
   } catch (error) {

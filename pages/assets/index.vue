@@ -4,11 +4,37 @@
       <PageHeader name="Activos">
         <template #buttons>
           <div class="sm:flex items-center hidden">
-            <el-button type="default" class="ml-2" @click="getExcel()" v-can="['assets:export']">Exportar a excel</el-button>
+            <el-button type="default" class="ml-2" @click="getExcel()" v-can="['assets:export']">Exportar a
+              excel</el-button>
             <el-button type="primary" class="ml-2" @click="printDiv('area')">Imprimir</el-button>
           </div>
         </template>
       </PageHeader>
+      <el-col class="mt-4">
+        <h2>Filtros</h2>
+        <el-row>
+          <el-form>
+            <el-row>
+              <el-form-item class="ml-4 w-10">
+                <el-button @click="modals.filters = true" type="primary" circle class="">
+                  <Icon name="ep:filter" />
+                </el-button>
+              </el-form-item>
+              <el-form-item class="w-64 sm:w-auto ml-4">
+                <el-date-picker v-model="filters.startDate" type="datetime" placeholder="Fecha de inicio"
+                  format="YYYY/MM/DD" value-format="x" :shortcuts="shortcuts" />
+              </el-form-item>
+              <div class="ml-4 w-10 flex items-center sm:items-start sm:mt-1">
+                <span class="ml-2">al</span>
+              </div>
+              <el-form-item class="w-64 sm:w-auto ml-4 sm:ml-0 sm:mr-4">
+                <el-date-picker v-model="filters.endDate" type="datetime" placeholder="Fecha limite" format="YYYY/MM/DD"
+                  value-format="x" />
+              </el-form-item>
+            </el-row>
+          </el-form>
+        </el-row>
+      </el-col>
       <el-col v-can="['assets:read']">
         <el-table :data="response.assets" v-loading="loading" :row-class-name="assetStatus" id="area">
           <el-table-column type="index" width="50" />
@@ -38,9 +64,11 @@
               <el-input v-model="filters.location" placeholder="Estado" clearable />
             </template>
             <template #default="{ row }">
-              <div>
-                {{ row.location?.code }} - {{ row.location?.name }}
-              </div>
+              <NuxtLink :href="`/places/${row.location.id}`">
+                <span class="text-teal-500 underline">
+                  {{ row.location?.code }} - {{ row.location?.name }}
+                </span>
+              </NuxtLink>
             </template>
           </el-table-column>
           <el-table-column label="Categoría" prop="model.category.name" :min-width="minWidth">
@@ -61,7 +89,7 @@
           <el-table-column v-role:not="'receptor'" width="140">
             <template #default="{ row }">
               <el-row justify="space-around">
-                <el-button type="info" circle @click="getAsset(row)" v-can="['assets:update']" >
+                <el-button type="info" circle @click="getAsset(row)" v-can="['assets:update']">
                   <Icon name="ep:edit" />
                 </el-button>
                 <NuxtLink :to="`/assets/${row.id}`" v-can="['assets:read']">
@@ -80,6 +108,60 @@
       </el-col>
       <el-container>
         <AssetsFormGet :id="toEdit" v-model:open="editModal"></AssetsFormGet>
+        <el-dialog v-model="modals.filters">
+          <template #header>
+            <h2 class="text-xl font-bold">Filtros</h2>
+          </template>
+          <el-form label-position="top">
+            <el-row>
+              <el-col :span="12">
+                <el-form-item label="Serial">
+                  <el-input v-model="filters.serial" placeholder="Serial" clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Estado">
+                  <el-input v-model="filters.location" placeholder="Estado" clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Categoría">
+                  <el-input v-model="filters.category" placeholder="Categoría" clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Marca">
+                  <el-input v-model="filters.brand" placeholder="Marca" clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Modelo">
+                  <el-input v-model="filters.model" placeholder="Modelo" clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Fecha de inicio">
+                  <el-date-picker v-model="filters.startDate" type="datetime" placeholder="Fecha de inicio"
+                    format="YYYY/MM/DD" value-format="x" :shortcuts="shortcuts" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Fecha limite">
+                  <el-date-picker v-model="filters.endDate" type="datetime" placeholder="Fecha limite" format="YYYY/MM/DD"
+                    value-format="x" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Todos">
+                  <el-switch v-model="filters.all" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row justify="end">
+              <el-button type="primary" @click="modals.filters = false">Cerrar</el-button>
+            </el-row>
+          </el-form>
+        </el-dialog>
       </el-container>
     </el-row>
   </el-container>
@@ -95,6 +177,50 @@ definePageMeta({
 
 const AssetServices = useAssets();
 const assetServices = new AssetServices();
+
+const modals = reactive({
+  filters: false
+})
+
+
+const shortcuts = [
+  {
+    text: 'Hoy',
+    value: new Date(),
+  },
+  {
+    text: 'Ayer',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24)
+      return date
+    },
+  },
+  {
+    text: 'Semana pasada',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
+      return date
+    },
+  },
+  {
+    text: 'Mes pasado',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24 * 30)
+      return date
+    },
+  },
+  {
+    text: 'Trimestre pasado',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24 * 90)
+      return date
+    },
+  }
+]
 
 const minWidth = 120;
 const toEdit = ref(0)
@@ -113,18 +239,21 @@ const response = reactive<{
   total: 0
 });
 
-const viewDetails = async (id: number) => {
-  await navigateTo(`/assets/${id}`);
-}
-
 const filters = reactive({
+  serial: '',
   limit: 10,
   offset: 1,
-  serial: '',
-  category: '',
-  brand: '',
+  sort: 'createdAt',
+  order: 'DESC',
+  location: '',
+  type: '',
+  status: '',
+  all: false,
   model: '',
-  location: ''
+  brand: '',
+  category: '',
+  endDate: '',
+  startDate: '',
 })
 
 const assetStatus = ({
@@ -148,6 +277,9 @@ const assetStatus = ({
 const getAssets = async () => {
   try {
     loading.value = true;
+    if (filters.endDate < filters.startDate) {
+      throw new Error('La fecha de inicio no puede ser mayor a la fecha limite')
+    }
     const data = await assetServices.getAssets(filters);
 
     response.assets = data?.value?.rows || [];
@@ -155,6 +287,11 @@ const getAssets = async () => {
     loading.value = false;
   } catch (error) {
     loading.value = false;
+    ElNotification({
+      title: 'Error al obtener los activos intente de nuevo mas tarde.',
+      message: error.message,
+      type: 'error'
+    })
   }
 }
 
@@ -205,7 +342,7 @@ const getExcel = async () => {
 }
 
 watch(editModal, () => {
-  if(!editModal.value) getAssets();
+  if (!editModal.value) getAssets();
 })
 
 watch(filters, useDebounce(async () => {

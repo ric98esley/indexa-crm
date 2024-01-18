@@ -47,7 +47,15 @@
           <h2>Guardar modelo</h2>
         </template>
         <template #default>
-          <ModelFormSave :id="modelToEdit" @submit="setModels"></ModelFormSave>
+          <ModelFormSave @submit="submitHandler"></ModelFormSave>
+        </template>
+      </el-dialog>
+      <el-dialog v-model="modals.edit">
+        <template #header>
+          <h2>Editar modelo</h2>
+        </template>
+        <template #default>
+          <ModelFormSave :id="modelToEdit" @submit="submitHandler"></ModelFormSave>
         </template>
       </el-dialog>
       <LeftButton @click="modals.create = true" />
@@ -64,9 +72,7 @@ definePageMeta({
   permissions: ['models:read', 'models:update', 'models:delete', 'models:create'],
 });
 
-const loadingCategories = ref(false);
 const loadingModels = ref(false);
-const loadingBrands = ref(false);
 
 const modelToEdit = ref<number>(0);
 
@@ -79,22 +85,7 @@ const filters = reactive({
   category: '',
   brand: '',
   name: ''
-})
-
-const categories = reactive<{
-  rows: Category[],
-  total: number
-}>({
-  rows: [],
-  total: 0
-})
-const brands = reactive<{
-  rows: Brand[],
-  total: number
-}>({
-  rows: [],
-  total: 0
-})
+});
 
 const models = reactive<{
   rows: Model[],
@@ -102,7 +93,7 @@ const models = reactive<{
 }>({
   rows: [],
   total: 0
-})
+});
 
 const modals = reactive({
   details: false,
@@ -110,22 +101,8 @@ const modals = reactive({
   create: false,
 })
 
-const model = reactive<{
-  id?: number,
-  name: string,
-  categoryId?: number,
-  brandId?: number
-}>({
-  id: undefined,
-  name: '',
-  categoryId: undefined,
-  brandId: undefined
-});
-
-
 const getModels = async () => {
   try {
-
     loadingModels.value = true;
     const { data } = await modelsServices.getModels({
       name: filters.name,
@@ -146,7 +123,12 @@ const getModels = async () => {
 
 const editModel = (row: Model) => {
   modelToEdit.value = row.id || 0;
-  modals.create = true;
+  modals.edit = true;
+}
+
+const submitHandler = async () => {
+  await setModels()
+  modelToEdit.value = 0;
 }
 
 const removeCategory = async (id: number) => {
@@ -185,22 +167,7 @@ watch(filters, useDebounce(async () => {
   await setModels()
 }, 500)
 )
-
-watch(() => modals.edit, async () => {
-  if (modals.edit) {
-  } else {
-    model.id = undefined;
-    model.brandId = undefined;
-    model.categoryId = undefined;
-    model.name = ''
-  }
-})
-
 watch(() => modals.create, async () => {
-  model.id = undefined;
-  model.brandId = undefined;
-  model.categoryId = undefined;
-  model.name = ''
 })
 
 onMounted(async () => {

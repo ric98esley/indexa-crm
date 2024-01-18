@@ -64,12 +64,19 @@
       <el-container>
         <!-- crear grupo -->
         <el-dialog v-model="modals.create">
-  
           <template #header>
             <h2>Crear nuevo grupo</h2>
           </template>
           <template #default>
-            <GroupFormSave :id="groupToEdit" @on-submit="setGroups"/>
+            <GroupFormSave @on-submit="submitHandler"/>
+          </template>
+        </el-dialog>
+        <el-dialog v-model="modals.edit">
+          <template #header>
+            <h2>Editar grupo</h2>
+          </template>
+          <template #default>
+            <GroupFormSave :id="groupToEdit" @on-submit="submitHandler"/>
           </template>
         </el-dialog>
       </el-container>
@@ -96,8 +103,6 @@ definePageMeta({
 const groupToEdit = ref<number | undefined>(undefined);
 
 const loadingGroup = ref(false);
-const loadingParent = ref(false);
-const loadingUser = ref(false);
 
 const filters = reactive({
   limit: 10,
@@ -123,22 +128,6 @@ const modals = reactive({
   create: false,
   menu: false
 });
-
-
-const group = reactive<{
-  id?: number,
-  name: string,
-  code: string,
-  parentId?: number,
-  managerId?: number,
-}>({
-  id: undefined,
-  name: '',
-  code: '',
-  parentId: undefined,
-  managerId: undefined
-});
-
 
 const getGroups = async ({
   id,
@@ -202,7 +191,7 @@ const getGroups = async ({
   }
 }
 const editGroup = (row: Group) => {
-  modals.create = true;
+  modals.edit = true;
   groupToEdit.value = row.id;
 }
 
@@ -231,6 +220,11 @@ const removeGroup = async (id: number) => {
   }
 }
 
+const submitHandler = async () => {
+  await setGroups()
+  groupToEdit.value = 0;
+}
+
 const setGroups = async () => {
   const query = {
     name: filters.name,
@@ -251,16 +245,6 @@ watch(filters, useDebounce(async () => {
 }, 500)
 )
 
-watch(() => modals.edit, async () => {
-  if (modals.edit) {
-  } else {
-    group.id = undefined;
-    group.code = '';
-    group.name = '';
-    group.parentId = undefined;
-    group.managerId = undefined;
-  }
-})
 
 onMounted(async () => {
   await setGroups();

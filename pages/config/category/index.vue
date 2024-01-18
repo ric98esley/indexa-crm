@@ -59,10 +59,18 @@
       <el-container>
         <el-dialog v-model="modals.create">
           <template #header>
-            <h2>Guardar categoría</h2>
+            <h2>Crear categoría</h2>
           </template>
           <template #default>
-            <CategoryFormSave @submit="setCategories" :id="categoryToEdit" ></CategoryFormSave>
+            <CategoryFormSave @submit="submitHandler" ></CategoryFormSave>
+          </template>
+        </el-dialog>
+        <el-dialog v-model="modals.edit">
+          <template #header>
+            <h2>Editar categoría</h2>
+          </template>
+          <template #default>
+            <CategoryFormSave @submit="submitHandler" :id="categoryToEdit" ></CategoryFormSave>
           </template>
         </el-dialog>
         <LeftButton @click="createCategory"/>
@@ -145,7 +153,7 @@ const createCategory = () => {
 }
 
 const editCategory = (row: Category) => {
-  modals.create = true;
+  modals.edit = true;
 
   if(row.id) {
     categoryToEdit.value = row.id;
@@ -166,6 +174,11 @@ const setCategories = async () => {
   const rta = await getCategories();
   response.categories = rta?.rows || []
   response.total = rta?.total || 0
+}
+
+const submitHandler = async () => {
+  await setCategories()
+  categoryToEdit.value = 0;
 }
 
 watch(filters, useDebounce(async () => {
