@@ -234,6 +234,8 @@ const getGroups = async ({
     })
   }
 }
+
+
 const setGroup = async (query?: string) => {
   const search = {
     name: query,

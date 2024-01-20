@@ -5,7 +5,7 @@ export const useGroups = () =>
       manager,
       code,
       parent,
-      limit = 10,
+      limit,
       offset = 0,
     }: {
       name?: string;
@@ -56,7 +56,7 @@ export const useGroups = () =>
         });
       }
     }
-    async getGroup(id: number) {
+    async getGroup(id: number | string) {
       try {
         const { data, error } = await useFetch<Group>(`/groups/${id}`);
 

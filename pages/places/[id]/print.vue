@@ -19,15 +19,15 @@
           </el-col>
         </el-row>
         <br />
-        <el-row class="text-xs">
-          <el-col :span="8">
+        <el-row class="text-xs" justify="space-between">
+          <el-col :span="7">
             <strong> Reporte de inventario</strong>
-
             <br />
-            Fecha de impresion: {{ new Date().toLocaleString() }} <br />
+            Fecha de reporte: {{ new Date().toLocaleString() }} <br />
+            Impreso por <b>{{ user?.username }}</b>
           </el-col>
 
-          <el-col :span="10">
+          <el-col :span="8">
             <strong>Datos de la {{ response.place?.type?.name }}</strong> <br />
             {{ response.place?.code }} - {{ response.place?.name }} | Grupo:
             {{ response.place?.group?.code }} - {{ response.place?.group?.name }}
@@ -71,12 +71,20 @@
           </tr>
         </table>
 
-        <table class="w-full signs mt-5">
+        <table class="w-full signs mt-10">
           <tr class="mt-5">
             <th>Firma del cliente</th>
             <th>Firma del técnico</th>
           </tr>
         </table>
+        <div>
+          <br /><br />
+          <strong>Nota:</strong> Con este documento se hace constar el buen
+          funcionamiento de los activos asignados, así como también el compromiso
+          por el cuidado de los mismos por parte de quien recibe. Es importante
+          señalar que en caso de robo, pedida o mal uso, el cliente asume la
+          responsabilidad ante la empresa.
+        </div>
       </el-col>
     </div>
   </el-container>
@@ -84,7 +92,8 @@
 
 <script setup lang="ts">
 
-const route = useRoute()
+const route = useRoute();
+import { useAuthStore } from '@/stores/authStore';
 
 definePageMeta({
   layout: 'print',
@@ -94,8 +103,12 @@ definePageMeta({
   permissions: ['locations:read', 'locations:create', 'locations:update', 'locations:delete']
 })
 
+const auth = useAuthStore();
+
 const LocationService = useLocation();
 const locationService = new LocationService();
+
+const user = auth.getUser;
 
 const response = reactive<{
   rows: Assignments[],
@@ -115,8 +128,8 @@ const response = reactive<{
 
 const setAssignments = async () => {
   const queries = {
-    id: route.params.id,
-    type: route.query.type,
+    id: route.params.id.toString(),
+    orderType: route.query.orderType,
     serial: route.query.serial,
     deposit: route.query.deposit,
     category: route.query.category,
@@ -165,7 +178,7 @@ onMounted(async () => {
 }
 
 .table-print {
-  text-align: center;
+  text-align: left;
   padding: 3px 2px;
 }
 

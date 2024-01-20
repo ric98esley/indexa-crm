@@ -189,5 +189,36 @@ export const useMovements = () => {
         })
       }
     }
+
+    async getMovementsByLocations({
+      limit = 10,
+      offset = 0,
+      startDate = '',
+      endDate = '',
+      search = '',
+      orderType = '',
+    }) {
+      try {
+        const params = useFilterObject({
+          limit,
+          offset: (offset - 1) * Number(limit),
+          startDate,
+          endDate,
+          search,
+          orderType
+        })
+        const { data, error } = await useFetch<{ total: number, rows: LocationMovementCount[] }>(`/movements/locations`, {
+          params
+        });
+
+        return data.value
+      } catch (error) {
+        ElNotification({
+          title: 'Error al cargar los movimientos',
+          message: error.message,
+          type: 'error'
+        })
+      }
+    }
   }
 }

@@ -42,27 +42,28 @@
         <el-row>
           <el-tabs v-model="type" class="w-full" type="card">
             <el-tab-pane label="Detalles activos" name="assets">
-              <AssignmentsTableView :assignments="response.assignments.rows" v-model:limit="filters.limit"
-                v-model:filters="filters" :total="response.assignments.total" :loading="loadingAssignments" />
+              <AssignmentsTableView :assignments="movements.rows" v-model:limit="filters.limit" v-model:filters="filters"
+                :total="movements.total" :loading="loadingAssignments" />
             </el-tab-pane>
-            <!-- <el-tab-pane label="Detalles por agencia" name="ag">
-              <el-table :data="response.count.rows">
+            <el-tab-pane label="Detalles por agencia" name="agencia">
+              <el-alert title="Debes ingresar un rango de fechas para obtener un resultado en la búsqueda" type="warning" />
+              <el-table :data="movementsByLocations.rows" v-loading="loadingAssignmentsByLocation">
                 <el-table-column label="Código" prop="code" />
-                <el-table-column label="Agencia" prop="location" />
-                <el-table-column label="Grupo" prop="groupCode" />
-                <el-table-column label="Código de grupo" prop="group" />
-                <el-table-column label="Total" prop="count" />
-                <el-table-column label="Acciones" :min-width="minWidth">
+                <el-table-column label="Agencia" prop="name" />
+                <el-table-column label="Grupo" prop="group.name" />
+                <el-table-column label="Código de grupo" prop="group.code" />
+                <el-table-column label="Total" prop="total" />
+                <el-table-column label="Acciones" width="120">
                   <template #default="{ row }">
                     <el-row>
-                      <el-button type="primary" circle @click="setPlace(row.locationId, row)">
+                      <el-button type="primary" circle @click="setPlace(row)">
                         <Icon name="ep:view" />
                       </el-button>
                     </el-row>
                   </template>
                 </el-table-column>
               </el-table>
-            </el-tab-pane> -->
+            </el-tab-pane>
           </el-tabs>
         </el-row>
         <el-container>
@@ -86,13 +87,13 @@
                 <el-input v-model="filters.group" placeholder="Código o nombre del grupo" clearable />
               </el-form-item>
               <el-form-item label="Serial">
-                <el-input v-model="filters.serial" placeholder="Código del activo" clearable/>
+                <el-input v-model="filters.serial" placeholder="Código del activo" clearable />
               </el-form-item>
               <el-form-item label="Categoría">
                 <el-input v-model="filters.category" placeholder="Nombre de la categoría" clearable />
               </el-form-item>
               <el-form-item label="Modelo">
-                <el-input v-model="filters.model" placeholder="Nombre del modelo" clearable/>
+                <el-input v-model="filters.model" placeholder="Nombre del modelo" clearable />
               </el-form-item>
               <el-form-item label="Marca">
                 <el-input v-model="filters.brand" placeholder="Nombre de la marca" clearable />
@@ -100,19 +101,17 @@
               <el-row justify="space-between">
                 <el-form-item label="Ordenar por">
                   <el-select v-model="filters.sort" placeholder="Ordenar por">
-                    <el-option v-for="option in sortBy" :key="option.value" :value="option.value"
-                    :label="option.label">
-                  </el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item label="Tipo de orden">
-                <el-select v-model="filters.order" placeholder="Tipo de orden">
-                  <el-option v-for="option in sortType" :key="option.value" :value="option.value"
-                    :label="option.label">
-                  </el-option>
-                </el-select>
-              </el-form-item>
-            </el-row>
+                    <el-option v-for="option in sortBy" :key="option.value" :value="option.value" :label="option.label">
+                    </el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="Tipo de orden">
+                  <el-select v-model="filters.order" placeholder="Tipo de orden">
+                    <el-option v-for="option in sortType" :key="option.value" :value="option.value" :label="option.label">
+                    </el-option>
+                  </el-select>
+                </el-form-item>
+              </el-row>
             </el-form>
           </el-dialog>
           <OrderTableView v-model:open="modals.order" :id="orderId" />
@@ -120,19 +119,12 @@
             <template #header>
               <el-row justify="space-between">
                 Agencia
-                <!-- <el-button @click="print(response.assignments.total, response.place.id, 'place')"
-                  type="primary">Imprimir</el-button> -->
+                <el-button @click="print()"
+                  type="primary">Imprimir</el-button>
               </el-row>
             </template>
-            <el-table :data="response.assignments.rows" v-loading="loadingAssignments">
-              <el-table-column label="serial" prop="target.serial">
-              </el-table-column>
-              <el-table-column label="Descripción">
-                <template #default="{ row }">
-                  {{ row.target?.model.category.name }} - {{ row.target.model.name }} - {{ row.target.model.brand.name }}
-                </template>
-              </el-table-column>
-            </el-table>
+            <AssignmentsTableView :assignments="movements.rows" v-model:limit="filters.limit" v-model:filters="filters"
+              :total="movements.total" :loading="loadingAssignments" />
           </el-dialog>
         </el-container>
       </el-col>
@@ -154,7 +146,10 @@ const movementsServices = new MovementServices();
 const route = useRoute();
 
 const loadingAssignments = ref(false);
+const loadingAssignmentsByLocation = ref(false);
 const orderId = ref(0);
+
+const placeId = ref(0);
 
 const shortcuts = [
   {
@@ -261,27 +256,20 @@ const sortType = [
   }
 ]
 
-const response = reactive<{
-  place: Place, assignments: { total: number, rows: Assignments[] }, count: {
-    total: number, rows: Count[]
-  }
+const movementsByLocations = reactive<{
+  total: number, rows: LocationMovementCount[]
 }>({
-  place: {
-    isActive: false,
-    code: '',
-    phone: '',
-    rif: '',
-    address: ''
-  },
-  count: {
-    total: 0,
-    rows: [],
-  },
-  assignments: {
-    total: 0,
-    rows: []
-  }
-})
+  total: 0,
+  rows: []
+});
+
+const movements = reactive<{
+  total: number, rows: Assignments[]
+}>({
+  total: 0,
+  rows: []
+});
+
 
 const type = ref('assets')
 
@@ -327,17 +315,33 @@ const filters = reactive<{
   order: 'DESC',
 })
 
-const getPlace = async ({
-  locationId
-}: {
-  locationId?: number
-}) => {
-  const { data, error } = await useFetch<Place>(`/locations/${locationId}`)
-  return data
-}
+const setMovementsByLocation = async () => {
+  try {
+    if(!filters.startDate || !filters.endDate) {
+      throw new Error('Debe seleccionar un rango de fechas')
+    }
+    loadingAssignmentsByLocation.value = true;
+    const query = {
+      limit: filters.limit,
+      offset: filters.offset,
+      orderType: route.query.type?.toString() || '',
+      startDate: filters.startDate,
+      endDate: filters.endDate
+    }
+    const res = await movementsServices.getMovementsByLocations(query);
+    loadingAssignmentsByLocation.value = false;
 
-const setLocation = async (placeId: number) => {
-  response.place = await getPlace({ locationId: placeId })
+    movementsByLocations.total = res?.total || 0;
+    movementsByLocations.rows = res?.rows || []
+
+  } catch (error) {
+    loadingAssignments.value = false;
+    ElNotification({
+      title: 'Error',
+      message: error.message,
+      type: 'error'
+    })
+  }
 }
 
 const setAssignments = async () => {
@@ -349,11 +353,11 @@ const setAssignments = async () => {
 
     const orderType = route.query.type?.toString() || '';
 
-    const res = await movementsServices.getMovements({...filters, orderType});
+    const res = await movementsServices.getMovements({ ...filters, orderType });
     loadingAssignments.value = false;
 
-    response.assignments.total = res?.value?.total || 0;
-    response.assignments.rows = res?.value?.rows || []
+    movements.total = res?.value?.total || 0;
+    movements.rows = res?.value?.rows || []
   } catch (error) {
     loadingAssignments.value = false;
     ElNotification({
@@ -369,11 +373,10 @@ const setAssignmentsExcel = async () => {
     const queries = {
       orderType: route.query.type?.toString() || '',
       serial: filters.serial,
-      deposit: filters.deposit,
       category: filters.category,
       brand: filters.brand,
       model: filters.model,
-      limit: response.assignments.total,
+      limit: movements.total,
       offset: filters.offset,
       startDate: filters.startDate,
       group: filters.group,
@@ -388,25 +391,57 @@ const setAssignmentsExcel = async () => {
   }
 }
 
-const setPlace = async (id: number, row: Count) => {
-  try {
-    await setLocation(id)
-    modals.place = true;
-    filters.location = row.code || '';
-    filters.limit = row.count || 0;
-    filters.offset = 0
-  } catch (error) {
-    console.log(error)
-  }
+const setPlace = (row: LocationMovementCount) => {
+  placeId.value = row.id;
+  filters.location = row.code;
+  modals.place = true;
 }
 
+const print = () => {
+  return navigateTo(
+    {
+      path: `/places/${placeId.value}/print`,
+      query: {
+        total: movements.total,
+        all: 'true',
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+        orderType: route.query.type?.toString() || '',
+      }
+    },
+    {
+      open: {
+        target: '_blank',
+        windowFeatures: {
+          popup: true,
+          noopener: true,
+          noreferrer: true,
+        }
+      }
+    })
+}
+
+watch(type, async () => {
+  if (type.value === 'agencia') {
+    await setMovementsByLocation()
+  }
+})
+
 watch(filters, useDebounce(async () => {
-  await setAssignments()
+  if (type.value === 'agencia') {
+    await setMovementsByLocation();
+  }
+  await setAssignments();
 }, 500
 ));
 
 watch(() => route.query.type, useDebounce(async () => {
-  await setAssignments()
+  if (type.value === 'assets') {
+    await setAssignments()
+  }
+  if (type.value === 'agencia') {
+    await setMovementsByLocation();
+  }
 }));
 
 onMounted(async () => {

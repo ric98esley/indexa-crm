@@ -1,7 +1,7 @@
 <template>
   <el-container direction="vertical" class="p-3">
     <el-row>
-      <PageHeader name="Categorías" />
+      <PageHeader name="Grupos" />
       <el-col :span="24" :gutter="12">
         <el-table :data="groups.rows" stripe v-loading="loadingGroup">
           <el-table-column type="expand" width="50">
@@ -45,13 +45,15 @@
           </el-table-column>
           <el-table-column label="Acciones" width="180">
             <template #default="props">
-              <el-row>
+              <el-row justify="space-around">
                 <el-button type="info" circle @click="editGroup(props.row)">
                   <Icon name="ep:edit" />
                 </el-button>
-                <el-button type="primary" circle>
-                  <Icon name="ep:view" />
-                </el-button>
+                <NuxtLink :to="`/config/group/${props.row.id}`">
+                  <el-button type="primary" circle>
+                    <Icon name="ep:view" />
+                  </el-button>
+                </NuxtLink>
                 <el-button type="danger" circle @click="removeGroup(props.row.id)">
                   <Icon name="ep:delete" />
                 </el-button>

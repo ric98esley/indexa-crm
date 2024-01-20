@@ -116,6 +116,15 @@ declare global {
     to: Place;
   }
 
+
+  interface LocationMovementCount {
+    id: number,
+    code: string,
+    name: string,
+    phone: string,
+    total: number
+  }
+
   interface Order extends Omit<Base, 'name'> {
     type: string;
     description: string;
@@ -134,6 +143,7 @@ declare global {
     manager?: User
     parentId?: number
     managerId?: number
+    children?: Group[]
   }
   interface Product extends Base {
     price: string,

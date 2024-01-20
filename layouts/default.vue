@@ -346,6 +346,10 @@ const menusA = reactive([
           {
             title: 'Ver grupos',
             route: { path: '/config/group' }
+          },
+          {
+            title: 'Árbol',
+            route: { path: '/config/group/tree' }
           }
         ]
       }
