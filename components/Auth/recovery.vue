@@ -1,17 +1,11 @@
 <script setup lang="ts" >
 import { FormInstance, FormRules } from 'element-plus';
 import { useAuthStore } from '@/stores/authStore'
-const auth = useAuthStore();
 
 const formUser = ref<FormInstance>()
 
 const AuthService = useAuth();
 const authService = new AuthService();
-
-interface UserForm {
-  username: string,
-  password: string
-}
 
 const user = reactive({
   email: ''
@@ -27,18 +21,18 @@ const rules = reactive({
 let loading = ref(false);
 
 const recovery = async () => {
-
-  loading.value = true;
-
   try {
+    loading.value = true;
     const data = await authService.recovery(user.email);
+    user.email = '';
   } catch (error) {
     ElNotification({
       title: 'Ha ocurrido un error',
       message: error?.message || ''
     })
-    loading.value = false;
     console.log(error)
+  } finally {
+    loading.value = false;
   }
 }
 </script>
