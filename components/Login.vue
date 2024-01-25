@@ -1,14 +1,12 @@
 <script setup lang="ts" >
 import { FormInstance, FormRules } from 'element-plus';
 import { useAuthStore } from '@/stores/authStore'
-import { Console } from 'console';
 const auth = useAuthStore();
 
 const formUser = ref<FormInstance>()
 
 const AuthService = useAuth();
 const authService = new AuthService();
-console.log(authService)
 
 interface UserForm {
   username: string,
@@ -67,8 +65,6 @@ const login = async (formEl: FormInstance | undefined) => {
     const userRoles = useRoles();
     const userPermissions = usePermissions();
 
-    console.log(user)
-
     userRoles.value = [user!.role];
     userPermissions.value = data.value?.ability || ['user:self'];
 
@@ -123,6 +119,11 @@ const login = async (formEl: FormInstance | undefined) => {
             sección</el-button>
         </el-form-item>
       </el-form>
+      <el-row justify="center">
+        <NuxtLink href="/recovery" >
+          Recuperar contraseña
+        </NuxtLink>
+      </el-row>
     </el-card>
   </div>
 </template>

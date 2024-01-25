@@ -73,6 +73,23 @@ export const useGroups = () =>
       }
     }
 
+    async getGroupLocation(id: number | string) {
+      try {
+        const { data, error } = await useFetch<{rows: Place[], total: number}>(`/groups/${id}/locations`);
+
+        if (error.value) {
+          throw new Error(error.value.data.message);
+        }
+        return data.value;
+      } catch (error) {
+        ElNotification({
+          title: 'Error al obtener el grupo intente de nuevo mas tarde',
+          message: error.message,
+          type: 'error',
+        });
+      }
+    }
+
     async createGroup(group: Group) {
       try {
         if (!group.name || !group.code)

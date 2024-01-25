@@ -43,7 +43,7 @@
               {{ row.manager?.username }} - {{ row?.manager?.profile?.name }} {{ row?.manager?.profile?.lastName }}
             </template>
           </el-table-column>
-          <el-table-column label="Acciones" width="180">
+          <el-table-column label="Acciones" width="150">
             <template #default="props">
               <el-row justify="space-around">
                 <el-button type="info" circle @click="editGroup(props.row)">
