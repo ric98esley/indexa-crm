@@ -121,6 +121,11 @@
           <el-table-column type="index" width="50" label="id" />
           <el-table-column label="Serial" prop="serial" min-width="120">
           </el-table-column>
+          <el-table-column label="Procedencia">
+            <template #default="{ row }">
+              {{ row.location?.code }} - {{ row.location?.name }}
+            </template>
+          </el-table-column>
           <el-table-column label="Categoría" prop="model.category.name" min-width="120">
           </el-table-column>
           <el-table-column label="Marca" prop="model.brand.name" min-width="120">

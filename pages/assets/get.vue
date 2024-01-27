@@ -1,7 +1,7 @@
 <template>
   <el-container direction="vertical" class="p-4">
     <el-row>
-      <PageHeader  class="mb-4">
+      <PageHeader class="mb-4">
         <template #title>
           Recibir total: <strong>{{ assetsCount }}</strong>
         </template>
@@ -13,8 +13,8 @@
         <el-card class="w-full">
           <el-form label-position="top" @submit.prevent="() => { }">
             <el-form-item label="Deposito (Por defecto)">
-              <el-select class="w-full" v-model="assignments.place" filterable remote
-                placeholder="Elige un deposito" :loading="loadingPlace" :remote-method="setPlaces">
+              <el-select class="w-full" v-model="assignments.place" filterable remote placeholder="Elige un deposito"
+                :loading="loadingPlace" :remote-method="setPlaces">
                 <el-option v-for="item in places.rows" :key="item.id" :label="`${item.id} - ${item.name}`"
                   :value="item.id!">
                   {{ item.id }} - {{ item.name }}
@@ -38,6 +38,11 @@
         <el-table :data="assignments.assets">
           <el-table-column type="index" width="50" />
           <el-table-column label="Serial" prop="serial" min-width="120">
+          </el-table-column>
+          <el-table-column label="Lugar" min-width="120">
+            <template #default="{ row }">
+              {{ row.location?.code }} - {{ row.location?.name }}
+            </template>
           </el-table-column>
           <el-table-column label="Estado" prop="location.name" min-width="120">
             <template type="text" #default="{ row }">
@@ -130,7 +135,7 @@ const getAssets = async (query: string, cb: (arg: any) => void) => {
 }
 
 const handleSelectAsset = (row: Asset) => {
-  if (assignments.assets.some(e => e.id === row.id)) return   ElMessage({
+  if (assignments.assets.some(e => e.id === row.id)) return ElMessage({
     message: 'Activo ya agregado a la lista.',
     type: 'warning',
   });

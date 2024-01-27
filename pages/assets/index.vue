@@ -35,79 +35,8 @@
           </el-form>
         </el-row>
       </el-col>
-      <el-col v-can="['assets:read']">
-        <el-table :data="response.assets" v-loading="loading" :row-class-name="assetStatus" id="area">
-          <el-table-column type="index" width="50" />
-          <el-table-column type="expand" width="50">
-            <template #default="{ row }">
-              <el-table :data="row.specifications" :border="true">
-                <el-table-column label="Campo" prop="type.name"></el-table-column>
-                <el-table-column label="Valor" prop="value"></el-table-column>
-              </el-table>
-            </template>
-          </el-table-column>
-          <el-table-column label="Fecha" :min-width="minWidth">
-            <template #default="{ row }">
-              {{ new Date(row.createdAt).toLocaleString() }}
-            </template>
-          </el-table-column>
-          <el-table-column label="Serial" prop="serial" :min-width="minWidth">
-            <template #header>
-              <el-input v-model="filters.serial" placeholder="Serial" clearable />
-            </template>
-            <template #default="{ row }">
-              <Copy :text="row.serial" />
-            </template>
-          </el-table-column>
-          <el-table-column label="Estado" :min-width="minWidth">
-            <template #header>
-              <el-input v-model="filters.location" placeholder="Estado" clearable />
-            </template>
-            <template #default="{ row }">
-              <NuxtLink :href="`/places/${row.location.id}`">
-                <span class="text-teal-500 underline">
-                  {{ row.location?.code }} - {{ row.location?.name }}
-                </span>
-              </NuxtLink>
-            </template>
-          </el-table-column>
-          <el-table-column label="Categoría" prop="model.category.name" :min-width="minWidth">
-            <template #header>
-              <el-input v-model="filters.category" placeholder="Categoría" clearable />
-            </template>
-          </el-table-column>
-          <el-table-column label="Marca" prop="model.brand.name" :min-width="minWidth">
-            <template #header>
-              <el-input v-model="filters.brand" placeholder="Marca" clearable />
-            </template>
-          </el-table-column>
-          <el-table-column label="Modelo" prop="model.name" :min-width="minWidth">
-            <template #header>
-              <el-input v-model="filters.model" placeholder="Modelo" clearable />
-            </template>
-          </el-table-column>
-          <el-table-column v-role:not="'receptor'" width="140">
-            <template #default="{ row }">
-              <el-row justify="space-around">
-                <el-button type="info" circle @click="getAsset(row)" v-can="['assets:update']">
-                  <Icon name="ep:edit" />
-                </el-button>
-                <NuxtLink :to="`/assets/${row.id}`" v-can="['assets:read']">
-                  <el-button type="primary" circle>
-                    <Icon name="ep:view" />
-                  </el-button>
-                </NuxtLink>
-                <el-button type="danger" circle @click="removeAsset(row.id)" v-can="['assets:delete']">
-                  <Icon name="ep:delete" />
-                </el-button>
-              </el-row>
-            </template>
-          </el-table-column>
-        </el-table>
-        <Pagination v-model:offset="filters.offset" v-model:limit="filters.limit" :total="response.total" />
-      </el-col>
+      <AssetsTableView :assets="response.assets" :total="response.total" :filters="filters" :loading="loading" />
       <el-container>
-        <AssetsFormGet :id="toEdit" v-model:open="editModal"></AssetsFormGet>
         <el-dialog v-model="modals.filters">
           <template #header>
             <h2 class="text-xl font-bold">Filtros</h2>
@@ -172,14 +101,15 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'tecnico', 'receptor', 'auditor'],
+  permissions: ['assets:read']
 })
 
 const AssetServices = useAssets();
 const assetServices = new AssetServices();
 
 const modals = reactive({
-  filters: false
+  filters: false,
+  create: false
 })
 
 
@@ -222,9 +152,7 @@ const shortcuts = [
   }
 ]
 
-const minWidth = 120;
 const toEdit = ref(0)
-const editModal = ref(false)
 const loading = ref(true)
 
 const response = reactive<{
@@ -256,24 +184,6 @@ const filters = reactive({
   startDate: '',
 })
 
-const assetStatus = ({
-  row,
-  rowIndex,
-}: {
-  row: Asset,
-  rowIndex: number
-}) => {
-  if (row.location && row.location.type && row.location.type.status === 'archivado') {
-    return 'danger-row'
-  } else if (row.location && row.location.type && row.location.type.status === 'pendiente') {
-    return 'warning-row'
-  } else if (row.location && row.location.type && row.location.type.status == 'asignado') {
-    return 'success-row'
-  }
-  return ''
-}
-
-
 const getAssets = async () => {
   try {
     loading.value = true;
@@ -284,39 +194,14 @@ const getAssets = async () => {
 
     response.assets = data?.value?.rows || [];
     response.total = data?.value?.total || 0;
-    loading.value = false;
   } catch (error) {
-    loading.value = false;
     ElNotification({
       title: 'Error al obtener los activos intente de nuevo mas tarde.',
       message: error.message,
       type: 'error'
     })
-  }
-}
-
-const removeAsset = async (id: number) => {
-  try {
-    loading.value = true;
-    const { data, error } = await useFetch<{ message: string }>(`/assets/${id}`, {
-      method: 'delete'
-    })
-
-    if (error.value) {
-      throw new Error('El activo debe de estar disponible y no asignado')
-    }
-
-    ElNotification({
-      message: data.value?.message
-    })
-    await getAssets()
-  } catch (error) {
-    console.log(error)
+  } finally {
     loading.value = false;
-    ElNotification({
-      title: 'Error al ocultar el activo intente de nuevo mas tarde.',
-      message: error.message
-    })
   }
 }
 
@@ -331,19 +216,9 @@ const printDiv = async (nombreDiv: string) => {
   document.body.innerHTML = contenidoOriginal;
 }
 
-const getAsset = (row: Asset) => {
-  toEdit.value = row.id || 0;
-  editModal.value = true;
-}
-
-
 const getExcel = async () => {
   await assetServices.getExcel({ ...filters, limit: response.total })
 }
-
-watch(editModal, () => {
-  if (!editModal.value) getAssets();
-})
 
 watch(filters, useDebounce(async () => {
   await getAssets()

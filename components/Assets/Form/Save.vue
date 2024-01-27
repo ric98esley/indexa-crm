@@ -120,17 +120,6 @@ const getModels = async (name?: string) => {
   }
 }
 
-const getWarehouses = async ({ name }: { name?: string }) => {
-  try {
-    const { data } = await locationsServices.getLocations({
-      status: ['desplegable', 'archivado', 'pendiente']
-    })
-    return data.value;
-  } catch (error) {
-    console.log(error);
-  }
-}
-
 const getAsset = async () => {
   try {
     loadingAsset.value = true;

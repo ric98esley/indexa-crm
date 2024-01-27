@@ -14,7 +14,7 @@ const LocationServices = useLocation();
 const orderServices = new OrderServices();
 const locationServices = new LocationServices();
 
-const emit = defineEmits(['update:open'])
+const emit = defineEmits(['update:open', 'submit'])
 
 const getModal = computed({
   get() {
@@ -52,6 +52,7 @@ const checking = async () => {
     if (!target.assetId || !target.locationId) return;
 
     await orderServices.checking({ targets: [target] });
+    emit('submit')
   } catch (error) {
     console.log()
   }

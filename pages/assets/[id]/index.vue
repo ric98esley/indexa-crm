@@ -42,6 +42,10 @@
           <Pagination v-model:offset="filters.offset" v-model:limit="filters.limit" :total="movements.total" />
         </el-row>
       </el-col>
+      <el-col>
+        <h3>Log del activo</h3>
+        <AssetsTableLogs :data="logs.rows"></AssetsTableLogs>
+      </el-col>
     </el-row>
   </el-container>
 </template>
@@ -69,6 +73,14 @@ const movements = reactive<{
   rows: [],
   total: 0
 })
+const logs = reactive<{
+  rows: object[],
+  total: number
+}>({
+  rows: [],
+  total: 0
+})
+
 
 const filters = reactive<{
   locationId?: number
@@ -110,13 +122,26 @@ const getAssetMovements = async (assetId?: number) => {
   }
 }
 
+const getLogs = async (id: number) => {
+  try {
+    const data = await assetServices.findOneLogs({
+      id
+    })
+
+    logs.rows = data?.rows || [];
+    logs.total = data?.total || 0;
+  } catch (error) {
+
+  } finally { }
+}
+
 watch(filters, useDebounce(async () => {
   await getAssetMovements(Number(route.params.id))
 }, 500
 ))
 
 onMounted(async () => {
-  // setAsset(Number(route.params.id));
   await getAssetMovements(Number(route.params.id));
+  await getLogs(Number(route.params.id));
 })
 </script>
