@@ -65,6 +65,10 @@
               </el-option>
             </el-select>
           </el-form-item>
+          <el-form-item label="Notas  (Numero de teléfono, otro IMEI)">
+            <el-input v-model="asset.notes" placeholder="Información que permita identificar el activo">
+            </el-input>
+          </el-form-item>
           <el-row justify="space-between" align="middle">
             <el-form-item>
               <el-button type="primary" :disabled="!asset.serial || !asset.modelId || !asset.locationId"
@@ -105,6 +109,11 @@
           <el-table-column label="Serial" prop="serial">
             <template #default="{ row }">
               <el-input v-model="row.serial"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column label="Notas" props="notes">
+            <template #default="{ row }">
+              <el-input v-model="row.notes"></el-input>
             </template>
           </el-table-column>
           <el-table-column label="Modelo">
@@ -185,6 +194,7 @@ const modelSelected = reactive({
 const asset = reactive<NewAsset>({
   serial: undefined,
   modelId: undefined,
+  notes: '',
   locationId: undefined,
   customFields: []
 });
@@ -302,6 +312,7 @@ const addAsset = () => {
   }
 
   asset.serial = '';
+  asset.notes = '';
   toAdd.assets.unshift(newAsset);
 }
 
@@ -378,8 +389,6 @@ const resetModel = async () => {
   asset.modelId = undefined;
   await getModels();
 }
-
-watch
 
 watch(() => modelSelected.categoryId, async () => {
   await resetModel();

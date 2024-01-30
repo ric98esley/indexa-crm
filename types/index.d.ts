@@ -13,6 +13,7 @@ declare global {
   interface NewAsset {
     serial?: string;
     modelId?: number;
+    notes: string;
     locationId?: number;
     customFields?: {
       id: number;

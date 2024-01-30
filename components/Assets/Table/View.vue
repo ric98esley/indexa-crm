@@ -38,9 +38,6 @@ const emit = defineEmits([
   'update:filters'
 ])
 
-const AssetServices = useAssets();
-const assetService = new AssetServices();
-
 const minWidth = 120;
 const toEdit = ref(0);
 const toDelete = ref(0);
@@ -62,6 +59,10 @@ const assetStatus = ({
   row: Asset,
   rowIndex: number
 }) => {
+  if (row.deletedAt) {
+    return 'info-row'
+  }
+
   if (row.location && row.location.type && row.location.type.status === 'archivado') {
     return 'danger-row'
   } else if (row.location && row.location.type && row.location.type.status === 'pendiente') {
@@ -69,6 +70,7 @@ const assetStatus = ({
   } else if (row.location && row.location.type && row.location.type.status == 'asignado') {
     return 'success-row'
   }
+
   return ''
 }
 
@@ -95,10 +97,22 @@ const filters = computed({
       <el-table-column type="index" width="50" />
       <el-table-column type="expand" width="50">
         <template #default="{ row }">
-          <el-table :data="row.specifications" :border="true">
-            <el-table-column label="Campo" prop="type.name"></el-table-column>
-            <el-table-column label="Valor" prop="value"></el-table-column>
-          </el-table>
+          <el-row>
+            <el-col :span="12">
+              <article class="ml-20">
+                <h4><b>Notas:</b></h4>
+                <p>
+                  {{ row?.notes }}
+                </p>
+              </article>
+            </el-col>
+            <el-col :span="12">
+              <el-table :data="row.specifications" :border="true">
+                <el-table-column label="Campo" prop="type.name"></el-table-column>
+                <el-table-column label="Valor" prop="value"></el-table-column>
+              </el-table>
+            </el-col>
+          </el-row>
         </template>
       </el-table-column>
       <el-table-column label="Fecha" :min-width="minWidth">
@@ -178,5 +192,9 @@ const filters = computed({
 
 .el-table .danger-row {
   --el-table-tr-bg-color: var(--el-color-danger-light-5);
+}
+
+.el-table .info-row {
+  --el-table-tr-bg-color: var(--el-color-info-light-5);
 }
 </style>

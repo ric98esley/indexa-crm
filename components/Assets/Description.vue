@@ -35,11 +35,11 @@ const setAsset = async () => {
   }
 }
 
-watch(getModal,() => {
-  if(getModal.value == false) setAsset();
+watch(getModal, () => {
+  if (getModal.value == false) setAsset();
 })
-watch(editModal,() => {
-  if(editModal.value == false) setAsset();
+watch(editModal, () => {
+  if (editModal.value == false) setAsset();
 })
 
 onMounted(async () => {
@@ -64,7 +64,7 @@ onMounted(async () => {
         </div>
       </template>
     </PageHeader>
-    <el-row >
+    <el-row>
       <el-col :span="24">
         <div class="sm:hidden items-center justify-end flex w-full">
           <el-button type="danger" @click="getModal = true" v-can="['assets:checking']">Recibir</el-button>
@@ -125,6 +125,15 @@ onMounted(async () => {
               </div>
             </template>
             {{ asset.data?.location?.code }}
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <template #label>
+              <div class="cell-item">
+                <Icon name="ep:phone" />
+                Nota
+              </div>
+            </template>
+            {{ asset.data?.notes }}
           </el-descriptions-item>
         </el-descriptions>
       </el-col>

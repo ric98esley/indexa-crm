@@ -35,7 +35,7 @@
           </el-form>
         </el-row>
       </el-col>
-      <AssetsTableView :assets="response.assets" :total="response.total" :filters="filters" :loading="loading" />
+      <AssetsTableView :assets="response.assets" :total="response.total" :filters="filters" :loading="loading" @refresh="getAssets()" />
       <el-container>
         <el-dialog v-model="modals.filters">
           <template #header>
@@ -152,7 +152,6 @@ const shortcuts = [
   }
 ]
 
-const toEdit = ref(0)
 const loading = ref(true)
 
 const response = reactive<{
