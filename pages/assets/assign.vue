@@ -271,7 +271,7 @@ const setPlaces = async (search: string, cb: (arg: any) => void) => {
     loadingPlace.value = true;
     const { data } = await locationsServices.getLocations({
       ...query,
-      status: ['asignado', 'desplegable', 'pendiente']
+      status: ['asignado', 'disponible', 'pendiente']
     })
 
     cb(data.value.rows);
