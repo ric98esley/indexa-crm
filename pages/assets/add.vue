@@ -325,7 +325,7 @@ const removeAsset = (row: NewAsset) => {
 const addAssets = async () => {
   try {
     const newAssets = toAdd.assets.map((asset) => {
-      const { modelId, customFields, ...rest } = asset;
+      const { modelId, customFields, notes, ...rest } = asset;
 
       const specifications = customFields?.map((field) => ({
         typeId: field.id,
@@ -334,6 +334,9 @@ const addAssets = async () => {
       return {
         modelId,
         specifications,
+        ...(notes && notes != '' && {
+          notes
+        }),
         ...rest
       }
     }
