@@ -5,6 +5,10 @@ const props = defineProps({
     type: Array,
     default: []
   },
+  redirect: {
+    type: String,
+    default: 'places'
+  },
   loading: {
     type: Boolean,
     default: true
@@ -105,7 +109,7 @@ const filters = computed({
               <el-button type="info" circle @click="setPlace(row.id)" v-can="['locations:update']">
                 <Icon name="ep:edit" />
               </el-button>
-              <NuxtLink :href="`/places/${row.id}`">
+              <NuxtLink :href="`/${props.redirect}/${row.id}`">
                 <el-button type="primary" circle>
                   <Icon name="ep:view" />
                 </el-button>

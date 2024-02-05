@@ -37,12 +37,14 @@ const modelSelected = reactive<{
   serial: string,
   categoryId?: number,
   brandId?: number,
-  modelId?: number
+  modelId?: number,
+  notes: string,
 }>({
   serial: '',
   categoryId: undefined,
   brandId: undefined,
-  modelId: undefined
+  modelId: undefined,
+  notes: ''
 })
 
 const categories = reactive<{
@@ -68,14 +70,12 @@ const models = reactive<{
   rows: []
 })
 
-const LocationsServices = useLocation();
 const CategoriesServices = useCategories();
 const BrandsServices = useBrands();
 const ModelsServices = useModels();
 const AssetServices = useAssets();
 const modelServices = new ModelsServices();
 const brandServices = new BrandsServices();
-const locationsServices = new LocationsServices();
 const categoriesServices = new CategoriesServices();
 const assetServices = new AssetServices()
 
@@ -128,20 +128,21 @@ const getAsset = async () => {
       id: props.id
     });
 
-    if (asset?.value?.model?.category && !categories.rows.find((category) => category.id == asset?.value.model?.category.id)) {
+    if (asset?.value?.model?.category && !categories.rows.find((category) => category.id == asset?.value?.model?.category.id)) {
       categories.rows.push(asset?.value?.model?.category);
     }
-    if (asset?.value?.model?.brand && !brands.rows.find((model) => model.id == asset?.value.model?.brand.id)) {
+    if (asset?.value?.model?.brand && !brands.rows.find((model) => model.id == asset?.value?.model?.brand.id)) {
       brands.rows.push(asset?.value?.model?.brand);
     }
-    if (asset?.value?.model && !models.rows.find((model) => model.id == asset?.value?.model.id)) {
+    if (asset?.value?.model && !models.rows.find((model) => model.id == asset?.value?.model?.id)) {
       models.rows.push(asset?.value?.model);
     }
 
     modelSelected.categoryId = asset?.value?.model?.category.id || undefined;
     modelSelected.brandId = asset?.value?.model?.brand.id || undefined;
     modelSelected.modelId = asset?.value?.model?.id || undefined;
-    modelSelected.serial = asset?.value?.serial || ''
+    modelSelected.serial = asset?.value?.serial || '';
+    modelSelected.notes = asset?.value?.notes || '';
 
     loadingAsset.value = false;
   } catch (error) {
@@ -150,12 +151,12 @@ const getAsset = async () => {
   }
 }
 
-
 const patchAsset = async () => {
   try {
-    const asset = await assetServices.patchAsset({
+    await assetServices.patchAsset({
       id: props.id,
-      modelId: modelSelected.modelId
+      modelId: modelSelected.modelId,
+      notes: modelSelected.notes
     })
   } catch (error) {
     console.log(error)
@@ -163,7 +164,7 @@ const patchAsset = async () => {
 }
 
 watch(() => modelSelected.categoryId, () => {
-  if(!modelSelected.categoryId) {
+  if (!modelSelected.categoryId) {
     modelSelected.brandId = undefined;
     modelSelected.modelId = undefined;
   }
@@ -223,6 +224,10 @@ watch(() => props.open, async () => {
       </el-form-item>
       <el-form-item :label="field.name" v-for="field in toEdit.customFields">
         <el-input v-model="field.value"></el-input>
+      </el-form-item>
+      <el-form-item label="Notas  (Numero de teléfono, otro IMEI)">
+        <el-input v-model="modelSelected.notes" placeholder="Información que permita identificar el activo">
+        </el-input>
       </el-form-item>
       <el-row justify="space-between" align="middle">
         <el-form-item>
