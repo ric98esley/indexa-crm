@@ -131,6 +131,13 @@ export const useAssets = () => {
         });
       }
     }
+    async create() {
+      try {
+        
+      } catch (error) {
+        
+      }
+    }
     async getAssetMovements({
       id,
       paranoid,
@@ -295,10 +302,12 @@ export const useAssets = () => {
       id,
       locationId,
       modelId,
+      notes,
     }: {
       id: number;
       locationId?: number;
       modelId?: number;
+      notes?: string
     }) {
       try {
         const body = {
@@ -308,6 +317,9 @@ export const useAssets = () => {
           ...(modelId && {
             modelId,
           }),
+          ...(notes && {
+            notes
+          })
         };
 
         const { data, error } = await useFetch<Asset>(`/assets/${id}`, {
