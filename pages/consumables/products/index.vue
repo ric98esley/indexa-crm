@@ -15,6 +15,11 @@
           </template>
         </el-table-column>
         <el-table-column type="index" width="50" />
+        <el-table-column prop="code" label="Código">
+          <template #header>
+            <el-input :debounce="2000" v-model="filters.code" placeholder="Código" clearable />
+          </template>
+        </el-table-column>
         <el-table-column prop="name" label="Nombre">
           <template #header>
             <el-input :debounce="2000" v-model="filters.name" placeholder="Nombre" clearable />
@@ -77,6 +82,7 @@ const filters = reactive({
   limit: 10,
   offset: 0,
   name: '',
+  code: '',
   category: '',
 });
 
@@ -109,7 +115,7 @@ const editProduct = (row: Product) => {
 
 const removeProduct = async (id: number) => {
   try {
-    const { data, error } = await useFetch<Product>(`/locations/types/${id}`, {
+    const { data, error } = await useFetch<Product>(`/products/${id}`, {
       method: 'delete'
     })
 
@@ -118,13 +124,15 @@ const removeProduct = async (id: number) => {
     }
 
     ElNotification({
-      message: 'La Tipo ha sido borrada.'
+      message: 'El producto ha sido borrada.',
+      type: 'success'
     })
     await setProducts()
   } catch (error) {
     loadingProduct.value = false;
     ElNotification({
-      message: 'Error al borrar la Tipo intente de nuevo mas tarde.'
+      message: 'Error al borrar el producto intente de nuevo mas tarde.',
+      type: 'error'
     })
   }
 }

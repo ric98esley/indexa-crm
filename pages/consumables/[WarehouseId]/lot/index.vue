@@ -44,7 +44,9 @@
         <el-card>
           <el-table :data="targets.rows">
             <el-table-column label="Producto" prop="productId">
-
+              <template #default="{ row }">
+                <ConsumableTableItem :id="row.productId"></ConsumableTableItem>
+              </template>
             </el-table-column>
             <el-table-column label="Cantidad" prop="quantity"></el-table-column>
           </el-table>

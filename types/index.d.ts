@@ -47,7 +47,6 @@ declare global {
     ability: string[];
   }
   interface Category extends Base {
-    brands: Brand[];
     description: string;
     type: string;
     customFields?: Specification[];
@@ -148,7 +147,7 @@ declare global {
     code: string;
     unit: string;
     description: string;
-    category: Category;
+    category?: Category;
   }
 
   interface Consumable extends Base {
