@@ -107,11 +107,79 @@ export const useConsumable = () => {
         if (error.value) {
           throw new Error(error.value.data.message);
         }
-        return data.value
+        return data.value;
       } catch (error) {
         ElNotification({
           title: 'Error al obtener los almacenes intente de nuevo mas tarde',
           message: error.message,
+        });
+      }
+    }
+
+    async findOneInventory({
+      id,
+      limit,
+      offset,
+    }: {
+      id?: number | string;
+      limit?: number;
+      offset?: number;
+    }) {
+      try {
+        const params = useFilterObject({
+          limit,
+          offset,
+        });
+        const { data, error } = await useFetch<{
+          rows: Consumable[];
+          total: number;
+        }>(`/consumables/${id}/products`, {
+          params,
+        });
+        if (error.value) {
+          throw new Error(error.value.data.message);
+        }
+        return data.value;
+      } catch (error) {
+        ElNotification({
+          title: 'Error al obtener el inventario',
+          message: error.message,
+          type: 'error',
+        });
+      }
+    }
+
+    async checking({
+      id,
+      customer,
+      description,
+      rows = [],
+    }: {
+      id: number;
+      customer: string;
+      description: string;
+      rows: {
+        productId: number;
+        quantity: string;
+      }[];
+    }) {
+      try {
+        const body = useFilterObject({
+          customer,
+          description,
+          targets: rows,
+        });
+        const { data, error } = await useFetch(`/consumables/${id}/checking`, {
+          method: 'POST',
+          body,
+        });
+
+        return data.value;
+      } catch (error) {
+        ElNotification({
+          title: 'Error al crear la orden',
+          message: error.message,
+          type: 'error',
         });
       }
     }

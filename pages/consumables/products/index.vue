@@ -27,11 +27,6 @@
         </el-table-column>
         <el-table-column label="Precio" prop="price">
         </el-table-column>
-        <el-table-column label="Deposito" prop="deposit.name">
-          <template #header>
-            <el-input :debounce="2000" v-model="filters.deposit" placeholder="Deposito" clearable />
-          </template>
-        </el-table-column>
         <el-table-column>
           <template #default="props">
             <el-row>
@@ -54,45 +49,13 @@
     </el-row>
     <el-container>
       <el-dialog v-model="modals.create">
-        <template #header>
-          <h2>Crear nueva tipo</h2>
-        </template>
-        <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="type"
-            @submit.prevent="createProduct()">
-            <el-form-item label="Nombre">
-              <el-input v-model="type.name" placeholder="Ingrese aqui el nombre"></el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :disabled="!type.name" native-type="submit">Crear</el-button>
-            </el-form-item>
-          </el-form>
-        </template>
+        <ProductFormSave @submit="setProducts"></ProductFormSave>
       </el-dialog>
       <el-dialog v-model="modals.edit">
-        <template #header>
-          <h2>Editar tipo</h2>
-        </template>
-        <template #default>
-          <el-form label-position="top" label-width="auto" autocomplete="off" status-icon :model="type"
-            @submit.prevent="patchProduct()">
-            <el-form-item label="Nombre">
-              <el-input v-model="type.name" placeholder="Ingrese aqui el nombre"></el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :disabled="!type.name" native-type="submit">Editar</el-button>
-            </el-form-item>
-          </el-form>
-        </template>
+        <ProductFormSave  :id="productToEdit" @submit="setProducts"></ProductFormSave>
       </el-dialog>
     </el-container>
-    <el-row justify="end" :span="24">
-      <div
-        class="fixed top-[45%] right-0 w-14 h-14 flex items-center justify-center bg-[var(--el-color-primary)] cursor-pointer z-10 rounded-s-lg"
-        @click="modals.create = true">
-        <Icon name="ep:plus" size="2rem" color="white" />
-      </div>
-    </el-row>
+    <LeftButton @click="modals.create = true"></LeftButton>
   </el-container>
 </template>
 
@@ -104,14 +67,17 @@ definePageMeta({
   roles: ['superuser', 'admin', 'auditor', 'receptor'],
 });
 
+const ProductService = useProducts();
+const productService = new ProductService();
+
 const loadingProduct = ref(false);
+const productToEdit = ref<number | undefined>(0);
 
 const filters = reactive({
   limit: 10,
   offset: 0,
   name: '',
   category: '',
-  deposit: ''
 });
 
 const response = reactive<{
@@ -123,10 +89,8 @@ const response = reactive<{
 })
 
 const modals = reactive({
-  details: false,
-  edit: false,
   create: false,
-  menu: false
+  edit: false
 });
 
 
@@ -138,122 +102,9 @@ const type = reactive<{
   name: ''
 });
 
-
-const getProducts = async () => {
-  try {
-    loadingProduct.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Product[] }>('/products',
-      {
-        params: {
-          ...(filters.name != '' && filters.name && {
-            search: filters.name
-          }),
-          ...(filters.offset && {
-            offset: (filters.offset - 1) * filters.limit
-          }),
-          ...(filters.limit && {
-            limit: filters.limit,
-          }),
-          ...(filters.category
-            && {
-            category: filters.category,
-          })
-        }
-      }
-    );
-    if (error.value) {
-      throw new Error()
-    }
-
-    loadingProduct.value = false;
-    return data.value
-  } catch (error) {
-    loadingProduct.value = false;
-    ElNotification({
-      message: 'Error al obtener los tipos intente de nuevo mas tarde'
-    })
-  }
-}
-
-const createProduct = async () => {
-  try {
-    loadingProduct.value = true;
-
-    const { data, error } = await useFetch<Product>('/products',
-      {
-        method: 'post',
-        body: {
-          name: type.name,
-        }
-      },
-    )
-    loadingProduct.value = false;
-
-    if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
-      ElNotification({
-        title: 'Error al crear tipos intente de nuevo mas tarde',
-        message: error.value?.data.message.message,
-      })
-      return
-    }
-    await setProducts()
-    ElNotification({
-      title: 'Tipo creada correctamente',
-      message: `${data.value?.name}`
-    })
-    type.id = undefined;
-    type.name = '';
-    return data.value
-  } catch (error) {
-    loadingProduct.value = false;
-    ElNotification({
-      title: 'Error al crear tipos intente de nuevo mas tarde',
-    })
-  }
-}
-
-const patchProduct = async () => {
-  try {
-    loadingProduct.value = true;
-
-    const body = {
-      name: type.name,
-    }
-
-    const { data, error } = await useFetch<Product>(`/locations/types/${type.id}`,
-      {
-        method: 'PATCH',
-        body
-      }
-    );
-    loadingProduct.value = false;
-
-
-    if (error.value) {
-      throw error
-    }
-    await setProducts()
-    ElNotification({
-      title: 'Tipo modificada correctamente',
-      message: `${data.value?.name}`
-    })
-
-    type.id = undefined;
-    type.name = '';
-    return data.value
-  } catch (error) {
-    loadingProduct.value = false;
-    ElNotification({
-      title: 'Error al modificar la Tipo intente de nuevo mas tarde',
-    })
-    console.log(error)
-  }
-}
-
 const editProduct = (row: Product) => {
   modals.edit = true;
-  type.id = row.id;
-  type.name = row.name || '';
+  productToEdit.value = row.id;
 }
 
 const removeProduct = async (id: number) => {
@@ -279,7 +130,7 @@ const removeProduct = async (id: number) => {
 }
 
 const setProducts = async () => {
-  const rta = await getProducts();
+  const rta = await productService.find(filters)
   response.rows = rta?.rows || []
   response.total = rta?.total || 0
 }
