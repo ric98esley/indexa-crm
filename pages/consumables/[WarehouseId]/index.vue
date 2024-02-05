@@ -13,6 +13,13 @@
               </div>
             </template>
             <LocationDescription :place="place" />
+            <template #extra>
+              <NuxtLink type="button" :href="`/consumables/${route.params.WarehouseId}/lot`">
+                <el-button type="primary">
+                  Entrada
+                </el-button>
+              </NuxtLink>
+            </template>
           </el-page-header>
         </el-row>
       </el-col>
