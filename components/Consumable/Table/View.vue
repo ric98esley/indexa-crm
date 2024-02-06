@@ -11,14 +11,31 @@ const props = defineProps({
   },
   loading: {
     type: Boolean,
+  },
+  filters: {
+    type: Object,
+    default: () => ({
+      code: '',
+      limit: 10,
+      offset: 1,
+      sort: 'createdAt',
+      order: 'DESC',
+      name: '',
+    })
+  },
+  total: {
+    type: Number,
+    default: () => 0
   }
 })
+
+const emit = defineEmits(['update:filters']);
 
 const assetStatus = ({
   row,
   rowIndex,
 }: {
-  row: Asset,
+  row: Consumable,
   rowIndex: number
 }) => {
   if (row.deletedAt) {
@@ -30,6 +47,15 @@ const assetStatus = ({
   }
   return ''
 }
+
+const filters = computed({
+  get() {
+    return props.filters
+  },
+  set(value) {
+    emit('update:filters', value)
+  }
+})
 </script>
 
 <template>
@@ -45,6 +71,7 @@ const assetStatus = ({
       </el-table-column>
       <el-table-column prop="min" label="Mínimo" sortable></el-table-column>
     </el-table>
+    <Pagination v-model:offset="filters.offset" v-model:limit="filters.limit" :total="props.total" />
   </el-col>
 </template>
 

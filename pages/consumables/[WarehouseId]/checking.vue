@@ -52,7 +52,7 @@
             <el-table-column header-align="right" width="80">
               <template #default="{ row }">
                 <div class="text-right">
-                  <el-tooltip content="Eliminar" :open-delay="300" placement="top" class="text-right">
+                  <el-tooltip cdontent="Eliminar" :open-delay="300" placement="top" class="text-right">
                     <el-button type="danger" @click="removeTarget(row)">
                       <Icon name="ep:delete" />
                     </el-button>
@@ -74,8 +74,8 @@
 
           </el-input>
         </el-form-item>
-        <el-form-item label="Descripción">
-          <el-input v-model="targets.description">
+        <el-form-item label="Nota">
+          <el-input v-model="targets.description" type="textarea">
 
           </el-input>
         </el-form-item>
@@ -178,6 +178,4 @@ const checking = async () => {
     console.log(error)
   }
 }
-
-
 </script>

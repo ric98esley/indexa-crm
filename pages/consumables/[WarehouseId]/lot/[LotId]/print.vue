@@ -13,7 +13,7 @@
           </el-col>
 
           <el-col :span="8">
-            <strong>Datos de {{ response.place?.type?.name }}</strong> <br />
+            <strong>Datos de la {{ response.place?.type?.name }}</strong> <br />
             {{ response.place?.code }} - {{ response.place?.name }} | Grupo:
             {{ response.place?.group?.code }} - {{ response.place?.group?.name }}
             <br />
@@ -23,7 +23,7 @@
           </el-col>
           <el-col :span="6">
             <strong>
-              Datos del responsable de
+              Datos del responsable de la
               {{ response.place?.type?.name || '' }}: </strong><br />
             Nombre: <b> {{ response.place?.manager?.name || '' }}</b> <br />
             Teléfono: <b>{{ response.place?.manager?.phone || '' }}</b> <br />
@@ -76,7 +76,6 @@
 </template>
 
 <script setup lang="ts">
-
 const route = useRoute();
 import { useAuthStore } from '@/stores/authStore';
 
@@ -132,17 +131,17 @@ const setAssignments = async () => {
 }
 
 const setPlace = async () => {
-  const place = await locationService.getLocation({id: route.params.id});
+  const place = await locationService.getLocation({ id: route.params.id });
   response.place = place;
 }
 
 onMounted(async () => {
   await setAssignments()
   await setPlace()
-  .then(() => {
-    window.print();
-    setTimeout(window.close, 500);
-  });
+    .then(() => {
+      window.print();
+      setTimeout(window.close, 500);
+    });
 })
 </script>
 

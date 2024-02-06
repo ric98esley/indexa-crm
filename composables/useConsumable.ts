@@ -128,7 +128,7 @@ export const useConsumable = () => {
       try {
         const params = useFilterObject({
           limit,
-          offset,
+          offset: (Number(offset) - 1) * Number(limit),
         });
         const { data, error } = await useFetch<{
           rows: Consumable[];
@@ -173,6 +173,54 @@ export const useConsumable = () => {
           method: 'POST',
           body,
         });
+
+        ElNotification({
+          title: 'Productos agregados',
+          message: 'Los productos han sido agregados al inventario',
+          type: 'success'
+        })
+
+        return data.value;
+      } catch (error) {
+        ElNotification({
+          title: 'Error al crear la orden',
+          message: error.message,
+          type: 'error',
+        });
+      }
+    }
+    async checkout({
+      id,
+      customer,
+      description,
+      rows = [],
+    }: {
+      id: number;
+      customer: string;
+      description: string;
+      rows: {
+        productId: number;
+        quantity: string;
+      }[];
+    }) {
+      try {
+        const body = useFilterObject({
+          customer,
+          description,
+          targets: rows,
+        });
+        const { data, error } = await useFetch(`/consumables/${id}/checkout`, {
+          method: 'POST',
+          body,
+        });
+
+        
+        ElNotification({
+          title: 'Productos removidos',
+          message: 'Los productos han sido removidos del inventario',
+          type: 'success'
+        })
+
 
         return data.value;
       } catch (error) {

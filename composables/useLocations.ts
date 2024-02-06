@@ -286,7 +286,7 @@ class LocationsService {
     startDate,
     endDate,
   }:{
-    id: number,
+    id: number | string,
     limit?: number,
     offset?: number,
     paranoid?: boolean,

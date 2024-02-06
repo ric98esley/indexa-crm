@@ -38,6 +38,10 @@ const getProduct = async () => {
   }
 }
 
+watch(() => props.id, async () => {
+  await getProduct()
+})
+
 onMounted(async () => {
   await getProduct()
 })

@@ -1,6 +1,6 @@
 <template>
   <el-container direction="vertical" class="p-3">
-    <PageHeader name="Agregar consumibles">
+    <PageHeader name="Remover consumibles">
       <template #buttons>
         <el-button type="warning" @click="modals.save = true">Guardar</el-button>
       </template>
@@ -30,6 +30,9 @@
                 </el-col>
               </el-row>
             </el-form-item>
+            <el-form-item>
+              <el-input disabled placeholder="Cantidad disponible"></el-input>
+            </el-form-item>
             <el-form-item label="Cantidad">
               <el-input v-model="toAdd.quantity" type="number">
               </el-input>
@@ -52,7 +55,7 @@
             <el-table-column header-align="right" width="80">
               <template #default="{ row }">
                 <div class="text-right">
-                  <el-tooltip content="Eliminar" :open-delay="300" placement="top" class="text-right">
+                  <el-tooltip cdontent="Eliminar" :open-delay="300" placement="top" class="text-right">
                     <el-button type="danger" @click="removeTarget(row)">
                       <Icon name="ep:delete" />
                     </el-button>
@@ -97,14 +100,10 @@ definePageMeta({
   permissions: ['consumables:read']
 });
 
-
-const ProductService = useProducts();
 const ConsumableService = useConsumable();
-const productService = new ProductService();
 const consumableService = new ConsumableService();
 
 const route = useRoute();
-const router = useRouter();
 
 const loadingProducts = ref(false);
 
@@ -114,7 +113,7 @@ const modals = reactive({
 })
 
 const products = reactive<{
-  rows: Product[],
+  rows: Consumable[],
   total: number
 }>({
   rows: [],
@@ -151,8 +150,8 @@ const removeTarget = (row: any) => {
 }
 
 const searchProduct = async (name: string) => {
-  const data = await productService.find({
-    search: name
+  const data = await consumableService.findOneInventory({
+    id: route.params.WarehouseId.toString()
   })
 
   products.rows = data?.rows || [];
@@ -178,6 +177,4 @@ const checking = async () => {
     console.log(error)
   }
 }
-
-
 </script>

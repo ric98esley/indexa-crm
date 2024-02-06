@@ -14,24 +14,34 @@
             </template>
             <LocationDescription :place="place" />
             <template #extra>
-              <NuxtLink type="button" :href="`/consumables/${route.params.WarehouseId}/lot`">
-                <el-button type="primary">
-                  Entrada
-                </el-button>
-              </NuxtLink>
+              <el-row >
+                <NuxtLink type="button" :href="`/consumables/${route.params.WarehouseId}/checking`">
+                  <el-button type="primary" class="ml-4">
+                    Entrada
+                  </el-button>
+                </NuxtLink>
+                <NuxtLink type="button" :href="`/consumables/${route.params.WarehouseId}/checkout`">
+                  <el-button type="warning"  class="ml-4">
+                    Salida
+                  </el-button>
+                </NuxtLink>
+              </el-row>
             </template>
           </el-page-header>
         </el-row>
       </el-col>
       <el-col>
         <h2 class="m-4">Inventario de consumibles</h2>
-        <ConsumableTableView :data="inventory.rows"></ConsumableTableView>
+        <ConsumableTableView :data="inventory.rows" :loading="loadingInventory" :total="inventory.total"
+          :filters="inventoryFilter"></ConsumableTableView>
       </el-col>
     </el-row>
   </el-container>
 </template>
 
 <script lang="ts" setup>
+import { filterFields } from 'element-plus/es/components/form/src/utils';
+
 definePageMeta({
   middleware: [
     'nuxt-permissions'
@@ -47,6 +57,13 @@ const locationService = new LocationService();
 const consumableService = new ConsumableService();
 
 const loadingInventory = ref(false);
+
+const inventoryFilter = reactive({
+  offset: 1,
+  limit: 10,
+  code: '',
+  name: '',
+})
 
 const inventory = reactive<{
   rows: Consumable[],
@@ -99,16 +116,24 @@ const setPlace = async (placeId: number) => {
 
 const setInventory = async () => {
   try {
+    loadingInventory.value = true;
     const data = await consumableService.findOneInventory({
       id: route.params.WarehouseId.toString(),
+      ...inventoryFilter
     })
 
     inventory.rows = data?.rows || [];
     inventory.total = data?.total || 0;
   } catch (error) {
-
+    console.log(error)
+  } finally {
+    loadingInventory.value = false;
   }
 }
+
+watch(inventoryFilter, () => {
+  setInventory();
+})
 
 onMounted(() => {
   setPlace(Number(route.params.WarehouseId));
