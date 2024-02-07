@@ -118,17 +118,20 @@ export const useConsumable = () => {
 
     async findOneInventory({
       id,
+      search,
       limit,
       offset,
     }: {
       id?: number | string;
+      search?: string;
       limit?: number;
       offset?: number;
     }) {
       try {
         const params = useFilterObject({
           limit,
-          offset: (Number(offset) - 1) * Number(limit),
+          ...(offset && { offset: (Number(offset) - 1) * Number(limit) }),
+          search,
         });
         const { data, error } = await useFetch<{
           rows: Consumable[];
@@ -169,7 +172,7 @@ export const useConsumable = () => {
           description,
           targets: rows,
         });
-        const { data, error } = await useFetch(`/consumables/${id}/checking`, {
+        const { data, error } = await useFetch<Lot>(`/consumables/${id}/checking`, {
           method: 'POST',
           body,
         });
@@ -177,8 +180,23 @@ export const useConsumable = () => {
         ElNotification({
           title: 'Productos agregados',
           message: 'Los productos han sido agregados al inventario',
-          type: 'success'
-        })
+          type: 'success',
+        });
+
+        if (data.value && data.value.id) return navigateTo(
+          {
+            path: `/consumables/1/lot/${data.value.id}/print`,
+          },
+          {
+            open: {
+              target: '_blank',
+              windowFeatures: {
+                popup: true,
+                noopener: true,
+                noreferrer: true,
+              }
+            }
+          })
 
         return data.value;
       } catch (error) {
@@ -209,23 +227,91 @@ export const useConsumable = () => {
           description,
           targets: rows,
         });
-        const { data, error } = await useFetch(`/consumables/${id}/checkout`, {
+        const { data, error } = await useFetch<Lot>(`/consumables/${id}/checkout`, {
           method: 'POST',
           body,
         });
 
-        
+        if (data.value && data.value.id) return navigateTo(
+          {
+            path: `/consumables/1/lot/${data.value.id}/print`,
+          },
+          {
+            open: {
+              target: '_blank',
+              windowFeatures: {
+                popup: true,
+                noopener: true,
+                noreferrer: true,
+              }
+            }
+          })
+
         ElNotification({
           title: 'Productos removidos',
           message: 'Los productos han sido removidos del inventario',
-          type: 'success'
-        })
-
+          type: 'success',
+        });
 
         return data.value;
       } catch (error) {
         ElNotification({
           title: 'Error al crear la orden',
+          message: error.message,
+          type: 'error',
+        });
+      }
+    }
+
+    async getLots({
+      customer,
+      type,
+      description,
+      limit,
+      offset,
+    }: {
+      customer?: string;
+      type?: string;
+      description?: string;
+      limit?: number;
+      offset?: number;
+    }) {
+      try {
+        const params = useFilterObject({
+          limit,
+          ...(offset && { offset: (Number(offset) - 1) * Number(limit) }),
+          customer,
+          type,
+          description,
+        });
+        const { data, error } = await useFetch<{
+          rows: Lot[];
+          total: number;
+        }>(`/consumables/lots`, {
+          params,
+        });
+        if (error.value) {
+          throw new Error(error.value.data.message);
+        }
+        return data.value;
+      } catch (error) {
+        ElNotification({
+          title: 'Error al cargar el historial',
+          message: error.message,
+          type: 'error',
+        });
+      }
+    }
+    async getOneLot({ id }: { id: number | string }) {
+      try {
+        const { data, error } = await useFetch<Lot>(`/consumables/lots/${id}`);
+        if (error.value) {
+          throw new Error(error.value.data.message);
+        }
+        return data.value;
+      } catch (error) {
+        ElNotification({
+          title: 'Error al cargar el historial',
           message: error.message,
           type: 'error',
         });

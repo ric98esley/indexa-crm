@@ -1,32 +1,15 @@
 <template>
   <el-container>
-    <div id="print" class="print text-xs">
+    <div id="print" class="print text-xs w-full">
       <el-col>
         <PrintHeader />
         <br />
         <el-row class="text-xs" justify="space-between">
-          <el-col :span="7">
+          <el-col :span="24">
             <strong> Reporte de inventario</strong>
             <br />
             Fecha de reporte: {{ new Date().toLocaleString() }} <br />
             Impreso por <b>{{ user?.username }}</b>
-          </el-col>
-
-          <el-col :span="8">
-            <strong>Datos de la {{ response.place?.type?.name }}</strong> <br />
-            {{ response.place?.code }} - {{ response.place?.name }} | Grupo:
-            {{ response.place?.group?.code }} - {{ response.place?.group?.name }}
-            <br />
-            Dirección: <b> {{ response.place?.address }} </b><br />
-            Numero de {{ response.place?.type?.name }}:
-            <b> {{ response.place?.phone }}</b>
-          </el-col>
-          <el-col :span="6">
-            <strong>
-              Datos del responsable de la
-              {{ response.place?.type?.name || '' }}: </strong><br />
-            Nombre: <b> {{ response.place?.manager?.name || '' }}</b> <br />
-            Teléfono: <b>{{ response.place?.manager?.phone || '' }}</b> <br />
           </el-col>
         </el-row>
         <br /><br />
@@ -34,23 +17,26 @@
           <tr>
             <th></th>
             <th>Fecha</th>
-            <th>Serial</th>
+            <th>Código</th>
             <th>Descripción</th>
+            <th>Cantidad</th>
           </tr>
-          <tr v-for="(assignment, index) in response.rows" v-bind:key="index">
+          <tr v-for="(movement, index) in response.movements" v-bind:key="index">
             <td>{{ index + 1 }}</td>
-            <td>{{ new Date(assignment?.createdAt).toLocaleString() }}</td>
-            <td>{{ assignment.asset?.serial }}</td>
+            <td>{{ new Date(movement.createdAt!).toLocaleString() }}</td>
+            <td>{{ movement.target?.product.code}}</td>
             <td>
-              {{ assignment.asset.model?.category.name || '' }} -
-              {{ assignment.asset.model?.brand.name || '' }} -
-              {{ assignment.asset.model?.name || '' }}
+              {{ movement.target?.product.name || '' }} -
+              {{ movement.target?.product.category?.name || '' }}
+            </td>
+            <td>
+              {{ movement.quantity || '' }} - {{ movement.target?.product.unit }}
             </td>
           </tr>
           <tr>
             <th colspan="4">
               <b>
-                Cantidad de activos asignados: {{ response.rows.length }}
+                Cantidad de activos asignados: {{ response.movements.length }}
               </b>
             </th>
           </tr>
@@ -58,18 +44,10 @@
 
         <table class="w-full signs mt-10">
           <tr class="mt-5">
-            <th>Firma del cliente</th>
-            <th>Firma del técnico</th>
+            <th>Firma quien recibe: {{ response.customer }}</th>
+            <th>Firma quien entrega: {{ response.createdBy?.username }}</th>
           </tr>
         </table>
-        <div>
-          <br /><br />
-          <strong>Nota:</strong> Con este documento se hace constar el buen
-          funcionamiento de los activos asignados, así como también el compromiso
-          por el cuidado de los mismos por parte de quien recibe. Es importante
-          señalar que en caso de robo, pedida o mal uso, el cliente asume la
-          responsabilidad ante la empresa.
-        </div>
       </el-col>
     </div>
   </el-container>
@@ -84,60 +62,41 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  permissions: ['locations:read', 'locations:create', 'locations:update', 'locations:delete']
+  permissions: ['consumables:read']
 })
 
 const auth = useAuthStore();
 
-const LocationService = useLocation();
-const locationService = new LocationService();
+const ConsumableService = useConsumable()
+const consumableService = new ConsumableService();
 
 const user = auth.getUser;
 
-const response = reactive<{
-  rows: Assignments[],
-  place: Place,
-  total?: number,
-}>({
-  place: {
-    isActive: false,
-    code: '',
-    phone: '',
-    rif: '',
-    address: ''
-  },
-  total: undefined,
-  rows: []
+const response = reactive<Lot>({
+  customer: '',
+  type: '',
+  description: '',
+  movements: [],
+  createdBy: undefined,
+  createdAt: ''
 });
 
-const setAssignments = async () => {
-  const queries = {
-    id: route.params.id.toString(),
-    orderType: route.query.orderType,
-    serial: route.query.serial,
-    deposit: route.query.deposit,
-    category: route.query.category,
-    brand: route.query.brand,
-    model: route.query.model,
-    limit: route.query.total,
-    startDate: route.query.startDate,
-    endDate: route.query.endDate,
-    all: route.query.all
+const setLot = async () => {
+  const lot = await consumableService.getOneLot({
+    id: route.params.LotId.toString()
+  });
+  if (lot) {
+    response.customer = lot.customer;
+    response.type = lot.type;
+    response.description = lot.description;
+    response.movements = lot.movements;
+    response.createdBy = lot.createdBy;
+    response.createdAt = lot.createdAt
   }
-  const assets = await locationService.getLocationAssets(queries);
-
-  response.rows = assets?.rows || [];
-  response.total = assets?.total || 0;
-}
-
-const setPlace = async () => {
-  const place = await locationService.getLocation({ id: route.params.id });
-  response.place = place;
 }
 
 onMounted(async () => {
-  await setAssignments()
-  await setPlace()
+  await setLot()
     .then(() => {
       window.print();
       setTimeout(window.close, 500);

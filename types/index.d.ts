@@ -156,10 +156,19 @@ declare global {
     min: number;
   }
 
-  interface ConsumableHistory extends Base {
+
+
+  interface ConsumableMovement extends Base {
     quantity: string;
+    target?: Consumable;
+  }
+
+  interface Lot extends Omit<Base, 'name'> {
+    customer: string;
     type: string;
-    warehouse: Consumable;
+    description: string;
+    createdBy?: User;
+    movements: ConsumableMovement[];
   }
   interface Count {
     code?: string;

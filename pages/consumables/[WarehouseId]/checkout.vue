@@ -11,27 +11,12 @@
           <el-form label-position="top" @submit.prevent="addToList">
             <el-form-item label="Producto">
               <el-row justify="space-between" class="w-full">
-                <el-col :span="20" :lg="22">
-                  <el-row justify="end">
-                    <el-select class="w-full" v-model="toAdd.productId" filterable remote
-                      placeholder="Por favor escoge una categoría" :loading="loadingProducts"
-                      :remote-method="searchProduct">
-                      <el-option v-for="item in products.rows" :key="item.id" :label="item.code + ' - ' + item.name"
-                        :value="item.id!" />
-                    </el-select>
-                  </el-row>
-                </el-col>
-                <el-col :span="4" :lg="2">
-                  <el-row justify="end">
-                    <el-button type="info" @click="modals.addProduct = true">
-                      <Icon name="ep:plus" />
-                    </el-button>
-                  </el-row>
-                </el-col>
+                <el-select class="w-full" v-model="toAdd.productId" filterable remote
+                  placeholder="Por favor escoge un producto" :loading="loadingProducts" :remote-method="searchProduct">
+                  <el-option v-for="item in products.rows" :key="item.product.id" :label="item.product.code + ' - ' + item.product.name"
+                    :value="item.product.id!" />
+                </el-select>
               </el-row>
-            </el-form-item>
-            <el-form-item>
-              <el-input disabled placeholder="Cantidad disponible"></el-input>
             </el-form-item>
             <el-form-item label="Cantidad">
               <el-input v-model="toAdd.quantity" type="number">
@@ -55,7 +40,7 @@
             <el-table-column header-align="right" width="80">
               <template #default="{ row }">
                 <div class="text-right">
-                  <el-tooltip cdontent="Eliminar" :open-delay="300" placement="top" class="text-right">
+                  <el-tooltip content="Eliminar" :open-delay="300" placement="top" class="text-right">
                     <el-button type="danger" @click="removeTarget(row)">
                       <Icon name="ep:delete" />
                     </el-button>
@@ -77,8 +62,8 @@
 
           </el-input>
         </el-form-item>
-        <el-form-item label="Descripción">
-          <el-input v-model="targets.description">
+        <el-form-item label="Notas">
+          <el-input v-model="targets.description" type="textarea">
 
           </el-input>
         </el-form-item>
@@ -149,9 +134,10 @@ const removeTarget = (row: any) => {
   }
 }
 
-const searchProduct = async (name: string) => {
+const searchProduct = async (search: string) => {
   const data = await consumableService.findOneInventory({
-    id: route.params.WarehouseId.toString()
+    id: route.params.WarehouseId.toString(),
+    search
   })
 
   products.rows = data?.rows || [];
@@ -165,7 +151,7 @@ const addToList = () => {
 
 const checking = async () => {
   try {
-    await consumableService.checking({
+    await consumableService.checkout({
       id: Number(route.params.WarehouseId),
       ...targets
     })
