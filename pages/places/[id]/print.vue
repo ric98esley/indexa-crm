@@ -120,10 +120,11 @@ const setAssignments = async () => {
     category: route.query.category,
     brand: route.query.brand,
     model: route.query.model,
-    limit: route.query.total,
+    limit: Number(route.query.total),
     startDate: route.query.startDate,
     endDate: route.query.endDate,
-    all: route.query.all
+    all: route.query.all,
+    current: route.query.current
   }
   const assets = await locationService.getLocationAssets(queries);
 

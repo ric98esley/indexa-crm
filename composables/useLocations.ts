@@ -15,89 +15,103 @@ class LocationsService {
     endDate,
     startDate,
     limit = 10,
-    offset = 0
+    offset = 0,
   }: {
-    status?: string[],
-    search?: string,
-    name?: string,
-    code?: string,
-    group?: string,
-    groupId?: number,
-    manager?: string,
-    type?: string,
-    rif?: string,
-    address?: string,
-    order?: string,
-    sort?: string,
-    endDate?: string,
-    startDate?: string,
-    limit?: number,
-    offset?: number
+    status?: string[];
+    search?: string;
+    name?: string;
+    code?: string;
+    group?: string;
+    groupId?: number;
+    manager?: string;
+    type?: string;
+    rif?: string;
+    address?: string;
+    order?: string;
+    sort?: string;
+    endDate?: string;
+    startDate?: string;
+    limit?: number;
+    offset?: number;
   }) {
     try {
-      const { data, error } = await useFetch<{ total: number, rows: Place[] }>('/locations',
+      const { data, error } = await useFetch<{ total: number; rows: Place[] }>(
+        '/locations',
         {
           params: {
-            ...(status && status?.length > 0 && {
-              status: status.join(',')
-            }),
-            ...(search && search != '' && {
-              search
-            }),
-            ...(name != '' && name && {
-              name
-            }),
-            ...(code != '' && code && {
-              code
-            }),
-            ...(group != '' && group && {
-              group
-            }),
+            ...(status &&
+              status?.length > 0 && {
+                status: status.join(','),
+              }),
+            ...(search &&
+              search != '' && {
+                search,
+              }),
+            ...(name != '' &&
+              name && {
+                name,
+              }),
+            ...(code != '' &&
+              code && {
+                code,
+              }),
+            ...(group != '' &&
+              group && {
+                group,
+              }),
             ...(groupId && {
-              groupId
+              groupId,
             }),
-            ...(manager != '' && manager && {
-              manager
-            }),
-            ...(type != '' && type && {
-              type
-            }),
-            ...(rif != '' && rif && {
-              rif
-            }),
-            ...(address != '' && address && {
-              address
-            }),
-            ...(order != '' && order && {
-              order
-            }),
-            ...(sort != '' && sort && {
-              sort
-            }),
-            ...(endDate != '' && endDate && {
-              endDate
-            }),
-            ...(startDate != '' && startDate && {
-              startDate
-            }),
+            ...(manager != '' &&
+              manager && {
+                manager,
+              }),
+            ...(type != '' &&
+              type && {
+                type,
+              }),
+            ...(rif != '' &&
+              rif && {
+                rif,
+              }),
+            ...(address != '' &&
+              address && {
+                address,
+              }),
+            ...(order != '' &&
+              order && {
+                order,
+              }),
+            ...(sort != '' &&
+              sort && {
+                sort,
+              }),
+            ...(endDate != '' &&
+              endDate && {
+                endDate,
+              }),
+            ...(startDate != '' &&
+              startDate && {
+                startDate,
+              }),
             ...(offset && {
-              offset: (offset - 1) * limit
+              offset: (offset - 1) * limit,
             }),
             ...(limit && {
-              limit
-            })
-          }
+              limit,
+            }),
+          },
         }
       );
       if (error.value) {
-        throw new Error(error.value.data.message)
+        throw new Error(error.value.data.message);
       }
-      return { data, error }
+      return { data, error };
     } catch (error) {
       ElNotification({
         title: 'Error al obtener las agencia intente de nuevo mas tarde',
         message: error.message,
-      })
+      });
     }
   }
 
@@ -113,19 +127,18 @@ class LocationsService {
     rif,
     address,
   }: {
-    code: string,
-    name: string,
-    typeId: number,
-    zoneId: number,
-    groupId: number,
-    isActive?: boolean,
-    phone?: string,
-    rif?: string,
-    address?: string,
-    managerId?: number
+    code: string;
+    name: string;
+    typeId: number;
+    zoneId: number;
+    groupId: number;
+    isActive?: boolean;
+    phone?: string;
+    rif?: string;
+    address?: string;
+    managerId?: number;
   }) {
     try {
-
       const body = useFilterObject({
         code,
         isActive,
@@ -139,69 +152,70 @@ class LocationsService {
         address,
       });
 
-      const { data, error } = await useFetch<Place>('/locations',
-        {
-          method: 'POST',
-          body
-        },
-      )
+      const { data, error } = await useFetch<Place>('/locations', {
+        method: 'POST',
+        body,
+      });
 
-      if (error.value && error.value.statusCode && error.value.statusCode >= 400) {
+      if (
+        error.value &&
+        error.value.statusCode &&
+        error.value.statusCode >= 400
+      ) {
         throw new Error(error.value.data.message);
       }
       ElNotification({
         title: 'Agencia creada correctamente',
-        message: `${data.value?.name}`
-      })
-      return { data, error }
+        message: `${data.value?.name}`,
+      });
+      return { data, error };
     } catch (error) {
       ElNotification({
         title: 'Error al crear agencia intente de nuevo mas tarde',
         message: error.message,
-        type: 'error'
-      })
+        type: 'error',
+      });
     }
   }
 
   async getLocation({ id }: { id: number }) {
     try {
-      const { data, error } = await useFetch<Place>('/locations/' + id)
+      const { data, error } = await useFetch<Place>('/locations/' + id);
 
       if (error.value) {
         throw new Error(error.value.data.message);
       }
 
-      return data.value
-
+      return data.value;
     } catch (error) {
       ElNotification({
         title: 'Error al obtener la localización',
         message: error.message,
-        type: 'error'
-      })
+        type: 'error',
+      });
     }
   }
 
   async removePlace(id: number) {
     try {
       const { data, error } = await useFetch<Place>(`/locations/${id}`, {
-        method: 'delete'
-      })
+        method: 'delete',
+      });
 
       if (error.value) {
-        throw new Error(error.value.data.message)
+        throw new Error(error.value.data.message);
       }
 
       ElNotification({
-        message: 'la agencia ha sido borrada.'
-      })
+        message: 'la agencia ha sido borrada.',
+      });
 
-      return data.value
+      return data.value;
     } catch (error) {
       ElNotification({
         title: 'Error al borrar la agencia intente de nuevo mas tarde.',
-        message: error.me
-      })
+        message: error.me,
+      });
     }
   }
 
@@ -217,16 +231,16 @@ class LocationsService {
     zoneId,
     address,
   }: {
-    id: number,
-    name?: string,
-    isActive?: string | number | boolean,
-    typeId?: number,
-    groupId?: number,
-    phone?: string,
-    rif?: string,
-    managerId?: number,
-    zoneId?: number,
-    address?: string,
+    id: number;
+    name?: string;
+    isActive?: string | number | boolean;
+    typeId?: number;
+    groupId?: number;
+    phone?: string;
+    rif?: string;
+    managerId?: number;
+    zoneId?: number;
+    address?: string;
   }) {
     try {
       const body = useFilterObject({
@@ -241,12 +255,10 @@ class LocationsService {
         address,
       });
 
-      const { data, error } = await useFetch<Place>(`/locations/${id}`,
-        {
-          method: 'PATCH',
-          body
-        }
-      );
+      const { data, error } = await useFetch<Place>(`/locations/${id}`, {
+        method: 'PATCH',
+        body,
+      });
 
       if (error.value) {
         throw new Error(error.value.data.message);
@@ -254,19 +266,19 @@ class LocationsService {
 
       ElNotification({
         title: 'Agencia modificada correctamente',
-        message: `${data.value?.name}`
-      })
+        message: `${data.value?.name}`,
+      });
 
-      return data.value
+      return data.value;
     } catch (error) {
       ElNotification({
         title: 'Error al modificar el agencia intente de nuevo mas tarde',
-        message: error.message
-      })
+        message: error.message,
+      });
     }
   }
 
-  async getLocationAssets({ 
+  async getLocationAssets({
     id,
     limit = 10,
     offset = 1,
@@ -285,28 +297,28 @@ class LocationsService {
     order,
     startDate,
     endDate,
-  }:{
-    id: number | string,
-    limit?: number,
-    offset?: number,
-    paranoid?: boolean,
-    current?: boolean,
-    all?: boolean,
-    orderType?: string,
-    movementType?: string,
-    location?: string,
-    group?: string,
-    serial?: string,
-    category?: string,
-    model?: string,
-    brand?: string,
-    sort?: string,
-    order?: string,
-    startDate?: string,
-    endDate?: string,
+  }: {
+    id: number | string;
+    limit?: number;
+    offset?: number;
+    paranoid?: boolean;
+    current?: boolean;
+    all?: boolean;
+    orderType?: string;
+    movementType?: string;
+    location?: string;
+    group?: string;
+    serial?: string;
+    category?: string;
+    model?: string;
+    brand?: string;
+    sort?: string;
+    order?: string;
+    startDate?: string;
+    endDate?: string;
   }) {
     try {
-      if(offset < 1) offset = 1;
+      if (offset < 1) offset = 1;
       const query = useFilterObject({
         limit,
         offset: (offset - 1) * limit,
@@ -327,27 +339,29 @@ class LocationsService {
         endDate,
       });
 
-      const { data, error } = await useFetch<{ total: number, rows: Assignments[] }>(`/locations/${id}/assets`,
-        {
-          params: query
-        }
-      );
+      const { data, error } = await useFetch<{
+        total: number;
+        rows: Assignments[];
+      }>(`/locations/${id}/assets`, {
+        params: query,
+      });
 
       if (error.value) {
         throw new Error(error.value.data.message);
       }
 
-      return data.value
+      return data.value;
     } catch (error) {
       ElNotification({
-        title: 'Error al obtener los activos de la agencia intente de nuevo mas tarde',
+        title:
+          'Error al obtener los activos de la agencia intente de nuevo mas tarde',
         message: error.message,
-        type: 'error'
-      })
+        type: 'error',
+      });
     }
   }
 }
 
 export const useLocation = () => {
-  return LocationsService
-}
+  return LocationsService;
+};

@@ -74,10 +74,10 @@
             <el-form label-position="top">
               <el-row>
                 <el-form-item label="Mostrar lo oculto">
-                  <el-switch v-model="filters.paranoid" active-color="#13ce66" inactive-color="#ff4949" />
+                  <el-switch v-model="filters.paranoid" active-text="VER"  />
                 </el-form-item>
                 <el-form-item label="Mostrar actualmente asignado">
-                  <el-switch v-model="filters.all" active-color="#13ce66" inactive-color="#ff4949" />
+                  <el-switch v-model="filters.all" active-text="VER" />
                 </el-form-item>
               </el-row>
               <el-form-item label="Lugar del activo">
@@ -299,7 +299,7 @@ const filters = reactive<{
 }>({
   paranoid: false,
   all: false,
-  current: false,
+  current: true,
   location: '',
   group: '',
   serial: '',

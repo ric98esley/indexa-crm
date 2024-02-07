@@ -190,7 +190,9 @@ const print = () => {
       path: `/places/${route.params.id}/print`,
       query: {
         total: currentAssignments.total,
-        all: 'false'
+        all: 'false',
+        current: 'true',
+        ...filters
       }
     },
     {
