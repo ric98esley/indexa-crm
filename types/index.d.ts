@@ -153,7 +153,8 @@ declare global {
   interface Consumable extends Base {
     quantity: string;
     product: Product;
-    min: number;
+    min: string;
+    location: Place;
   }
 
 

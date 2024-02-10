@@ -172,10 +172,13 @@ export const useConsumable = () => {
           description,
           targets: rows,
         });
-        const { data, error } = await useFetch<Lot>(`/consumables/${id}/checking`, {
-          method: 'POST',
-          body,
-        });
+        const { data, error } = await useFetch<Lot>(
+          `/consumables/${id}/checking`,
+          {
+            method: 'POST',
+            body,
+          }
+        );
 
         ElNotification({
           title: 'Productos agregados',
@@ -183,20 +186,22 @@ export const useConsumable = () => {
           type: 'success',
         });
 
-        if (data.value && data.value.id) return navigateTo(
-          {
-            path: `/consumables/1/lot/${data.value.id}/print`,
-          },
-          {
-            open: {
-              target: '_blank',
-              windowFeatures: {
-                popup: true,
-                noopener: true,
-                noreferrer: true,
-              }
+        if (data.value && data.value.id)
+          return navigateTo(
+            {
+              path: `/consumables/1/lot/${data.value.id}/print`,
+            },
+            {
+              open: {
+                target: '_blank',
+                windowFeatures: {
+                  popup: true,
+                  noopener: true,
+                  noreferrer: true,
+                },
+              },
             }
-          })
+          );
 
         return data.value;
       } catch (error) {
@@ -227,25 +232,30 @@ export const useConsumable = () => {
           description,
           targets: rows,
         });
-        const { data, error } = await useFetch<Lot>(`/consumables/${id}/checkout`, {
-          method: 'POST',
-          body,
-        });
+        const { data, error } = await useFetch<Lot>(
+          `/consumables/${id}/checkout`,
+          {
+            method: 'POST',
+            body,
+          }
+        );
 
-        if (data.value && data.value.id) return navigateTo(
-          {
-            path: `/consumables/1/lot/${data.value.id}/print`,
-          },
-          {
-            open: {
-              target: '_blank',
-              windowFeatures: {
-                popup: true,
-                noopener: true,
-                noreferrer: true,
-              }
+        if (data.value && data.value.id)
+          return navigateTo(
+            {
+              path: `/consumables/1/lot/${data.value.id}/print`,
+            },
+            {
+              open: {
+                target: '_blank',
+                windowFeatures: {
+                  popup: true,
+                  noopener: true,
+                  noreferrer: true,
+                },
+              },
             }
-          })
+          );
 
         ElNotification({
           title: 'Productos removidos',
@@ -261,6 +271,27 @@ export const useConsumable = () => {
           type: 'error',
         });
       }
+    }
+
+    async updateInventory({
+      productId,
+      locationId,
+      min
+    }: {
+      productId: number | string;
+      locationId: number | string;
+      min: string
+    }) {
+      try {
+        const body = {
+          min
+        }
+        await useFetch<Consumable>(`/consumables/${locationId}/products/${productId}`,
+        {
+          method: 'PATCH',
+          body
+        })
+      } catch (error) {}
     }
 
     async getLots({

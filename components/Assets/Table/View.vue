@@ -155,7 +155,7 @@ const filters = computed({
           <el-input v-model="filters.model" placeholder="Modelo" clearable />
         </template>
       </el-table-column>
-      <el-table-column v-role:not="'receptor'" width="140">
+      <el-table-column width="140">
         <template #default="{ row }">
           <el-row justify="space-around">
             <el-button type="info" circle @click="editAsset(row)" v-can="['assets:update']">
