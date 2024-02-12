@@ -59,13 +59,29 @@ const filters = computed({
   set(value) {
     emit('update:filters', value)
   }
-})
+});
+
+
+const movementStatus = ({
+  row,
+  rowIndex,
+}: {
+  row: Assignments,
+  rowIndex: number
+}) => {
+  if (!row.current) {
+    return 'info-row'
+  }
+
+  return ''
+}
+
 
 </script>
 
 <template>
   <el-row>
-    <el-table :data="props.assignments" v-loading="loading">
+    <el-table :data="props.assignments" v-loading="loading" :row-class-name="movementStatus">
       <el-table-column type="index" width="50" />
       <el-table-column type="expand" width="50">
         <template #default="{ row }">
@@ -142,3 +158,21 @@ const filters = computed({
     </el-container>
   </el-row>
 </template>
+
+<style>
+.el-table .warning-row {
+  --el-table-tr-bg-color: var(--el-color-warning-light-5);
+}
+
+.el-table .success-row {
+  --el-table-tr-bg-color: var(--el-color-success-light-5);
+}
+
+.el-table .danger-row {
+  --el-table-tr-bg-color: var(--el-color-danger-light-5);
+}
+
+.el-table .info-row {
+  --el-table-tr-bg-color: var(--el-color-info-light-5);
+}
+</style>

@@ -34,6 +34,42 @@ const orderModal = computed(
   }
 )
 
+const filters = reactive<{
+  paranoid: boolean,
+  all: boolean,
+  current: boolean,
+  location: string,
+  group: string,
+  serial: string,
+  category: string,
+  model: string,
+  brand: string,
+  limit: number,
+  offset: number,
+  sort: string,
+  order: string,
+  type: string,
+  startDate: string,
+  endDate: string,
+}>({
+  paranoid: false,
+  all: true,
+  current: true,
+  location: '',
+  group: '',
+  serial: '',
+  category: '',
+  model: '',
+  brand: '',
+  type: '',
+  limit: 10,
+  offset: 1,
+  startDate: '',
+  endDate: '',
+  sort: 'createdAt',
+  order: 'DESC',
+})
+
 const order = reactive<{
   data: Order,
   assignments: Assignments[],
@@ -52,27 +88,22 @@ const order = reactive<{
   }
 )
 
-const setOrder = async ()  => {
-  try {
-    loadingAssignments.value = true;
-    if(!props.id) throw new Error('Se debe proporcionar un id');
-    const data = await orderService.getOrder({ id: Number(props.id) });
+const setOrder = async () => {
+  if (!props.id) throw new Error('Se debe proporcionar un id');
+  const data = await orderService.getOrder({ id: Number(props.id) });
 
-    if(data?.value) {
-      order.data = data?.value;
-    }
-
-    const assignments = await orderService.getOrderMovements({ id: Number(props.id) })
-
-    if(assignments?.value){
-      order.assignments = assignments.value.rows || [];
-      order.total = assignments.value.total || 0;
-    }
-
-    loadingAssignments.value = false
-  } catch (error) {
-    loadingAssignments.value = false
+  if (data?.value) {
+    order.data = data?.value;
   }
+}
+
+const getMovementsOrder = async () => {
+  const movement = await orderService.getOrderMovements({ id: Number(props.id), ...filters })
+  if (movement?.value) {
+    order.assignments = movement.value.rows || [];
+    order.total = movement.value.total || 0;
+  }
+
 }
 
 const print = (total: number, id?: number, type?: string) => {
@@ -82,6 +113,7 @@ const print = (total: number, id?: number, type?: string) => {
       {
         path: `/assignments/${id}/print`,
         query: {
+          ...filters,
           total: total,
         }
       },
@@ -96,52 +128,45 @@ const print = (total: number, id?: number, type?: string) => {
         }
       })
   }
-  // if (type == 'place') {
-  //   return navigateTo(
-  //     {
-  //       path: `/places/${id}/print`,
-  //       query: {
-  //         total: total,
-  //         type: route.query.type,
-  //         startDate: dateFilter.date[0],
-  //         endDate: dateFilter.date[1],
-  //         all: 'true'
-  //       }
-  //     },
-  //     {
-  //       open: {
-  //         target: '_blank',
-  //         windowFeatures: {
-  //           popup: true,
-  //           noopener: true,
-  //           noreferrer: true,
-  //         }
-  //       }
-  //     })
-  // }
 }
 
-watch(() => props.id , async () => {
-  await setOrder()
+watch(() => props.id, async () => {
+  try {
+    loadingAssignments.value = true;
+
+    await setOrder();
+    await getMovementsOrder()
+
+  } catch (error) {
+    console.log(error)
+  } finally {
+    loadingAssignments.value = false
+  }
 })
+
+watch(filters, async () => {
+  try {
+    loadingAssignments.value = true;
+
+    await getMovementsOrder()
+
+  } catch (error) {
+    console.log(error)
+  } finally {
+    loadingAssignments.value = false
+  }
+} )
 </script>
 <template>
   <el-dialog v-model="orderModal">
     <template #header>
       <el-row justify="space-between">
-        {{ order.data.type == 'checking'? 'Entrada': 'Salida' }} Orden {{ order.data?.id }} tipo: {{ enumOrderDescription[order.data.description] ?? ''}}
+        {{ order.data.type == 'checking' ? 'Entrada' : 'Salida' }} Orden {{ order.data?.id }} tipo: {{
+          enumOrderDescription[order.data.description] ?? '' }}
         <el-button class="mx-4" @click="print(order.total, props.id, 'order')" type="primary">Imprimir</el-button>
       </el-row>
     </template>
-    <el-table :data="order.assignments" v-loading="loadingAssignments">
-      <el-table-column type="index" width="50" label="id"></el-table-column>
-      <el-table-column label="serial" prop="asset.serial">
-      </el-table-column>
-      <el-table-column label="Descripción">
-        <template #default="{ row }">
-          {{ row.asset?.model.category.name }} - {{ row.asset.model.name }} - {{ row.asset.model.brand.name }}
-        </template>
-      </el-table-column>
-    </el-table>
+    <AssignmentsTableView :assignments="order.assignments" v-model:limit="filters.limit" v-model:filters="filters"
+      :total="order.total" :loading="loadingAssignments" />
   </el-dialog>
 </template>

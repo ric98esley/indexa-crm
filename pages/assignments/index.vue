@@ -77,7 +77,7 @@
                   <el-switch v-model="filters.paranoid" active-text="VER"  />
                 </el-form-item>
                 <el-form-item label="Mostrar actualmente asignado">
-                  <el-switch v-model="filters.all" active-text="VER" />
+                  <el-switch v-model="filters.all" inactive-text="VER"  />
                 </el-form-item>
               </el-row>
               <el-form-item label="Lugar del activo">
@@ -298,7 +298,7 @@ const filters = reactive<{
   endDate: string,
 }>({
   paranoid: false,
-  all: false,
+  all: true,
   current: true,
   location: '',
   group: '',
@@ -336,11 +336,6 @@ const setMovementsByLocation = async () => {
 
   } catch (error) {
     loadingAssignments.value = false;
-    ElNotification({
-      title: 'Error',
-      message: error.message,
-      type: 'error'
-    })
   }
 }
 
@@ -403,9 +398,7 @@ const print = () => {
       path: `/places/${placeId.value}/print`,
       query: {
         total: movements.total,
-        all: 'true',
-        startDate: filters.startDate,
-        endDate: filters.endDate,
+        ...filters,
         orderType: route.query.type?.toString() || '',
       }
     },

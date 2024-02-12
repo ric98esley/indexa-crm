@@ -49,7 +49,7 @@
               <th>Lugar</th>
             </template>
           </tr>
-          <tr v-for="(assignment, index) in assignments" v-bind:key="index">
+          <tr v-for="(assignment, index) in assignments" v-bind:key="index" :class="assignment.current ? '' : 'is-not-current'">
             <td>{{ index + 1 }}</td>
             <td>{{ new Date(assignment.createdAt).toLocaleString() }}</td>
             <td>{{ assignment.asset?.serial }}</td>
@@ -220,5 +220,9 @@ onMounted(async () => {
 
 .logo-print {
   width: 150px;
+}
+
+.is-not-current {
+    text-decoration:line-through;
 }
 </style>

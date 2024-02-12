@@ -69,9 +69,9 @@ export const useMovements = () => {
       } catch (error) {
         ElNotification({
           title: 'Error al cargar los movimientos',
-          message: error.message
+          message: error.message,
+          type: 'error'
         })
-        console.log(error)
       }
     }
 
