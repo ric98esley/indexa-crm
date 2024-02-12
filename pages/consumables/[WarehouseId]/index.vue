@@ -71,6 +71,7 @@ const inventoryFilter = reactive({
   limit: 10,
   code: '',
   name: '',
+  search: ''
 });
 const historyFilters = reactive({
   limit: 10,

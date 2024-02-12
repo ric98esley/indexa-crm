@@ -72,8 +72,14 @@ const filters = computed({
   <el-col>
     <el-table :data="props.data" v-loading="props.loading" :row-class-name="assetStatus" id="area">
       <el-table-column prop="product.code" label="Código" sortable>
+        <template #header>
+          <div class="w-28">
+            <el-input v-model="filters.search" placeholder="Buscar"></el-input>
+          </div>
+        </template>
       </el-table-column>
-      <el-table-column prop="product.name" label="Nombre" sortable></el-table-column>
+      <el-table-column prop="product.name" label="Nombre" sortable>
+      </el-table-column>
       <el-table-column prop="quantity" label="Cantidad" sortable>
         <template #default="{ row }">
           {{ row.quantity }} - {{ row.product.unit }}
@@ -112,5 +118,10 @@ const filters = computed({
 
 .el-table .info-row {
   --el-table-tr-bg-color: var(--el-color-info-light-5);
+}
+
+.cell {
+  display: flex;
+  align-items: center;
 }
 </style>
