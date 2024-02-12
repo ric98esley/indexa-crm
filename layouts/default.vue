@@ -167,14 +167,6 @@ const menusA = reactive([
             title: 'Productos',
             route: { path: '/consumables/products' }
           },
-          {
-            ability: [
-              'consumables:read',
-              'consumables:create',
-            ],
-            title: 'Historial',
-            route: { path: '/consumables/history' }
-          }
         ]
       }
     ],

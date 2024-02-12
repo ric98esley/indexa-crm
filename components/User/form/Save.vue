@@ -43,10 +43,10 @@ const groups = reactive<{
 
 const roles = [
   { label: "Taquilla", value: "taquilla" },
-  { label: "Técnico", value: "tecnico" },
+  // { label: "Técnico", value: "tecnico" },
   { label: "Auditor", value: "auditor" },
   { label: "Receptor", value: "receptor" },
-  { label: "Asistente", value: "asistente" },
+  // { label: "Asistente", value: "asistente" },
 ];
 
 const rules = {

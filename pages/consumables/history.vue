@@ -46,10 +46,6 @@ const consumableService = new ConsumableService();
 
 const loadingHistory = ref(false);
 
-const dateFilter = reactive<{ date: string[] }>({
-  date: []
-});
-
 const filters = reactive({
   limit: 10,
   offset: 1,
@@ -82,13 +78,13 @@ const historyStatus = ({
   row,
   rowIndex,
 }: {
-  row: ConsumableHistory,
+  row: Lot,
   rowIndex: number
 }) => {
-  if (row.type && row.type == 'sub') {
+  if (row.type && row.type == 'checkout') {
     return 'warning-row'
   }
-  else if (row.type && row.type == 'add') {
+  else if (row.type && row.type == 'checking') {
     return 'success-row'
   }
   return ''
@@ -98,22 +94,6 @@ watch(filters, useDebounce(async () => {
   await setHistory()
 }, 500)
 )
-
-watch(dateFilter, useDebounce(() => {
-  if (
-    dateFilter.date === null ||
-    dateFilter.date === undefined ||
-    dateFilter.date.length == 0
-  ) {
-    filters.startDate = '';
-    filters.endDate = '';
-    return;
-  }
-  console.log(dateFilter.date)
-  filters.startDate = dateFilter.date[0];
-  filters.endDate = dateFilter.date[1];
-}))
-
 
 onMounted(async () => {
   await setHistory();

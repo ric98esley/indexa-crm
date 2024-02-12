@@ -65,7 +65,8 @@ const place = reactive<Place>({
     name: ''
   },
   type: {
-    name: ''
+    name: '',
+    status: ''
   },
   manager: {
     name: ''

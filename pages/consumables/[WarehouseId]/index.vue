@@ -31,17 +31,23 @@
         </el-row>
       </el-col>
       <el-col>
-        <h2 class="m-4">Inventario de consumibles</h2>
-        <ConsumableTableView :data="inventory.rows" :loading="loadingInventory" :total="inventory.total"
-          :filters="inventoryFilter"></ConsumableTableView>
+        <el-tabs v-model="activeTab">
+          <el-tab-pane label="Inventario" name="inventory">
+            <h2 class="m-4">Inventario de consumibles</h2>
+            <ConsumableTableView :data="inventory.rows" :loading="loadingInventory" :total="inventory.total"
+              :filters="inventoryFilter"></ConsumableTableView>
+          </el-tab-pane>
+          <el-tab-pane label="Historial" name="history">
+            <h2 class="m-4">Historial de lotes de asignación o recepción</h2>
+            <ConsumableTableLot :data="history.rows" :total="history.total" v-model:filters="historyFilters"  />
+          </el-tab-pane>
+        </el-tabs>
       </el-col>
     </el-row>
   </el-container>
 </template>
 
 <script lang="ts" setup>
-import { filterFields } from 'element-plus/es/components/form/src/utils';
-
 definePageMeta({
   middleware: [
     'nuxt-permissions'
@@ -56,6 +62,8 @@ const ConsumableService = useConsumable();
 const locationService = new LocationService();
 const consumableService = new ConsumableService();
 
+const activeTab = ref('inventory');
+
 const loadingInventory = ref(false);
 
 const inventoryFilter = reactive({
@@ -63,10 +71,25 @@ const inventoryFilter = reactive({
   limit: 10,
   code: '',
   name: '',
-})
+});
+const historyFilters = reactive({
+  limit: 10,
+  offset: 1,
+  warehouseId: Number(route.params.WarehouseId),
+  customer: '',
+  description: '',
+});
 
 const inventory = reactive<{
   rows: Consumable[],
+  total: number
+}>({
+  rows: [],
+  total: 0
+});
+
+const history = reactive<{
+  rows: Lot[],
   total: number
 }>({
   rows: [],
@@ -87,7 +110,8 @@ const place = reactive<Place>({
     name: ''
   },
   type: {
-    name: ''
+    name: '',
+    status: ''
   },
   manager: {
     name: ''
@@ -131,8 +155,28 @@ const setInventory = async () => {
   }
 }
 
+const setHistory = async () => {
+  const rta = await consumableService.getLots(
+    historyFilters
+  );
+  history.rows = rta?.rows || []
+  history.total = rta?.total || 0
+}
+
+watch(activeTab, () => {
+  if(activeTab.value == 'inventory') {
+    setInventory();
+  }
+  if(activeTab.value == 'history') {
+    setHistory();
+  }
+})
+
 watch(inventoryFilter, () => {
   setInventory();
+})
+watch(historyFilters, () => {
+  setHistory();
 })
 
 onMounted(() => {

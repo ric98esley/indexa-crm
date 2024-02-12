@@ -9,6 +9,7 @@
             <strong> Reporte de inventario</strong>
             <br />
             Fecha de reporte: {{ new Date().toLocaleString() }} <br />
+            Fecha de asignación: {{ new Date(response.createdAt || '').toLocaleString() }} <br />
             Impreso por <b>{{ user?.username }}</b>
           </el-col>
         </el-row>
@@ -36,12 +37,20 @@
           <tr>
             <th colspan="4">
               <b>
-                Cantidad de activos asignados: {{ response.movements.length }}
+                Cantidad de asignados: {{ response.movements.length }}
               </b>
             </th>
           </tr>
         </table>
 
+        <table class="w-full table-print mt-10">
+          <tr class="mt-5">
+            <th><b>Nota</b></th>
+          </tr>
+          <tr class="mt-5">
+            {{ response.description }}
+          </tr>
+        </table>
         <table class="w-full signs mt-10">
           <tr class="mt-5">
             <th>Firma quien recibe: {{ response.customer }}</th>
@@ -83,6 +92,7 @@ const response = reactive<Lot>({
 
 const setLot = async () => {
   const lot = await consumableService.getOneLot({
+    warehouseId: route.params.WarehouseId.toString(),
     id: route.params.LotId.toString()
   });
   if (lot) {

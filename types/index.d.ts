@@ -169,6 +169,7 @@ declare global {
     type: string;
     description: string;
     createdBy?: User;
+    location?: Place;
     movements: ConsumableMovement[];
   }
   interface Count {

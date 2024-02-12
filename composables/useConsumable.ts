@@ -162,8 +162,9 @@ export const useConsumable = () => {
       customer: string;
       description: string;
       rows: {
-        productId: number;
-        quantity: string;
+        productId?: number;
+        quantity?: string;
+        min?: string;
       }[];
     }) {
       try {
@@ -189,7 +190,7 @@ export const useConsumable = () => {
         if (data.value && data.value.id)
           return navigateTo(
             {
-              path: `/consumables/1/lot/${data.value.id}/print`,
+              path: `/consumables/${data.value.locationId}/lot/${data.value.id}/print`,
             },
             {
               open: {
@@ -222,8 +223,9 @@ export const useConsumable = () => {
       customer: string;
       description: string;
       rows: {
-        productId: number;
-        quantity: string;
+        productId?: number;
+        quantity?: string;
+        min?: string;
       }[];
     }) {
       try {
@@ -243,7 +245,7 @@ export const useConsumable = () => {
         if (data.value && data.value.id)
           return navigateTo(
             {
-              path: `/consumables/1/lot/${data.value.id}/print`,
+              path: `/consumables/${data.value.locationId!}/lot/${data.value.id}/print`,
             },
             {
               open: {
@@ -300,12 +302,14 @@ export const useConsumable = () => {
       description,
       limit,
       offset,
+      warehouseId
     }: {
       customer?: string;
       type?: string;
       description?: string;
       limit?: number;
       offset?: number;
+      warehouseId: number;
     }) {
       try {
         const params = useFilterObject({
@@ -318,7 +322,7 @@ export const useConsumable = () => {
         const { data, error } = await useFetch<{
           rows: Lot[];
           total: number;
-        }>(`/consumables/lots`, {
+        }>(`/consumables/${warehouseId}/lots`, {
           params,
         });
         if (error.value) {
@@ -333,9 +337,9 @@ export const useConsumable = () => {
         });
       }
     }
-    async getOneLot({ id }: { id: number | string }) {
+    async getOneLot({ id , warehouseId}: { id: number | string , warehouseId: number | stirng}) {
       try {
-        const { data, error } = await useFetch<Lot>(`/consumables/lots/${id}`);
+        const { data, error } = await useFetch<Lot>(`/consumables/${warehouseId}/lots/${id}`);
         if (error.value) {
           throw new Error(error.value.data.message);
         }
