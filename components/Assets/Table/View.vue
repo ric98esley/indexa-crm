@@ -120,17 +120,21 @@ const filters = computed({
           {{ new Date(row.createdAt).toLocaleString() }}
         </template>
       </el-table-column>
-      <el-table-column label="Serial" prop="serial" :min-width="minWidth">
+      <el-table-column label="Serial" prop="serial" :min-width="minWidth" sortable>
         <template #header>
-          <el-input v-model="filters.serial" placeholder="Serial" clearable />
+          <div class="w-24">
+            <el-input v-model="filters.serial" placeholder="Serial" clearable />
+          </div>
         </template>
         <template #default="{ row }">
           <Copy :text="row.serial" />
         </template>
       </el-table-column>
-      <el-table-column label="Estado" :min-width="minWidth">
+      <el-table-column label="Lugar" prop="location.code" :min-width="minWidth" sortable>
         <template #header>
-          <el-input v-model="filters.location" placeholder="Estado" clearable />
+          <div class="w-24">
+            <el-input v-model="filters.location" placeholder="código" clearable />
+          </div>
         </template>
         <template #default="{ row }">
           <NuxtLink :href="`/places/${row.location.id}`">
@@ -140,19 +144,25 @@ const filters = computed({
           </NuxtLink>
         </template>
       </el-table-column>
-      <el-table-column label="Categoría" prop="model.category.name" :min-width="minWidth">
+      <el-table-column label="Categoría" prop="model.category.name" :min-width="minWidth" sortable>
         <template #header>
-          <el-input v-model="filters.category" placeholder="Categoría" clearable />
+          <div class="w-24">
+            <el-input v-model="filters.category" placeholder="Categoría" clearable />
+          </div>
         </template>
       </el-table-column>
-      <el-table-column label="Marca" prop="model.brand.name" :min-width="minWidth">
+      <el-table-column label="Marca" prop="model.brand.name" :min-width="minWidth" sortable>
         <template #header>
-          <el-input v-model="filters.brand" placeholder="Marca" clearable />
+          <div class="w-24">
+            <el-input v-model="filters.brand" placeholder="Marca" clearable />
+          </div>
         </template>
       </el-table-column>
-      <el-table-column label="Modelo" prop="model.name" :min-width="minWidth">
+      <el-table-column label="Modelo" prop="model.name" :min-width="minWidth" sortable>
         <template #header>
-          <el-input v-model="filters.model" placeholder="Modelo" clearable />
+          <div class="w-24">
+            <el-input v-model="filters.model" placeholder="Modelo" clearable />
+          </div>
         </template>
       </el-table-column>
       <el-table-column width="140">
@@ -196,5 +206,10 @@ const filters = computed({
 
 .el-table .info-row {
   --el-table-tr-bg-color: var(--el-color-info-light-5);
+}
+
+.cell {
+  display: flex;
+  align-items: center;
 }
 </style>
