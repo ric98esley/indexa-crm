@@ -46,23 +46,14 @@
                 :total="movements.total" :loading="loadingAssignments" />
             </el-tab-pane>
             <el-tab-pane label="Detalles por agencia" name="agencia">
-              <el-alert title="Debes ingresar un rango de fechas para obtener un resultado en la búsqueda" type="warning" />
-              <el-table :data="movementsByLocations.rows" v-loading="loadingAssignmentsByLocation">
-                <el-table-column label="Código" prop="code" />
-                <el-table-column label="Agencia" prop="name" />
-                <el-table-column label="Grupo" prop="group.name" />
-                <el-table-column label="Código de grupo" prop="group.code" />
-                <el-table-column label="Total" prop="total" />
-                <el-table-column label="Acciones" width="120">
-                  <template #default="{ row }">
-                    <el-row>
-                      <el-button type="primary" circle @click="setPlace(row)">
-                        <Icon name="ep:view" />
-                      </el-button>
-                    </el-row>
-                  </template>
-                </el-table-column>
-              </el-table>
+              <el-alert title="Debes ingresar un rango de fechas para obtener un resultado en la búsqueda"
+                type="warning" />
+              <AssignmentsTableLocation
+                :data="movementsByLocations.rows"
+                :total="movementsByLocations.total"
+                v-model:filters="filters"
+                :order-type="route.query.type?.toString()"
+                />
             </el-tab-pane>
           </el-tabs>
         </el-row>
@@ -74,10 +65,10 @@
             <el-form label-position="top">
               <el-row>
                 <el-form-item label="Mostrar lo oculto">
-                  <el-switch v-model="filters.paranoid" active-text="VER"  />
+                  <el-switch v-model="filters.paranoid" active-text="VER" />
                 </el-form-item>
                 <el-form-item label="Mostrar actualmente asignado">
-                  <el-switch v-model="filters.all" inactive-text="VER"  />
+                  <el-switch v-model="filters.all" inactive-text="VER" />
                 </el-form-item>
               </el-row>
               <el-form-item label="Lugar del activo">
@@ -115,17 +106,6 @@
             </el-form>
           </el-dialog>
           <OrderTableView v-model:open="modals.order" :id="orderId" />
-          <el-dialog v-model="modals.place">
-            <template #header>
-              <el-row justify="space-between">
-                Agencia
-                <el-button @click="print()"
-                  type="primary">Imprimir</el-button>
-              </el-row>
-            </template>
-            <AssignmentsTableView :assignments="movements.rows" v-model:limit="filters.limit" v-model:filters="filters"
-              :total="movements.total" :loading="loadingAssignments" />
-          </el-dialog>
         </el-container>
       </el-col>
     </el-row>
@@ -148,8 +128,6 @@ const route = useRoute();
 const loadingAssignments = ref(false);
 const loadingAssignmentsByLocation = ref(false);
 const orderId = ref(0);
-
-const placeId = ref(0);
 
 const shortcuts = [
   {
@@ -317,24 +295,21 @@ const filters = reactive<{
 
 const setMovementsByLocation = async () => {
   try {
-    if(!filters.startDate || !filters.endDate) {
+    if (!filters.startDate || !filters.endDate) {
       throw new Error('Debe seleccionar un rango de fechas')
     }
     loadingAssignmentsByLocation.value = true;
-    const query = {
-      limit: filters.limit,
-      offset: filters.offset,
-      orderType: route.query.type?.toString() || '',
-      startDate: filters.startDate,
-      endDate: filters.endDate
-    }
-    const res = await movementsServices.getMovementsByLocations(query);
+
+    const orderType = route.query.type?.toString();
+
+    const res = await movementsServices.getMovementsByLocations({...filters, orderType});
     loadingAssignmentsByLocation.value = false;
 
     movementsByLocations.total = res?.total || 0;
     movementsByLocations.rows = res?.rows || []
 
   } catch (error) {
+    console.log(error)
     loadingAssignments.value = false;
   }
 }
@@ -386,34 +361,6 @@ const setAssignmentsExcel = async () => {
   }
 }
 
-const setPlace = (row: LocationMovementCount) => {
-  placeId.value = row.id;
-  filters.location = row.code;
-  modals.place = true;
-}
-
-const print = () => {
-  return navigateTo(
-    {
-      path: `/places/${placeId.value}/print`,
-      query: {
-        total: movements.total,
-        ...filters,
-        orderType: route.query.type?.toString() || '',
-      }
-    },
-    {
-      open: {
-        target: '_blank',
-        windowFeatures: {
-          popup: true,
-          noopener: true,
-          noreferrer: true,
-        }
-      }
-    })
-}
-
 watch(type, async () => {
   if (type.value === 'agencia') {
     await setMovementsByLocation()
@@ -421,10 +368,12 @@ watch(type, async () => {
 })
 
 watch(filters, useDebounce(async () => {
+  if (type.value === 'assets') {
+    await setAssignments()
+  }
   if (type.value === 'agencia') {
     await setMovementsByLocation();
   }
-  await setAssignments();
 }, 500
 ));
 

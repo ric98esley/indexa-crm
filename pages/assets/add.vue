@@ -97,59 +97,61 @@
             Total: {{ toAdd.assets.length }}
           </el-row>
         </template>
-        <el-table :data="toAdd.assets">
-          <el-table-column type="expand" width="50">
-            <template #default="props">
-              <el-table :data="props.row.customFields" :border="true">
-                <el-table-column label="Campo" prop="name"></el-table-column>
-                <el-table-column label="Valor" prop="value"></el-table-column>
-              </el-table>
-            </template>
-          </el-table-column>
-          <el-table-column label="Serial" prop="serial">
-            <template #default="{ row }">
-              <el-input v-model="row.serial"></el-input>
-            </template>
-          </el-table-column>
-          <el-table-column label="Notas" props="notes">
-            <template #default="{ row }">
-              <el-input v-model="row.notes"></el-input>
-            </template>
-          </el-table-column>
-          <el-table-column label="Modelo">
-            <template type="text" #default="{ row }">
-              <el-select v-model="row.modelId" class="select-success" placeholder="Selecciona un modelo" label="Deposito"
-                style="width: 100%" filterable remote :remote-method="getModels">
-                <el-option v-for="option in response.models" :key="option.id" :value="option.id!"
-                  :label="`${option.id} - ${option.name}`">
-                  {{ option.id }} - {{ option.name }}
-                </el-option>
-              </el-select>
-            </template>
-          </el-table-column>
-          <el-table-column label="Estado">
-            <template type="text" #default="{ row }">
-              <el-select v-model="row.locationId" class="select-success" placeholder="Selecciona un estado"
-                label="Estados" style="width: 100%" name="assetDeposit" filterable>
-                <el-option v-for="option in response.warehouses" :key="option.id" :value="option.id!"
-                  :label="`${option.id} - ${option.name}`">
-                  {{ option.id }} - {{ option.name }}
-                </el-option>
-              </el-select>
-            </template>
-          </el-table-column>
-          <el-table-column header-align="right" width="80">
-            <template #default="{ row }">
-              <div class="text-right">
-                <el-tooltip content="Eliminar" :open-delay="300" placement="top" class="text-right">
-                  <el-button type="danger" @click="removeAsset(row)">
-                    <Icon name="ep:delete" />
-                  </el-button>
-                </el-tooltip>
-              </div>
-            </template>
-          </el-table-column>
-        </el-table>
+        <el-col>
+          <el-table :data="toAdd.assets">
+            <el-table-column type="expand" width="50">
+              <template #default="props">
+                <el-table :data="props.row.customFields" :border="true">
+                  <el-table-column label="Campo" prop="name"></el-table-column>
+                  <el-table-column label="Valor" prop="value"></el-table-column>
+                </el-table>
+              </template>
+            </el-table-column>
+            <el-table-column label="Serial" prop="serial">
+              <template #default="{ row }">
+                <el-input v-model="row.serial"></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column label="Notas" props="notes">
+              <template #default="{ row }">
+                <el-input v-model="row.notes"></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column label="Modelo">
+              <template type="text" #default="{ row }">
+                <el-select v-model="row.modelId" class="select-success" placeholder="Selecciona un modelo"
+                  label="Deposito" style="width: 100%" filterable remote :remote-method="getModels">
+                  <el-option v-for="option in response.models" :key="option.id" :value="option.id!"
+                    :label="`${option.id} - ${option.name}`">
+                    {{ option.id }} - {{ option.name }}
+                  </el-option>
+                </el-select>
+              </template>
+            </el-table-column>
+            <el-table-column label="Estado">
+              <template type="text" #default="{ row }">
+                <el-select v-model="row.locationId" class="select-success" placeholder="Selecciona un estado"
+                  label="Estados" style="width: 100%" name="assetDeposit" filterable>
+                  <el-option v-for="option in response.warehouses" :key="option.id" :value="option.id!"
+                    :label="`${option.id} - ${option.name}`">
+                    {{ option.id }} - {{ option.name }}
+                  </el-option>
+                </el-select>
+              </template>
+            </el-table-column>
+            <el-table-column header-align="right" width="80">
+              <template #default="{ row }">
+                <div class="text-right">
+                  <el-tooltip content="Eliminar" :open-delay="300" placement="top" class="text-right">
+                    <el-button type="danger" @click="removeAsset(row)">
+                      <Icon name="ep:delete" />
+                    </el-button>
+                  </el-tooltip>
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-col>
       </el-card>
     </el-col>
     <el-dialog v-model="modals.addModel">

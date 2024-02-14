@@ -35,7 +35,7 @@
           <el-tab-pane label="Inventario" name="inventory">
             <h2 class="m-4">Inventario de consumibles</h2>
             <ConsumableTableView :data="inventory.rows" :loading="loadingInventory" :total="inventory.total"
-              :filters="inventoryFilter"></ConsumableTableView>
+              :filters="inventoryFilter" @refresh="setInventory"></ConsumableTableView>
           </el-tab-pane>
           <el-tab-pane label="Historial" name="history">
             <h2 class="m-4">Historial de lotes de asignación o recepción</h2>

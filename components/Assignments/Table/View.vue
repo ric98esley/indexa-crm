@@ -85,10 +85,7 @@ const movementStatus = ({
       <el-table-column type="index" width="50" />
       <el-table-column type="expand" width="50">
         <template #default="{ row }">
-          <el-table :data="row.asset.specifications" :border="true">
-            <el-table-column label="Campo" prop="type.name"></el-table-column>
-            <el-table-column label="Valor" prop="value"></el-table-column>
-          </el-table>
+          realizado por: {{ row.createdBy.username }}
         </template>
       </el-table-column>
       <el-table-column label="Fecha" :min-width="minWidth">
@@ -98,7 +95,7 @@ const movementStatus = ({
       </el-table-column>
       <el-table-column label="Serial" prop="asset.serial" :min-width="minWidth" sortable>
         <template #header>
-          <div class="w-24">
+          <div>
             <el-input v-model="filters.serial" placeholder="Serial" clearable />
           </div>
         </template>
@@ -108,21 +105,21 @@ const movementStatus = ({
       </el-table-column>
       <el-table-column label="Categoría" prop="asset.model.category.name" :min-width="minWidth" sortable>
         <template #header>
-          <div class="w-24">
+          <div>
             <el-input v-model="filters.category" placeholder="Categoría" clearable />
           </div>
         </template>
       </el-table-column>
       <el-table-column label="Marca" prop="asset.model.brand.name" :min-width="minWidth" sortable>
         <template #header>
-          <div class="w-24">
+          <div>
             <el-input v-model="filters.brand" placeholder="Marca" clearable />
           </div>
         </template>
       </el-table-column>
       <el-table-column label="Modelo" prop="asset.model.name" :min-width="minWidth" sortable>
         <template #header>
-          <div class="w-24">
+          <div>
             <el-input v-model="filters.model" placeholder="Modelo" clearable />
           </div>
         </template>
@@ -132,21 +129,21 @@ const movementStatus = ({
           <el-input v-model="filters.location" placeholder="Agencia" clearable />
         </template>
         <template #default="{ row }">
-          <b>
-            {{ row.to?.code }}
-          </b>
+          {{ row.to?.code }}
           - {{ row.to?.name }}
         </template>
       </el-table-column>
-      <el-table-column label="group" :min-width="minWidth" sortable prop="to.group.code">
+      <el-table-column label="group" :min-width="minWidth" sortable prop="to.group.code" resizable class-name="break-words">
         <template #header>
           <el-input v-model="filters.group" placeholder="Grupo" clearable />
         </template>
         <template #default="{ row }">
-          <b>
-            {{ row.to?.group.code }}
-          </b>
-          - {{ row.to?.group.name }}
+          <p>
+            <b>
+              {{ row.to?.group.code }}
+            </b>
+            - {{ row.to?.group.name }}
+          </p>
         </template>
       </el-table-column>
       <el-table-column width="120">
@@ -182,6 +179,7 @@ const movementStatus = ({
 .el-table .info-row {
   --el-table-tr-bg-color: var(--el-color-info-light-5);
 }
+
 .cell {
   display: flex;
   align-items: center;

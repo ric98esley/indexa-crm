@@ -1,50 +1,60 @@
 <template>
-  <el-container class="p-4">
-    <el-row class="p-2 w-full">
+  <el-container direction="vertical" class="p-4">
+    <el-row>
       <!-- Esta componente tiene el PageHeader -->
       <AssetsDescription :id="Number(route.params.id)"></AssetsDescription>
-      <el-col v-can="['movements:read']">
-        <h2 class="m-4">Historial de prestamos</h2>
-        <el-row>
-          <el-table :data="movements.rows" v-loading="loadingAssignments">
-            <el-table-column type="index" width="50" />
-            <el-table-column type="expand">
-              <template #default="{ row }">
-                Lugar de origen: {{ row.from.code }} - {{ row.from.name }}
-              </template>
-            </el-table-column>
-            <el-table-column label="Fecha" min-width="120">
-              <template #default="{ row }">
-                {{ new Date(row.createdAt).toLocaleString() }}
-              </template>
-            </el-table-column>
-            <el-table-column label="Tipo" width="80">
-              <template #default="{ row }">
-                {{ row.type == 'checkout' ? 'Salida' : 'Entrada' }}
-              </template>
-            </el-table-column>
-            <el-table-column label="Procedencia" min-width="120">
-              <template #default="{ row }">
-                <Nuxt-Link :to="`/places/${row.to.id}`">
-                  <span class="text-teal-500 underline">
-                    {{ row.to?.code }} - {{ row.to?.name }} / {{ row.to?.group?.code }} {{
-                      row.to?.group.name }}
-                  </span>
-                </Nuxt-Link>
-              </template>
-            </el-table-column>
-            <el-table-column label="Realizado por" min-width="120">
-              <template #default="{ row }">
-                {{ row.createdBy.username }}
-              </template>
-            </el-table-column>
-          </el-table>
-          <Pagination v-model:offset="filters.offset" v-model:limit="filters.limit" :total="movements.total" />
-        </el-row>
-      </el-col>
+      <el-tabs v-model="activeName" class="w-full">
+        <el-tab-pane label="Historial" name="history">
+          <el-col v-can="['movements:read']">
+            <h2 class="m-4">Historial de prestamos</h2>
+            <el-row>
+              <el-table :data="movements.rows" v-loading="loadingAssignments">
+                <el-table-column type="index" width="50" />
+                <el-table-column type="expand">
+                  <template #default="{ row }">
+                    Lugar de origen: {{ row.from.code }} - {{ row.from.name }}
+                  </template>
+                </el-table-column>
+                <el-table-column label="Fecha" min-width="120">
+                  <template #default="{ row }">
+                    {{ new Date(row.createdAt).toLocaleString() }}
+                  </template>
+                </el-table-column>
+                <el-table-column label="Tipo" width="80">
+                  <template #default="{ row }">
+                    {{ row.order.type == 'checkout' ? 'Salida' : 'Entrada' }}
+                  </template>
+                </el-table-column>
+                <el-table-column label="Procedencia" min-width="120">
+                  <template #default="{ row }">
+                    <Nuxt-Link :to="`/places/${row.to.id}`">
+                      <span class="text-teal-500 underline">
+                        {{ row.to?.code }} - {{ row.to?.name }} / {{ row.to?.group?.code }} {{
+                          row.to?.group.name }}
+                      </span>
+                    </Nuxt-Link>
+                  </template>
+                </el-table-column>
+                <el-table-column label="Realizado por" min-width="120">
+                  <template #default="{ row }">
+                    {{ row.createdBy.username }}
+                  </template>
+                </el-table-column>
+              </el-table>
+              <Pagination v-model:offset="filters.offset" v-model:limit="filters.limit" :total="movements.total" />
+            </el-row>
+          </el-col>
+        </el-tab-pane>
+        <el-tab-pane label="Bitácora" name="log">
+          <el-col v-can="['assets:read']">
+            <h2 class="m-4">Bitácora del activo</h2>
+            <el-row>
+              <AssetsTableLogs :data="logs.rows"></AssetsTableLogs>
+            </el-row>
+          </el-col>
+        </el-tab-pane>
+      </el-tabs>
       <el-col>
-        <h3>Log del activo</h3>
-        <AssetsTableLogs :data="logs.rows"></AssetsTableLogs>
       </el-col>
     </el-row>
   </el-container>
@@ -62,8 +72,10 @@ definePageMeta({
 const AssetServices = useAssets();
 const assetServices = new AssetServices();
 
+
 const route = useRoute();
 
+const activeName = ref('history')
 const loadingAssignments = ref(false)
 
 const movements = reactive<{

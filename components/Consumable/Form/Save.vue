@@ -18,7 +18,7 @@ const props = defineProps({
     type: Number
   },
   min: {
-    type: String,
+    type: String || Number,
     default: () => ''
   }
 });

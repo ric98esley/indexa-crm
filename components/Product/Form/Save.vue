@@ -164,5 +164,8 @@ onMounted(async () => {
     <el-form-item>
       <el-button native-type="submit" type="primary">Guardar</el-button>
     </el-form-item>
+    <el-dialog v-model="modals.addCategory">
+      <CategoryFormSave />
+    </el-dialog>
   </el-form>
 </template>

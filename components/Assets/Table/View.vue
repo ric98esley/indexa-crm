@@ -122,7 +122,7 @@ const filters = computed({
       </el-table-column>
       <el-table-column label="Serial" prop="serial" :min-width="minWidth" sortable>
         <template #header>
-          <div class="w-24">
+          <div>
             <el-input v-model="filters.serial" placeholder="Serial" clearable />
           </div>
         </template>
@@ -132,7 +132,7 @@ const filters = computed({
       </el-table-column>
       <el-table-column label="Lugar" prop="location.code" :min-width="minWidth" sortable>
         <template #header>
-          <div class="w-24">
+          <div>
             <el-input v-model="filters.location" placeholder="código" clearable />
           </div>
         </template>
@@ -146,21 +146,21 @@ const filters = computed({
       </el-table-column>
       <el-table-column label="Categoría" prop="model.category.name" :min-width="minWidth" sortable>
         <template #header>
-          <div class="w-24">
+          <div>
             <el-input v-model="filters.category" placeholder="Categoría" clearable />
           </div>
         </template>
       </el-table-column>
       <el-table-column label="Marca" prop="model.brand.name" :min-width="minWidth" sortable>
         <template #header>
-          <div class="w-24">
+          <div>
             <el-input v-model="filters.brand" placeholder="Marca" clearable />
           </div>
         </template>
       </el-table-column>
       <el-table-column label="Modelo" prop="model.name" :min-width="minWidth" sortable>
         <template #header>
-          <div class="w-24">
+          <div>
             <el-input v-model="filters.model" placeholder="Modelo" clearable />
           </div>
         </template>
