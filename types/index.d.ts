@@ -214,4 +214,10 @@ declare global {
     createdBy: string;
     createdAt: Date;
   }
+
+  interface OrderData {
+    description: string;
+    notes: string;
+    content: string;
+  }
 }

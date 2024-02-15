@@ -4,7 +4,7 @@
       <el-col :span="24">
         <PageHeader name="Agregar activos" class="mb-4">
           <template #buttons>
-            <el-button type="warning">
+            <el-button type="warning" @click="modals.confirm = true">
               Guardar
             </el-button>
           </template>
@@ -29,13 +29,10 @@
           </el-scrollbar>
         </el-card>
       </el-col>
-      <el-dialog v-model="modals.addModel">
-        <template #header>
-          <h2>Agregar modelo</h2>
-        </template>
-        <ModelFormSave />
-      </el-dialog>
     </el-row>
+    <el-dialog v-model="modals.confirm">
+      <OrderFormSave default-type="purchase" @submit="saveAssets"/>
+    </el-dialog>
   </el-container>
 </template>
 
@@ -47,25 +44,24 @@ definePageMeta({
     'nuxt-permissions'
   ],
   permissions: ['assets:create']
-})
+});
+
+const AssetsService = useAssets();
+const assetService = new AssetsService();
+
+const loading = ref(false)
 
 const scrollbar = ref<InstanceType<typeof ElScrollbar>>()
 
 const modals = reactive({
-  invoice: false,
   confirm: false,
-  addModel: false,
 })
-
 
 const toAdd = reactive<{
   assets: NewAsset[],
-  locationId?: number,
 }>({
   assets: [],
-  locationId: undefined,
 });
-
 
 const addAsset = (asset: NewAsset) => {
   const newAsset = { ...asset };
@@ -84,5 +80,13 @@ const removeAsset = (index: number) => {
   if (index !== -1) {
     toAdd.assets.splice(index, 1);
   }
+}
+
+const saveAssets  = async (orderData: OrderData) => {
+
+  await assetService.create({
+    ...toAdd,
+    ...orderData
+  })
 }
 </script>

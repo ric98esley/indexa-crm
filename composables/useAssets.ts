@@ -92,7 +92,9 @@ export const useAssets = () => {
     }
     async findOneLogs({ id }: { id: number }) {
       try {
-        const { data, error } = await useFetch<{total: number, rows: Log[]}>(`/assets/${id}/logs`);
+        const { data, error } = await useFetch<{ total: number; rows: Log[] }>(
+          `/assets/${id}/logs`
+        );
 
         if (error.value) {
           throw new Error(error.value.data.message);
@@ -106,13 +108,13 @@ export const useAssets = () => {
         });
       }
     }
-    async delete({ id, message }: { id: number, message: string }) {
+    async delete({ id, message }: { id: number; message: string }) {
       try {
         const { data, error } = await useFetch<Asset>(`/assets/${id}`, {
           method: 'DELETE',
           body: {
-            message
-          }
+            message,
+          },
         });
 
         if (error.value) {
@@ -120,8 +122,8 @@ export const useAssets = () => {
         }
         ElNotification({
           title: 'Activo ocultado',
-          type: 'success'
-        })
+          type: 'success',
+        });
         return data.value;
       } catch (error) {
         ElNotification({
@@ -131,11 +133,73 @@ export const useAssets = () => {
         });
       }
     }
-    async create() {
+    async create({
+      assets,
+      description,
+      notes,
+      content,
+    }: {
+      assets: NewAsset[];
+      description: string;
+      notes?: string;
+      content: string;
+    }) {
       try {
-        
+        const body = useFilterObject({
+          assets,
+          description,
+          notes,
+          content,
+        });
+
+        const loading = ElLoading.service({
+          lock: true,
+          text: 'Guardando',
+          background: 'rgba(0, 0, 0, 0.7)',
+        })
+
+        const { data, error } = await useFetch<{
+          created: Asset[];
+          errors: Asset[];
+        }>('/assets', {
+          method: 'post',
+          body,
+        });
+
+        loading.close();
+
+        if(error.value) {
+          throw new Error(error.value.data.message);
+        }
+
+        if (data.value) {
+          let i = 0;
+    
+          for (const asset of data.value.errors) {
+            setTimeout(function () {
+              ElMessage({
+                message: `Activo duplicado Serial: ${asset.serial}`,
+                type: 'error',
+              });
+            }, i * 200); // El retraso depende del valor de i
+            i++;
+          }
+          for (const asset of data.value.created) {
+            setTimeout(function () {
+              ElMessage({
+                message: `Activo creado correctamente serial: ${asset.serial}`,
+                type: 'success',
+              });
+            }, i * 200);
+            i++;
+          };
+        }
       } catch (error) {
-        
+        ElNotification({
+          title: 'Error al cargar los activos',
+          message: error.message,
+          type: 'error'
+        });
       }
     }
     async getAssetMovements({
@@ -307,7 +371,7 @@ export const useAssets = () => {
       id: number;
       locationId?: number;
       modelId?: number;
-      notes?: string
+      notes?: string;
     }) {
       try {
         const body = {
@@ -318,8 +382,8 @@ export const useAssets = () => {
             modelId,
           }),
           ...(notes && {
-            notes
-          })
+            notes,
+          }),
         };
 
         const { data, error } = await useFetch<Asset>(`/assets/${id}`, {
