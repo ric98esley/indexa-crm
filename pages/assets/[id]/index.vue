@@ -152,8 +152,13 @@ watch(filters, useDebounce(async () => {
 }, 500
 ))
 
+watch(activeName, () => {
+  if(activeName.value == 'history') getAssetMovements(Number(route.params.id));
+  if(activeName.value == 'log') getLogs(Number(route.params.id));
+})
+
 onMounted(async () => {
-  await getAssetMovements(Number(route.params.id));
-  await getLogs(Number(route.params.id));
+  if(activeName.value == 'history') getAssetMovements(Number(route.params.id));
+  if(activeName.value == 'log') getLogs(Number(route.params.id));
 })
 </script>

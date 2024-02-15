@@ -1,5 +1,3 @@
-import { da, th } from "element-plus/es/locale";
-
 export const useModels = () => {
   return class ModelsService {
     async getModels({

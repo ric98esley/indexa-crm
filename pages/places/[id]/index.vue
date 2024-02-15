@@ -23,13 +23,18 @@
         </el-row>
       </el-col>
       <el-col>
-        <h2 class="m-4">Activos en préstamo</h2>
-        <AssignmentsTableView :assignments="currentAssignments.rows" :loading="loadingAssignments"
-          v-model:filters="filters" :total="currentAssignments.total" />
-        <el-divider />
-        <h2 class="m-4">Préstamos anteriores</h2>
-        <AssignmentsTableView :assignments="lastAssignments.rows" :loading="loadingAssignmentsLast"
-          v-model:filters="filters2" :total="lastAssignments.total" />
+        <el-tabs v-model="activeName" class="w-full">
+          <el-tab-pane label="Actuales" name="current">
+            <h2 class="m-4">Activos en préstamo</h2>
+            <AssignmentsTableView :assignments="currentAssignments.rows" :loading="loadingAssignments"
+            v-model:filters="filters" :total="currentAssignments.total" />
+          </el-tab-pane>
+          <el-tab-pane label="Anteriores" name="lasted">
+            <h2 class="m-4">Préstamos anteriores</h2>
+            <AssignmentsTableView :assignments="lastAssignments.rows" :loading="loadingAssignmentsLast"
+            v-model:filters="filters2" :total="lastAssignments.total" />
+          </el-tab-pane>
+        </el-tabs>
       </el-col>
     </el-row>
   </el-container>
@@ -47,6 +52,8 @@ const route = useRoute();
 const router = useRouter();
 const LocationService = useLocation();
 const locationService = new LocationService();
+
+const activeName = ref('current');
 
 const loadingAssignments = ref(false);
 const loadingAssignmentsLast = ref(false);
@@ -220,9 +227,16 @@ watch(filters2, useDebounce(async () => {
 }, 500
 ))
 
+watch(activeName, () =>
+{
+  if(activeName.value == 'current') setPlaceAssignments(Number(route.params.id));
+  if(activeName.value == 'lasted') setPlaceAssignmentsLast(Number(route.params.id));
+})
+
 onMounted(() => {
   setPlace(Number(route.params.id));
-  setPlaceAssignments(Number(route.params.id))
-  setPlaceAssignmentsLast(Number(route.params.id))
+
+  if(activeName.value == 'current') setPlaceAssignments(Number(route.params.id));
+  if(activeName.value == 'lasted') setPlaceAssignmentsLast(Number(route.params.id));
 })
 </script>
