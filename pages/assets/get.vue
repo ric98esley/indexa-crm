@@ -6,7 +6,7 @@
           Recibir total: <strong>{{ assetsCount }}</strong>
         </template>
         <template #buttons>
-          <el-button type="primary" @click="checking()">Guardar</el-button>
+          <el-button type="warning" @click="modals.confirm = true" :disabled="assetsCount == 0">Guardar</el-button>
         </template>
       </PageHeader>
       <el-col class="lg:p-4">
@@ -21,7 +21,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="Serial">
+            <el-form-item label="Serial" v-if="assignments.place">
               <el-autocomplete v-model="filters.serial" value-key="serial" :fetch-suggestions="getAssets"
                 @select="handleSelectAsset" class="w-full">
                 <template #default="{ item }">
@@ -71,6 +71,9 @@
         </el-table>
       </el-col>
     </el-row>
+    <el-dialog v-model="modals.confirm">
+      <OrderFormSave default-type="checking" @submit="checking" />
+    </el-dialog>
   </el-container>
 </template>
 
@@ -87,8 +90,10 @@ const loadingPlace = ref(false);
 
 const AssetsServices = useAssets();
 const LocationsServices = useLocation();
+const OrdersServices = useOrders();
 const locationsServices = new LocationsServices();
 const assetService = new AssetsServices();
+const orderService = new OrdersServices();
 
 
 const places = reactive<{
@@ -111,8 +116,8 @@ const assignments = reactive<{
 })
 
 const modals = reactive({
-  edit: false,
-  assign: false
+  assign: false,
+  confirm: false,
 })
 
 const filters = reactive({
@@ -177,61 +182,26 @@ const setPlaces = async (search: string) => {
 }
 
 
-const checking = async () => {
-  try {
-    const targets = assignments.assets.map((asset) => {
-      const assetId = asset.id;
-      const locationId = asset.locationId;
-      const target = {
-        assetId,
-        locationId
-      };
-      return target
-    });
-    const { data, error } = await useFetch<Order>(
-      '/orders/checking',
-      {
-        method: 'post',
-        body: {
-          targets,
-          description: 'borrowing'
-        }
-      }
-    );
+const checking = async (orderData: OrderData) => {
+  const targets = assignments.assets.map((asset) => {
+    const assetId = asset.id;
+    const locationId = asset.locationId;
+    const target = {
+      assetId,
+      locationId
+    };
+    return target
+  });
 
-    if (error.value) {
-      throw new Error(error.value.data.message)
-    }
-    ElNotification({
-      message: "Activos recibidos correctamente",
-    });
+  await orderService.checking({
+    ...orderData,
+    targets
+  })
 
-    modals.assign = false
-    assignments.assets = [];
-    assignments.place = undefined;
-    assignments.locationId = undefined;
-
-    if (data.value && data.value.id) return navigateTo(
-      {
-        path: `/assignments/${data.value.id}/print`,
-      },
-      {
-        open: {
-          target: '_blank',
-          windowFeatures: {
-            popup: true,
-            noopener: true,
-            noreferrer: true,
-          }
-        }
-      })
-
-  } catch (error) {
-    ElNotification({
-      title: "Error al recibir",
-      message: error.message,
-    });
-  }
+  modals.assign = false
+  assignments.assets = [];
+  assignments.place = undefined;
+  assignments.locationId = undefined;
 }
 
 onMounted(() => {

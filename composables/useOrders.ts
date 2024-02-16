@@ -18,6 +18,52 @@ export const useOrders = () => {
         });
       }
     }
+    async getOrders({
+      limit = 10,
+      offset = 1,
+      type,
+      location,
+      notes,
+      description,
+      startDate,
+      endDate
+    }: {
+      limit: number;
+      offset: number;
+      type?: string;
+      notes?: string;
+      description?: string;
+      location?: string;
+      startDate?: string;
+      endDate?: string;
+    }) {
+      try {
+
+        const params = useFilterObject({
+          limit,
+          offset: (offset - 1) * limit,
+          type,
+          notes,
+          location,
+          description,
+          startDate,
+          endDate,
+        })
+        const { data, error } = await useFetch<{rows: Order[], total: number}>(`/orders`, {
+          params
+        });
+        if (error.value) {
+          throw new Error(error.value.data.message);
+        }
+        return data.value;
+      } catch (error) {
+        ElNotification({
+          title: 'Ha ocurrido un error al cargar la orden.',
+          message: error.message,
+          type: 'error',
+        });
+      }
+    }
     async getOrderMovements({
       id,
       paranoid = false,
@@ -105,6 +151,8 @@ export const useOrders = () => {
       targets,
       placeId,
       description = 'borrowing',
+      notes,
+      content,
     }: {
       targets: {
         assetId?: number;
@@ -112,17 +160,31 @@ export const useOrders = () => {
       }[];
       placeId?: number;
       description?: string;
+      notes?: string;
+      content?: string;
     }) {
       try {
         if (!placeId) throw new Error('Selecciona un lugar para asignar');
+
+        const loading = ElLoading.service({
+          lock: true,
+          text: 'Guardando',
+          background: 'rgba(0, 0, 0, 0.7)',
+        });
+
+        const body = useFilterObject({
+          targets,
+          locationId: placeId,
+          description,
+          notes,
+          content,
+        });
         const { data, error } = await useFetch<Order>('/orders/checkout', {
           method: 'post',
-          body: {
-            targets: targets,
-            locationId: placeId,
-            description: description,
-          },
+          body,
         });
+
+        loading.close();
 
         if (error.value) {
           throw new Error(error.value.data.message);
@@ -151,13 +213,16 @@ export const useOrders = () => {
         ElNotification({
           title: 'Vuelve a intentarlo mas tarde',
           message: error.message,
+          type: 'error'
         });
-        console.log(error);
       }
     }
     async checking({
       targets,
-      description = 'checking',
+      placeId,
+      description = 'borrowing',
+      notes,
+      content,
     }: {
       targets: {
         assetId?: number;
@@ -165,15 +230,30 @@ export const useOrders = () => {
       }[];
       placeId?: number;
       description?: string;
+      notes?: string;
+      content?: string;
     }) {
       try {
+
+        const body = useFilterObject({
+          targets,
+          locationId: placeId,
+          description,
+          notes,
+          content,
+        });
+
+        const loading = ElLoading.service({
+          lock: true,
+          text: 'Guardando',
+          background: 'rgba(0, 0, 0, 0.7)',
+        });
         const { data, error } = await useFetch<Order>('/orders/checking', {
           method: 'post',
-          body: {
-            targets,
-            description,
-          },
+          body
         });
+
+        loading.close();
 
         if (error.value) {
           throw new Error(error.value.data.message);
@@ -202,6 +282,7 @@ export const useOrders = () => {
         ElNotification({
           title: 'Error al recibir',
           message: error.message,
+          type: 'error'
         });
       }
     }

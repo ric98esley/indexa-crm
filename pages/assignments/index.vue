@@ -1,16 +1,18 @@
 <template>
-  <el-container direction="vertical" class="p-3">
-    <el-row class="p-2 w-full">
-      <PageHeader>
-        <template #title>
-          Reporte de: {{ route.query.type == 'checking' ? 'Entradas' : 'Salidas' }}
-        </template>
-        <template #buttons>
-          <el-button @click="setAssignmentsExcel" type="primary">
-            Exporta a excel
-          </el-button>
-        </template>
-      </PageHeader>
+  <el-container direction="vertical" class="p-4">
+    <el-row :span="24" :gutter="20">
+      <el-col :span="24">
+        <PageHeader>
+          <template #title>
+            Reporte de: {{ route.query.type == 'checking' ? 'Entradas' : 'Salidas' }}
+          </template>
+          <template #buttons>
+            <el-button @click="setAssignmentsExcel" type="primary">
+              Exporta a excel
+            </el-button>
+          </template>
+        </PageHeader>
+      </el-col>
       <el-col class="py-4">
         <p>
           <label>Fecha</label>
@@ -48,12 +50,12 @@
             <el-tab-pane label="Detalles por agencia" name="agencia">
               <el-alert title="Debes ingresar un rango de fechas para obtener un resultado en la búsqueda"
                 type="warning" />
-              <AssignmentsTableLocation
-                :data="movementsByLocations.rows"
-                :total="movementsByLocations.total"
-                v-model:filters="filters"
-                :order-type="route.query.type?.toString()"
-                />
+              <AssignmentsTableLocation :data="movementsByLocations.rows" :total="movementsByLocations.total"
+                v-model:filters="filters" :order-type="route.query.type?.toString()" />
+            </el-tab-pane>
+            <el-tab-pane label="Detalles por ordenes" name="order">
+              <OrderTableAll :data="orders.rows" :loading="loadingOrders" :total="orders.total"
+                v-model:filters="orderFilters" />
             </el-tab-pane>
           </el-tabs>
         </el-row>
@@ -121,13 +123,19 @@ definePageMeta({
 });
 
 const MovementServices = useMovements();
+const OrdersServices = useOrders();
 const movementsServices = new MovementServices();
+const ordersServices = new OrdersServices();
 
 const route = useRoute();
 
 const loadingAssignments = ref(false);
 const loadingAssignmentsByLocation = ref(false);
+const loadingOrders = ref(false);
 const orderId = ref(0);
+
+const type = ref('order')
+
 
 const shortcuts = [
   {
@@ -248,8 +256,15 @@ const movements = reactive<{
   rows: []
 });
 
+const orders = reactive<{
+  rows: Order[],
+  total: number
+}>({
+  total: 0,
+  rows: []
+})
 
-const type = ref('assets')
+
 
 const modals = reactive({
   place: false,
@@ -293,6 +308,14 @@ const filters = reactive<{
   order: 'DESC',
 })
 
+const orderFilters = reactive<{
+  limit: number,
+  offset: number,
+}>({
+  limit: 10,
+  offset: 1
+})
+
 const setMovementsByLocation = async () => {
   try {
     if (!filters.startDate || !filters.endDate) {
@@ -302,7 +325,7 @@ const setMovementsByLocation = async () => {
 
     const orderType = route.query.type?.toString();
 
-    const res = await movementsServices.getMovementsByLocations({...filters, orderType});
+    const res = await movementsServices.getMovementsByLocations({ ...filters, orderType });
     loadingAssignmentsByLocation.value = false;
 
     movementsByLocations.total = res?.total || 0;
@@ -361,32 +384,56 @@ const setAssignmentsExcel = async () => {
   }
 }
 
-watch(type, async () => {
-  if (type.value === 'agencia') {
-    await setMovementsByLocation()
+const setOrders = async () => {
+  loadingOrders.value = true;
+
+  const orderType = route.query.type?.toString();
+
+
+  const data = await ordersServices.getOrders({
+    ...orderFilters,
+    type: orderType,
+    startDate: filters.startDate,
+    endDate: filters.endDate
+  });
+
+  orders.rows = data?.rows || [];
+  orders.total = data?.total || 0;
+
+  loadingOrders.value = false;
+}
+
+const loadData = async () => {
+  if (type.value === 'assets') {
+    await setAssignments()
   }
+  if (type.value === 'agencia') {
+    await setMovementsByLocation();
+  }
+  if (type.value == 'order') {
+    await setOrders()
+  }
+}
+
+watch(type, async () => {
+  await loadData();
 })
 
 watch(filters, useDebounce(async () => {
-  if (type.value === 'assets') {
-    await setAssignments()
-  }
-  if (type.value === 'agencia') {
-    await setMovementsByLocation();
-  }
+  await loadData()
 }, 500
 ));
 
+watch(orderFilters, useDebounce(async () => {
+  await setOrders();
+}))
+
+
 watch(() => route.query.type, useDebounce(async () => {
-  if (type.value === 'assets') {
-    await setAssignments()
-  }
-  if (type.value === 'agencia') {
-    await setMovementsByLocation();
-  }
+  await loadData();
 }));
 
 onMounted(async () => {
-  await setAssignments();
+  await loadData()
 })
 </script>

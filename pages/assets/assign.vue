@@ -1,9 +1,15 @@
 <template>
   <el-container direction="vertical" class="p-4">
-    <el-row>
-      <el-col :span="24" class="md:p-4">
-        <PageHeader name="Asignar" class="mb-4" />
-        <el-col>
+    <el-row :span="24" :gutter="20">
+      <el-col :span="24">
+        <PageHeader name="Asignar" class="mb-4 h-8 items-center">
+          <template #buttons>
+            <el-button type="warning" v-if="assignments.place" :disabled="assetsCount == 0"
+              @click="modals.confirm = true">Asignar</el-button>
+          </template>
+        </PageHeader>
+      </el-col>
+      <el-col>
           <el-card class="w-full">
             <el-form label-width="120px" @submit.prevent="() => { }" label-position="top">
               <el-form-item label="Grupo">
@@ -33,7 +39,7 @@
                 </el-autocomplete>
               </el-form-item>
             </el-form>
-            <el-form label-position="top" @submit.prevent="() => { }">
+            <el-form label-position="top" @submit.prevent="() => { }" v-if="assignments.location">
               <el-form-item label="Serial">
                 <el-autocomplete v-model="filters.serial" value-key="serial" :fetch-suggestions="getAssets"
                   @select="handleSelectAsset" class="w-full">
@@ -46,18 +52,10 @@
             </el-form>
           </el-card>
         </el-col>
-
-      </el-col>
       <el-col :span="24" class="mt-4 md:p-4">
         <el-descriptions class="w-full" :column="width > 768 ? 3 : 1" border>
           <template #title>
             Datos de la asignación - activos {{ assetsCount }}
-          </template>
-          <template #extra>
-            <el-row justify="end" class="gap-y-4">
-              <el-button type="primary" v-if="assignments.place" :disabled="assetsCount == 0"
-                @click="checkout()">Asignar</el-button>
-            </el-row>
           </template>
           <template v-if="assignments.place">
 
@@ -142,6 +140,9 @@
         </el-table>
       </el-col>
     </el-row>
+    <el-dialog v-model="modals.confirm">
+      <OrderFormSave default-type="borrowing" @submit="checkout"/>
+    </el-dialog>
   </el-container>
 </template>
 
@@ -189,8 +190,7 @@ const assignments = reactive<{
 })
 
 const modals = reactive({
-  edit: false,
-  assign: false
+  confirm: false
 })
 
 const filters = reactive({
@@ -288,10 +288,11 @@ const handleSelectPlace = (row: Place) => {
   assignments.place = row;
 }
 
-const checkout = async () => {
+const checkout = async (orderData: OrderData) => {
   await orderService.checkout({
     targets: targets.value,
     placeId: assignments.place?.id,
+    ...orderData
   })
 
   assignments.assets = [];

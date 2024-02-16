@@ -1,17 +1,18 @@
 <template>
   <el-container direction="vertical" class="p-4">
-    <el-row :gutter="10">
-      <PageHeader name="Activos">
-        <template #buttons>
-          <div class="sm:flex items-center hidden">
-            <el-button type="default" class="ml-2" @click="getExcel()" v-can="['assets:export']">Exportar a
-              excel</el-button>
-            <el-button type="primary" class="ml-2" @click="printDiv('area')">Imprimir</el-button>
-          </div>
-        </template>
-      </PageHeader>
+    <el-row :span="24" :gutter="20">
+      <el-col :span="24">
+        <PageHeader name="Activos" class="mb-4">
+          <template #buttons>
+            <div class="sm:flex items-center hidden">
+              <el-button type="default" class="ml-2" @click="getExcel()" v-can="['assets:export']">Exportar a
+                excel</el-button>
+            </div>
+          </template>
+        </PageHeader>
+      </el-col>
       <el-col class="mt-4">
-        <h2>Filtros</h2>
+        <h2 class="mb-4">Filtros</h2>
         <el-row>
           <el-form>
             <el-row>
@@ -35,7 +36,8 @@
           </el-form>
         </el-row>
       </el-col>
-      <AssetsTableView :assets="response.assets" :total="response.total" :filters="filters" :loading="loading" @refresh="getAssets()" />
+      <AssetsTableView :assets="response.assets" :total="response.total" :filters="filters" :loading="loading"
+        @refresh="getAssets()" />
       <el-container>
         <el-dialog v-model="modals.filters">
           <template #header>

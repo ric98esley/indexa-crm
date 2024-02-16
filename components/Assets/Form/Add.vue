@@ -75,7 +75,8 @@ const submit = () => {
     modelId: asset.modelId,
     locationId: asset.locationId,
     notes: asset.notes
-  })
+  });
+  asset.serial = '';
 }
 
 watch(modelSelected, async () => {

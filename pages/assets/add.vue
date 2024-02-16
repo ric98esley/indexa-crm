@@ -10,12 +10,12 @@
           </template>
         </PageHeader>
       </el-col>
-      <el-col :sm="24" :md="12" :lg="8">
+      <el-col :sm="24" :md="12" :lg="8" class="mt-4">
         <el-card class="mb-4">
           <AssetsFormAdd @submit="addAsset" />
         </el-card>
       </el-col>
-      <el-col :sm="24" :md="24" :lg="16" >
+      <el-col :sm="24" :md="24" :lg="16" class="mt-4" >
         <el-card >
           <template #header>
             <el-row justify="end">
@@ -64,14 +64,14 @@ const toAdd = reactive<{
 });
 
 const addAsset = (asset: NewAsset) => {
-  const newAsset = { ...asset };
-  if (!newAsset.serial || !newAsset.modelId || !newAsset.locationId) return;
+  const newAsset = {...asset};
+  if (!asset.serial || !asset.modelId || !asset.locationId) return;
 
-  if (toAdd.assets.find(({ serial }) => serial === newAsset.serial)) {
+  if (toAdd.assets.find(({ serial }) => serial === asset.serial)) {
     return;
   }
 
-  toAdd.assets.push(newAsset);
+  toAdd.assets.push(newAsset!);
 
   scrollbar.value?.setScrollTop(9999);
 }
@@ -88,5 +88,7 @@ const saveAssets  = async (orderData: OrderData) => {
     ...toAdd,
     ...orderData
   })
+
+  toAdd.assets = []
 }
 </script>

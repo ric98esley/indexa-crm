@@ -18,8 +18,6 @@ const emit = defineEmits({
   }
 });
 
-const actionType = ['sale', 'warranty', 'purchase', 'request', 'borrowing', 'checking'];
-
 const checkType: { value: string, label: string }[] = [
   {
     value: 'sale',
