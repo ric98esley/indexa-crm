@@ -24,12 +24,12 @@
       </el-col>
       <el-col>
         <el-tabs v-model="activeName" class="w-full">
-          <el-tab-pane label="Actuales" name="current">
+          <el-tab-pane label="Inventario" name="current">
             <h2 class="m-4">Activos en préstamo</h2>
             <AssignmentsTableView :assignments="currentAssignments.rows" :loading="loadingAssignments"
             v-model:filters="filters" :total="currentAssignments.total" />
           </el-tab-pane>
-          <el-tab-pane label="Anteriores" name="lasted">
+          <el-tab-pane label="Historial" name="lasted">
             <h2 class="m-4">Préstamos anteriores</h2>
             <AssignmentsTableView :assignments="lastAssignments.rows" :loading="loadingAssignmentsLast"
             v-model:filters="filters2" :total="lastAssignments.total" />

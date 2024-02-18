@@ -157,9 +157,10 @@ declare global {
     location: Place;
   }
 
-
-
+  
+  
   interface ConsumableMovement extends Base {
+    lot: Lot;
     quantity: string;
     target?: Consumable;
   }

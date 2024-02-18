@@ -151,6 +151,41 @@ export const useConsumable = () => {
         });
       }
     }
+    async findOneHistory({
+      id,
+      search,
+      limit,
+      offset,
+    }: {
+      id?: number | string;
+      search?: string;
+      limit?: number;
+      offset?: number;
+    }) {
+      try {
+        const params = useFilterObject({
+          limit,
+          ...(offset && { offset: (Number(offset) - 1) * Number(limit) }),
+          search,
+        });
+        const { data, error } = await useFetch<{
+          rows: Consumable[];
+          total: number;
+        }>(`/consumables/${id}/movements`, {
+          params,
+        });
+        if (error.value) {
+          throw new Error(error.value.data.message);
+        }
+        return data.value;
+      } catch (error) {
+        ElNotification({
+          title: 'Error al obtener los movimientos',
+          message: error.message,
+          type: 'error',
+        });
+      }
+    }
 
     async checking({
       id,

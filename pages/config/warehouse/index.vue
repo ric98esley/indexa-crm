@@ -28,6 +28,11 @@
               </NuxtLink>
             </template>
           </el-table-column>
+          <el-table-column label="Código" min-width="180" prop="code">
+            <template #header>
+              <el-input v-model="filters.code" placeholder="Nombre" clearable />
+            </template>
+          </el-table-column>
           <el-table-column label="Estatus" min-width="120">
             <template #header>
               <el-input v-model="filters.status" placeholder="Estatus" clearable />
@@ -47,15 +52,17 @@
               {{ row.group.code }} - {{ row.group.name }}
             </template>
           </el-table-column>
-          <el-table-column label="Acciones" width="180">
+          <el-table-column label="Acciones" width="180" >
             <template #default="props">
               <el-row>
                 <el-button type="info" circle @click="editDeposit(props.row)" v-can="['locations:update']">
                   <Icon name="ep:edit" />
                 </el-button>
-                <el-button type="primary" circle>
-                  <Icon name="ep:view" />
-                </el-button>
+                <NuxtLink :href="`/places/${props.row.id}`">
+                  <el-button type="primary" circle>
+                    <Icon name="ep:view" />
+                  </el-button>
+                </NuxtLink>
                 <el-button type="danger" circle @click="removeWarehouse(props.row.id)" v-can="['locations:delete']">
                   <Icon name="ep:delete" />
                 </el-button>

@@ -14,14 +14,14 @@
             </template>
             <LocationDescription :place="place" />
             <template #extra>
-              <el-row >
+              <el-row>
                 <NuxtLink type="button" :href="`/consumables/${route.params.WarehouseId}/checking`">
                   <el-button type="primary" class="ml-4">
                     Entrada
                   </el-button>
                 </NuxtLink>
                 <NuxtLink type="button" :href="`/consumables/${route.params.WarehouseId}/checkout`">
-                  <el-button type="warning"  class="ml-4">
+                  <el-button type="warning" class="ml-4">
                     Salida
                   </el-button>
                 </NuxtLink>
@@ -37,9 +37,13 @@
             <ConsumableTableView :data="inventory.rows" :loading="loadingInventory" :total="inventory.total"
               :filters="inventoryFilter" @refresh="setInventory"></ConsumableTableView>
           </el-tab-pane>
-          <el-tab-pane label="Historial" name="history">
+          <el-tab-pane label="Lotes" name="lots">
             <h2 class="m-4">Historial de lotes de asignación o recepción</h2>
-            <ConsumableTableLot :data="history.rows" :total="history.total" v-model:filters="historyFilters"  />
+            <ConsumableTableLot :data="lot.rows" :total="lot.total" v-model:filters="lotFilters" />
+          </el-tab-pane>
+          <el-tab-pane label="Historial" name="history">
+            <h2 class="m-4">Historial de movimientos de productos</h2>
+            <ConsumableTableHistory :data="history.rows" v-model:filters="historyFilter" :total="history.total" />
           </el-tab-pane>
         </el-tabs>
       </el-col>
@@ -73,7 +77,14 @@ const inventoryFilter = reactive({
   name: '',
   search: ''
 });
-const historyFilters = reactive({
+const historyFilter = reactive({
+  offset: 1,
+  limit: 10,
+  code: '',
+  name: '',
+  search: ''
+});
+const lotFilters = reactive({
   limit: 10,
   offset: 1,
   warehouseId: Number(route.params.WarehouseId),
@@ -88,8 +99,15 @@ const inventory = reactive<{
   rows: [],
   total: 0
 });
-
 const history = reactive<{
+  rows: Consumable[],
+  total: number
+}>({
+  rows: [],
+  total: 0
+});
+
+const lot = reactive<{
   rows: Lot[],
   total: number
 }>({
@@ -156,32 +174,52 @@ const setInventory = async () => {
   }
 }
 
-const setHistory = async () => {
+const setLots = async () => {
   const rta = await consumableService.getLots(
-    historyFilters
+    lotFilters
   );
-  history.rows = rta?.rows || []
-  history.total = rta?.total || 0
+  lot.rows = rta?.rows || []
+  lot.total = rta?.total || 0
+}
+
+const setHistory = async () => {
+  const rta = await consumableService.findOneHistory({
+    id: route.params.WarehouseId.toString(),
+    ...historyFilter
+  });
+
+  history.rows = rta?.rows || [];
+  history.total = rta?.total || 0;
+}
+
+const setData = () => {
+  if (activeTab.value == 'inventory') {
+    setInventory();
+  }
+  if (activeTab.value == 'lots') {
+    setLots();
+  }
+  if (activeTab.value == 'history') {
+    setHistory();
+  }
 }
 
 watch(activeTab, () => {
-  if(activeTab.value == 'inventory') {
-    setInventory();
-  }
-  if(activeTab.value == 'history') {
-    setHistory();
-  }
+  setData()
 })
 
-watch(inventoryFilter, () => {
-  setInventory();
+watch(historyFilter, () => {
+  setData();
 })
-watch(historyFilters, () => {
-  setHistory();
+watch(inventoryFilter, () => {
+  setData();
+})
+watch(lotFilters, () => {
+  setLots();
 })
 
 onMounted(() => {
   setPlace(Number(route.params.WarehouseId));
-  setInventory()
+  setData()
 })
 </script>

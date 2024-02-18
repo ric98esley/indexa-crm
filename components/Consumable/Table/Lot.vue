@@ -7,12 +7,12 @@ const props = defineProps({
   loading: {
     type: Boolean
   },
+  warehouseId: {
+    type: Number
+  },
   total: {
     type: Number,
     default: () => 0
-  },
-  warehouseId: {
-    type: Number
   },
   filters: {
     type: Object,

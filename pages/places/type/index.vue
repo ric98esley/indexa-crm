@@ -31,7 +31,7 @@
         <el-table-column label="Acciones">
           <template #default="props">
             <el-row>
-              <el-button type="info" circle @click="editType(props.row)" v-can="['location_t ypes:delete']">
+              <el-button type="info" circle @click="editType(props.row)" v-can="['locations_types:update']">
                 <Icon name="ep:edit" />
               </el-button>
               <el-button type="primary" circle>
