@@ -158,6 +158,7 @@ const setPlaceAssignments = async (placeId: number) => {
     deposit: filters.deposit,
     category: filters.category,
     current: true,
+    paranoid: true,
     brand: filters.brand,
     model: filters.model,
     limit: filters.limit,
