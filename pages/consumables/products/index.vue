@@ -138,9 +138,11 @@ const removeProduct = async (id: number) => {
 }
 
 const setProducts = async () => {
-  const rta = await productService.find(filters)
-  response.rows = rta?.rows || []
-  response.total = rta?.total || 0
+  loadingProduct.value = true;
+  const rta = await productService.find(filters);
+  response.rows = rta?.rows || [];
+  response.total = rta?.total || 0;
+  loadingProduct.value = false;
 }
 
 watch(filters, useDebounce(async () => {

@@ -33,7 +33,7 @@ export const useProducts = () => {
           throw new Error(error.value.data.message);
         }
         ElNotification({
-          title: 'Tipo creada correctamente',
+          title: 'Producto creada correctamente',
           message: `${data.value?.name}`,
         });
 
@@ -100,6 +100,11 @@ export const useProducts = () => {
         if (error.value) {
           throw new Error(error.value.data.message);
         }
+
+        ElNotification({
+          title: 'Producto modificado correctamente',
+          type: 'success'
+        })
 
         return data.value;
       } catch (error) {

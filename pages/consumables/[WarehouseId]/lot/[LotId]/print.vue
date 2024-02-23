@@ -6,7 +6,7 @@
         <br />
         <el-row class="text-xs" justify="space-between">
           <el-col :span="24">
-            <strong> Reporte de inventario</strong>
+            <strong> Reporte de {{ response.type == 'checking' ? 'entrada' : 'salida' }}</strong>
             <br />
             Fecha de reporte: {{ new Date().toLocaleString() }} <br />
             Fecha de asignación: {{ new Date(response.createdAt || '').toLocaleString() }} <br />
@@ -25,7 +25,7 @@
           <tr v-for="(movement, index) in response.movements" v-bind:key="index">
             <td>{{ index + 1 }}</td>
             <td>{{ new Date(movement.createdAt!).toLocaleString() }}</td>
-            <td>{{ movement.target?.product.code}}</td>
+            <td>{{ movement.target?.product.code }}</td>
             <td>
               {{ movement.target?.product.name || '' }} -
               {{ movement.target?.product.category?.name || '' }}
@@ -52,7 +52,12 @@
           </tr>
         </table>
         <table class="w-full signs mt-10">
-          <tr class="mt-5">
+
+          <tr class="mt-5" v-if="response.type == 'checking'">
+            <th>Firma quien entrega: {{ response.customer }}</th>
+            <th>Firma quien recibe: {{ response.createdBy?.username }}</th>
+          </tr>
+          <tr class="mt-5" v-if="response.type == 'checkout'">
             <th>Firma quien recibe: {{ response.customer }}</th>
             <th>Firma quien entrega: {{ response.createdBy?.username }}</th>
           </tr>

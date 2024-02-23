@@ -70,6 +70,11 @@ const print = (row: Lot) => {
 <template>
   <el-col>
     <el-table :data="props.data" v-loading="props.loading" :row-class-name="historyStatus">
+      <el-table-column width="120">
+        <template #default="{ row }">
+          {{ new Date(row.createdAt).toLocaleString('es-VE') }}
+        </template>
+      </el-table-column>
       <el-table-column prop="target.product.code" label="Código" sortable>
         <template #header>
           <div class="w-28">
