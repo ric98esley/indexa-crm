@@ -157,8 +157,6 @@ declare global {
     location: Place;
   }
 
-  
-  
   interface ConsumableMovement extends Base {
     lot: Lot;
     quantity: string;
@@ -172,6 +170,11 @@ declare global {
     createdBy?: User;
     location?: Place;
     movements: ConsumableMovement[];
+  }
+
+  
+  interface Role extends Base{
+    ability : Object
   }
   interface Count {
     code?: string;
@@ -221,4 +224,5 @@ declare global {
     notes: string;
     content: string;
   }
+
 }
