@@ -137,6 +137,13 @@ const setCategory = async () => {
   }
 }
 
+const rules = {
+  name: [
+    {required: true, message: 'El nombre es obligatorio'},
+    { min: 3, message: 'Mínimo 3 letras'}
+  ]
+}
+
 const saveCategory = async () => {
   if (props.id == 0 || props.id == undefined) {
     await createCategory();
@@ -166,9 +173,10 @@ onMounted(async () => {
       ref="saveCategoryRef"
       :model="category"
       v-loading="loadingCategory"
+      :rules="rules"
     >
     <el-form-item label="Nombre" prop="name">
-      <el-input v-model="category.name" placeholder="Ingrese aquí el nombre"></el-input>
+      <el-input v-model="category.name" placeholder="Ingrese aquí el nombre" prop="name"></el-input>
     </el-form-item>
     <el-form-item label="Campos personalizados" v-if="category.type === 'asset'" props="customFields">
       <el-select class="w-full" v-model="category.customFields" multiple filterable reserve-keyword

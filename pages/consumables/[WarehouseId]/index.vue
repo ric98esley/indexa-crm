@@ -15,6 +15,9 @@
             <LocationDescription :place="place" />
             <template #extra>
               <el-row>
+                  <el-button type="info" class="ml-4"  @click="print">
+                    Imprimir
+                  </el-button>
                 <NuxtLink type="button" :href="`/consumables/${route.params.WarehouseId}/checking`">
                   <el-button type="primary" class="ml-4">
                     Entrada
@@ -202,6 +205,23 @@ const setData = () => {
   if (activeTab.value == 'history') {
     setHistory();
   }
+}
+
+const print = () => {
+  return navigateTo(
+    {
+      path: `/consumables/${route.params.WarehouseId}/print?total=${inventory.total}`,
+    },
+    {
+      open: {
+        target: '_blank',
+        windowFeatures: {
+          popup: true,
+          noopener: true,
+          noreferrer: true,
+        }
+      }
+    })
 }
 
 watch(activeTab, () => {

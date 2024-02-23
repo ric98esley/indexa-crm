@@ -169,7 +169,7 @@ const filters = computed({
         <template #default="{ row }">
           <el-row justify="space-around">
             <el-button type="info" circle @click="editAsset(row)" v-can="['assets:update']">
-              <Icon name="ep:edit" />
+              <Icon name="ic:twotone-log-in" />
             </el-button>
             <NuxtLink :to="`/assets/${row.id}`">
               <el-button type="primary" circle>
