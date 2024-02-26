@@ -114,6 +114,7 @@ export const useGroups = () =>
         ElNotification({
           title: 'Grupo creado correctamente',
           message: `${data.value?.name}`,
+          type: 'success'
         });
         group.id = undefined;
         group.name = '';
@@ -123,6 +124,7 @@ export const useGroups = () =>
         ElNotification({
           title: 'Error el grupo intente de nuevo mas tarde',
           message: error.message,
+          type: 'error'
         });
       }
     }
@@ -147,16 +149,15 @@ export const useGroups = () =>
         ElNotification({
           title: 'Grupo modificado correctamente',
           message: `${data.value?.name}`,
+          type: 'success'
         });
 
-        group.id = undefined;
-        group.name = '';
-        group.code = '';
         return data.value;
       } catch (error) {
         ElNotification({
           title: 'Error al modificar el grupo intente de nuevo mas tarde',
           message: error.message,
+          type: 'error'
         });
       }
     }

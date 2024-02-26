@@ -81,7 +81,7 @@ const setUser = async (query: string) => {
 
 const patchGroup = async () => {
   try {
-    await groupService.updateGroup(group);
+    await groupService.updateGroup({id: props.id, ...group});
   } catch (error) {
     console.log(error)
   }

@@ -46,7 +46,7 @@
           <el-table-column label="Acciones" width="150">
             <template #default="props">
               <el-row justify="space-around">
-                <el-button type="info" circle @click="editGroup(props.row)">
+                <el-button type="info" circle @click="editGroup(props.row)" v-can="['groups:update']">
                   <Icon name="ep:edit" />
                 </el-button>
                 <NuxtLink :to="`/config/group/${props.row.id}`">
@@ -54,7 +54,7 @@
                     <Icon name="ep:view" />
                   </el-button>
                 </NuxtLink>
-                <el-button type="danger" circle @click="removeGroup(props.row.id)">
+                <el-button type="danger" circle @click="removeGroup(props.row.id)" v-can="['groups:delete']">
                   <Icon name="ep:delete" />
                 </el-button>
               </el-row>
