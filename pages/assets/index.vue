@@ -52,7 +52,10 @@
               </el-col>
               <el-col :span="12">
                 <el-form-item label="Estado">
-                  <el-input v-model="filters.location" placeholder="Estado" clearable />
+                  <el-select v-model="filters.status" placeholder="Seleccione el estatus" clearable>
+                    <el-option v-for="status of statusEnum" :label="status.label" :value="status.value">
+                    </el-option>
+                  </el-select>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
@@ -113,6 +116,25 @@ const modals = reactive({
   filters: false,
   create: false
 })
+
+const statusEnum = [
+  {
+    value: 'asignado',
+    label: 'Asignado'
+  },
+  {
+    value: 'desplegable',
+    label: 'Disponible'
+  },
+  {
+    value: 'pendiente',
+    label: 'Pendiente'
+  },
+  {
+    value: 'archivado',
+    label: 'Archivado'
+  }
+]
 
 
 const shortcuts = [
