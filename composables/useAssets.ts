@@ -290,7 +290,7 @@ export const useAssets = () => {
       all,
       enabled,
       type,
-      // status, model, brand, category will be to string to search matches
+      group,
       status,
       location,
       model,
@@ -307,6 +307,7 @@ export const useAssets = () => {
       all?: boolean;
       enabled?: boolean;
       type?: string;
+      group?: string;
       // status, model, brand, category will be to string to search matches
       status?: string;
       location?: string;
@@ -326,7 +327,7 @@ export const useAssets = () => {
           all,
           enabled,
           type,
-          // status, model, brand, category will be to string to search matches
+          group,
           status,
           location,
           model,
