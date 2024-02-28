@@ -155,7 +155,7 @@ watch(filters, async () => {
   } finally {
     loadingAssignments.value = false
   }
-} )
+})
 </script>
 <template>
   <el-dialog v-model="orderModal">
@@ -166,6 +166,21 @@ watch(filters, async () => {
         <el-button class="mx-4" @click="print(order.total, props.id, 'order')" type="primary">Imprimir</el-button>
       </el-row>
     </template>
+
+    <el-descriptions title="Datos de la orden" direction="vertical" :column="2">
+      <el-descriptions-item label="Realizada por">{{ order.data.createdBy?.username }}</el-descriptions-item>
+      <el-descriptions-item label="Numero">{{ order.data.id }}</el-descriptions-item>
+      <el-descriptions-item label="Tipo">
+        <el-tag size="small">{{
+          enumOrderDescription[order.data.description] ?? '' }}</el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="Dirigido a">
+        {{ order.data.location?.code }} - {{ order.data.location?.name }}
+      </el-descriptions-item>
+      <el-descriptions-item label="Nota" :span="2">{{ order.data.notes }}</el-descriptions-item>
+      <el-descriptions-item label="Contenido" :span="2">{{ order.data.content }}</el-descriptions-item>
+    </el-descriptions>
+
     <AssignmentsTableView :assignments="order.assignments" v-model:limit="filters.limit" v-model:filters="filters"
       :total="order.total" :loading="loadingAssignments" />
   </el-dialog>

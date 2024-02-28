@@ -125,7 +125,8 @@ declare global {
 
   interface Order extends Omit<Base, 'name'> {
     type: string;
-    description: string;
+    description?: string;
+    notes?: string;
     content?: string;
     count: number;
     delivered: boolean;
@@ -133,7 +134,7 @@ declare global {
     location?: Place;
   }
 
-  interface Zone extends Base {}
+  interface Zone extends Base { }
   interface Group extends Base {
     code: string;
     parent?: Group;
@@ -172,9 +173,9 @@ declare global {
     movements: ConsumableMovement[];
   }
 
-  
-  interface Role extends Base{
-    ability : Object
+
+  interface Role extends Base {
+    ability: Object
   }
   interface Count {
     code?: string;

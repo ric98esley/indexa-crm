@@ -52,7 +52,7 @@
               </el-col>
               <el-col :span="12">
                 <el-form-item label="Estado">
-                  <el-select v-model="filters.status" placeholder="Seleccione el estatus" clearable>
+                  <el-select v-model="filters.status" placeholder="Seleccione el estatus" clearable class="w-full">
                     <el-option v-for="status of statusEnum" :label="status.label" :value="status.value">
                     </el-option>
                   </el-select>
@@ -61,6 +61,11 @@
               <el-col :span="12">
                 <el-form-item label="Categoría">
                   <el-input v-model="filters.category" placeholder="Categoría" clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Grupo">
+                  <el-input v-model="filters.group" placeholder="Código o nombre" clearable />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
@@ -199,6 +204,7 @@ const filters = reactive({
   location: '',
   type: '',
   status: '',
+  group: '',
   all: false,
   model: '',
   brand: '',

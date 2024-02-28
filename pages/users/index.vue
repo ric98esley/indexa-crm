@@ -1,7 +1,13 @@
 <template>
   <el-container direction="vertical" class="p-4">
     <el-row>
-      <PageHeader name="Usuarios" />
+      <PageHeader name="Usuarios" >
+        <template #buttons>
+          <NuxtLink href="/users/roles" v-role="['superuser']">
+            <el-button type="primary">Roles</el-button>
+          </NuxtLink>
+        </template>
+      </PageHeader>
       <el-col :span="24">
         <el-col>
           <el-table :data="users.rows" v-loading="loadingUser">

@@ -83,6 +83,10 @@
             <th>Firma del técnico</th>
           </tr>
         </table>
+        <div v-if="order.content">
+          <br /><br />
+          <strong>Nota de la orden:</strong> {{ order.content }}.
+        </div>
         <div>
           <br /><br />
           <strong>Nota:</strong> Con este documento se hace constar el buen
@@ -128,7 +132,7 @@ const order = reactive<Order>({
 
 const getOrder = async () => {
   try {
-    const data = await orderService.getOrder({ id: route.params.id });
+    const data = await orderService.getOrder({ id: +route.params.id });
     order.type = data?.value?.type || '';
     order.description = data?.value?.description || '';
     order.content = data?.value?.content;
