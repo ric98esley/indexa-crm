@@ -43,6 +43,7 @@ const filtersByLocation = computed({
   }
 });
 
+
 const filters = reactive<{
   paranoid: boolean,
   all: boolean,
@@ -73,13 +74,11 @@ const filters = reactive<{
   type: '',
   limit: 10,
   offset: 1,
-  startDate: filtersByLocation.value.startDate,
-  endDate: filtersByLocation.value.endDate,
+  startDate: props.filters.startDate,
+  endDate: props.filters.endDate,
   sort: 'createdAt',
   order: 'DESC',
 });
-
-
 
 const movements = reactive<{
   total: number, rows: Assignments[]
@@ -130,12 +129,19 @@ const setAssignments = async () => {
 
     const orderType = props.orderType;
 
-    const res = await movementsServices.getMovements({ ...filters, orderType });
+    const query = {
+      ...filters,
+      orderType,
+      startDate: filtersByLocation.value.startDate,
+      endDate: filtersByLocation.value.endDate,
+    }
+
+    const res = await movementsServices.getMovements(query);
     loadingAssignments.value = false;
 
     movements.total = res?.value?.total || 0;
     movements.rows = res?.value?.rows || []
-  } catch (error) {
+  } catch (error: unknown) {
     loadingAssignments.value = false;
     ElNotification({
       title: 'Error',
