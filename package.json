@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "@element-plus/nuxt": "1.0.5",
-    "@nuxt/devtools": "^1.0.0",
+    "@nuxt/devtools": "0.8.5",
     "@nuxtjs/tailwindcss": "6.8.0",
     "@types/node": "18",
     "element-plus": "2.3.7",
