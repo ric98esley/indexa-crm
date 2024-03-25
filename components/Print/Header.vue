@@ -6,12 +6,12 @@
       </el-row>
     </el-col>
     <el-col :span="12" class="text-right text-xs">
-      <strong>Comercializadora la excelencia (Gana loterías)</strong>
+      <strong>Comercializadora Atenas</strong>
       <address>
-        Rif: J-29401587-5 <br />
+        Rif: J-00000000 <br />
         Departamento técnico <br />
-        Calle 15, Barrio Obrero - San Cristóbal <br />
-        Teléfono: 0276-355-6947 <br />
+        Dirección comercial<br />
+        Teléfono: 0000-000000 <br />
       </address>
     </el-col>
   </el-row>
