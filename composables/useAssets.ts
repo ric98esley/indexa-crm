@@ -200,12 +200,13 @@ export const useAssets = () => {
 
         if (data.value) {
           let i = 0;
-    
           for (const asset of data.value.errors) {
             setTimeout(function () {
               ElMessage({
                 message: `Activo duplicado Serial: ${asset.serial}`,
                 type: 'error',
+                showClose: true,
+                duration: 0
               });
             }, i * 200); // El retraso depende del valor de i
             i++;
