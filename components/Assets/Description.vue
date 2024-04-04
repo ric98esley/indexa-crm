@@ -8,6 +8,7 @@ const props = defineProps({
 
 const getModal = ref(false);
 const editModal = ref(false);
+const restoreModal = ref(false);
 
 const width = ref<number>(window.screen.width);
 
@@ -59,16 +60,22 @@ onMounted(async () => {
       </template>
       <template #buttons>
         <div class="sm:flex items-center hidden">
+          <el-button type="primary" class="hidden" @click="restoreModal = true" v-can="['assets:recovery']"
+            v-if="asset.data?.deletedAt">Restaurar</el-button>
           <el-button type="danger" @click="getModal = true" v-can="['assets:checking']">Recibir</el-button>
-          <el-button type="warning" class="hidden" @click="editModal = true" v-can="['assets:update']">Editar</el-button>
+          <el-button type="warning" class="hidden" @click="editModal = true"
+            v-can="['assets:update']">Editar</el-button>
         </div>
       </template>
     </PageHeader>
     <el-row>
       <el-col :span="24">
         <div class="sm:hidden items-center justify-end flex w-full">
+          <el-button type="primary" class="hidden" @click="restoreModal = true" v-can="['assets:recovery']"
+            v-if="asset.data?.deletedAt">Restaurar</el-button>
           <el-button type="danger" @click="getModal = true" v-can="['assets:checking']">Recibir</el-button>
-          <el-button type="warning" class="hidden" @click="editModal = true" v-can="['assets:update']">Editar</el-button>
+          <el-button type="warning" class="hidden" @click="editModal = true"
+            v-can="['assets:update']">Editar</el-button>
         </div>
         <h2> Datos del activo</h2>
         <el-descriptions :column="width > 768 ? 3 : 1" border>
@@ -152,9 +159,11 @@ onMounted(async () => {
         </el-descriptions>
       </el-col>
       <el-container>
-        <AssetsFormGet :id="$props.id" v-model:open="getModal"></AssetsFormGet>
+        <AssetsFormGet :id="$props.id" v-model:open="getModal" />
         <AssetsFormSave :id="props.id" v-model:open="editModal" />
-
+        <el-dialog v-model="restoreModal">
+          <AssetsFormRestore :id="asset.data?.id" @submit="setAsset" />
+        </el-dialog>
       </el-container>
     </el-row>
   </el-col>

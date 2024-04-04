@@ -124,6 +124,7 @@ const setAssignments = async () => {
     startDate: route.query.startDate,
     endDate: route.query.endDate,
     all: route.query.all,
+    paranoid: route.query.paranoid,
     current: route.query.current
   }
   const assets = await locationService.getLocationAssets(queries);

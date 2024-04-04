@@ -73,6 +73,10 @@ const movementStatus = ({
     return 'info-row'
   }
 
+  if (row.asset.deletedAt) {
+    return 'danger-row'
+  }
+
   return ''
 }
 

@@ -134,6 +134,31 @@ export const useAssets = () => {
         });
       }
     }
+    async restore({ id, message }: { id: number; message: string }) {
+      try {
+        const { data, error } = await useFetch<Asset>(`/assets/${id}/restore`, {
+          method: 'PATCH',
+          body: {
+            message,
+          },
+        });
+
+        if (error.value) {
+          throw new Error(error.value.data.message);
+        }
+        ElNotification({
+          title: 'Activo restaurado',
+          type: 'success',
+        });
+        return data.value;
+      } catch (error) {
+        ElNotification({
+          title: 'Error al restaura el activo',
+          message: error.message,
+          type: 'error',
+        });
+      }
+    }
     async create({
       assets,
       description,

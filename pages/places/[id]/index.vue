@@ -200,6 +200,7 @@ const print = () => {
       query: {
         total: currentAssignments.total,
         all: 'false',
+        paranoid: 'true',
         current: 'true',
         ...filters
       }
