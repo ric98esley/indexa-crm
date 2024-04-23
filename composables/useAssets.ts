@@ -68,7 +68,7 @@ export const useAssets = () => {
         }
 
         return data;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al cargar los activos',
           message: error.message,

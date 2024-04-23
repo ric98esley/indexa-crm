@@ -176,9 +176,6 @@ const filters = computed({
                 <Icon name="ep:view" />
               </el-button>
             </NuxtLink>
-            <el-button type="danger" circle @click="removeAsset(row.id)" v-can="['assets:delete']">
-              <Icon name="ep:delete" />
-            </el-button>
           </el-row>
         </template>
       </el-table-column>

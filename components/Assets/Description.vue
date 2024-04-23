@@ -9,6 +9,7 @@ const props = defineProps({
 const getModal = ref(false);
 const editModal = ref(false);
 const restoreModal = ref(false);
+const deleteModal = ref(false);
 
 const width = ref<number>(window.screen.width);
 
@@ -62,7 +63,9 @@ onMounted(async () => {
         <div class="sm:flex items-center hidden">
           <el-button type="primary" class="hidden" @click="restoreModal = true" v-can="['assets:recovery']"
             v-if="asset.data?.deletedAt">Restaurar</el-button>
-          <el-button type="danger" @click="getModal = true" v-can="['assets:checking']">Recibir</el-button>
+          <el-button type="danger" class="hidden" @click="deleteModal = true"
+          v-can="['assets:delete']" v-if="!asset.data?.deletedAt">Ocultar</el-button>
+          <el-button type="success" @click="getModal = true" v-can="['assets:checking']">Recibir</el-button>
           <el-button type="warning" class="hidden" @click="editModal = true"
             v-can="['assets:update']">Editar</el-button>
         </div>
@@ -76,6 +79,8 @@ onMounted(async () => {
           <el-button type="danger" @click="getModal = true" v-can="['assets:checking']">Recibir</el-button>
           <el-button type="warning" class="hidden" @click="editModal = true"
             v-can="['assets:update']">Editar</el-button>
+          <el-button type="danger" class="hidden" @click="deleteModal = true"
+            v-can="['assets:delete']" v-if="!asset.data?.deletedAt">Ocultar</el-button>
         </div>
         <h2> Datos del activo</h2>
         <el-descriptions :column="width > 768 ? 3 : 1" border>
@@ -122,7 +127,7 @@ onMounted(async () => {
                 Fecha de creación
               </div>
             </template>
-            {{ new Date(asset.data.createdAt).toLocaleDateString() }}
+            {{ asset.data && asset.data.createdAt && new Date(asset.data.createdAt).toLocaleDateString() }}
           </el-descriptions-item>
           <el-descriptions-item>
             <template #label>
@@ -163,6 +168,9 @@ onMounted(async () => {
         <AssetsFormSave :id="props.id" v-model:open="editModal" />
         <el-dialog v-model="restoreModal">
           <AssetsFormRestore :id="asset.data?.id" @submit="setAsset" />
+        </el-dialog>
+        <el-dialog v-model="deleteModal">
+          <AssetsFormDelete :id="props.id" @submit="setAsset()" ></AssetsFormDelete>
         </el-dialog>
       </el-container>
     </el-row>

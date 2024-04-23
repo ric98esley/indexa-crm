@@ -7,6 +7,7 @@
             <div class="sm:flex items-center hidden">
               <el-button type="default" class="ml-2" @click="getExcel()" v-can="['assets:export']">Exportar a
                 excel</el-button>
+              <el-button type="primary" class="ml-2" @click="print()" v-can="['assets:export']">Imprimir</el-button>
             </div>
           </template>
         </PageHeader>
@@ -86,8 +87,8 @@
               </el-col>
               <el-col :span="12">
                 <el-form-item label="Fecha limite">
-                  <el-date-picker v-model="filters.endDate" type="datetime" placeholder="Fecha limite" format="YYYY/MM/DD"
-                    value-format="x" />
+                  <el-date-picker v-model="filters.endDate" type="datetime" placeholder="Fecha limite"
+                    format="YYYY/MM/DD" value-format="x" />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
@@ -186,11 +187,7 @@ const loading = ref(true)
 const response = reactive<{
   assets: Asset[],
   total: number
-  locations: Warehouse[]
-  categories: any[]
 }>({
-  categories: [],
-  locations: [],
   assets: [],
   total: 0
 });
@@ -223,7 +220,7 @@ const getAssets = async () => {
 
     response.assets = data?.value?.rows || [];
     response.total = data?.value?.total || 0;
-  } catch (error) {
+  } catch (error: any) {
     ElNotification({
       title: 'Error al obtener los activos intente de nuevo mas tarde.',
       message: error.message,
@@ -234,15 +231,26 @@ const getAssets = async () => {
   }
 }
 
-const printDiv = async (nombreDiv: string) => {
-  var contenido = document.getElementById(nombreDiv).innerHTML;
-  var contenidoOriginal = document.body.innerHTML;
-  if (!contenido) return;
-  document.body.innerHTML = contenido;
-
-  window.print();
-
-  document.body.innerHTML = contenidoOriginal;
+const print = async () => {
+  return navigateTo(
+    {
+      path: `/assets/print`,
+      query: {
+        total: response.total,
+        ...filters,
+        all: filters.all ? 'true' : 'false'
+      }
+    },
+    {
+      open: {
+        target: '_blank',
+        windowFeatures: {
+          popup: true,
+          noopener: true,
+          noreferrer: true,
+        }
+      }
+    })
 }
 
 const getExcel = async () => {
