@@ -1,4 +1,5 @@
 class LocationsService {
+  private URL = '/locations'
   async getLocations({
     status,
     search,
@@ -35,8 +36,8 @@ class LocationsService {
     offset?: number;
   }) {
     try {
-      const { data, error } = await useFetch<{ total: number; rows: Place[] }>(
-        '/locations',
+      const { data, error } = await useApi<{ total: number; rows: Place[] }>(
+        this.URL,
         {
           params: {
             ...(status &&
@@ -152,7 +153,7 @@ class LocationsService {
         address,
       });
 
-      const { data, error } = await useFetch<Place>('/locations', {
+      const { data, error } = await useApi<Place>(this.URL, {
         method: 'POST',
         body,
       });
@@ -180,7 +181,7 @@ class LocationsService {
 
   async getLocation({ id }: { id: number }) {
     try {
-      const { data, error } = await useFetch<Place>('/locations/' + id);
+      const { data, error } = await useApi<Place>(`/${this.URL}/${id}`);
 
       if (error.value) {
         throw new Error(error.value.data.message);
@@ -198,7 +199,7 @@ class LocationsService {
 
   async removePlace(id: number) {
     try {
-      const { data, error } = await useFetch<Place>(`/locations/${id}`, {
+      const { data, error } = await useApi<Place>(`/${this.URL}/${id}`, {
         method: 'delete',
       });
 
@@ -255,7 +256,7 @@ class LocationsService {
         address,
       });
 
-      const { data, error } = await useFetch<Place>(`/locations/${id}`, {
+      const { data, error } = await useApi<Place>(`/${this.URL}/${id}`, {
         method: 'PATCH',
         body,
       });
@@ -339,10 +340,10 @@ class LocationsService {
         endDate,
       });
 
-      const { data, error } = await useFetch<{
+      const { data, error } = await useApi<{
         total: number;
         rows: Assignments[];
-      }>(`/locations/${id}/assets`, {
+      }>(`/${this.URL}/${id}/assets`, {
         params: query,
       });
 
