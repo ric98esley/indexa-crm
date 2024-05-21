@@ -10,7 +10,7 @@ export const useBrands = () => {
       limit?: number,
     }) {
       try {
-        const { data, error } = await useFetch<{ total: number, rows: Brand[] }>('/brands',
+        const { data, error } = await useApi<{ total: number, rows: Brand[] }>('/brands',
           {
             params: {
               ...(name != '' && name && {
@@ -42,7 +42,7 @@ export const useBrands = () => {
       name: string
     }) {
       try {
-        const { data, error } = await useFetch<Brand>('/brands',
+        const { data, error } = await useApi<Brand>('/brands',
           {
             method: 'post',
             body: {
@@ -80,7 +80,7 @@ export const useBrands = () => {
           name,
         }
 
-        const { data, error } = await useFetch<Brand>(`/brands/${id}`,
+        const { data, error } = await useApi<Brand>(`/brands/${id}`,
           {
             method: 'PATCH',
             body
@@ -106,7 +106,7 @@ export const useBrands = () => {
 
     async removeBrand(id: number) {
       try {
-        const { data, error } = await useFetch<Brand>(`/brands/${id}`, {
+        const { data, error } = await useApi<Brand>(`/brands/${id}`, {
           method: 'delete'
         })
 
@@ -126,7 +126,7 @@ export const useBrands = () => {
 
     async getBrand(id: number) {
       try {
-        const { data, error } = await useFetch<Brand>(`/brands/${id}`)
+        const { data, error } = await useApi<Brand>(`/brands/${id}`)
 
         if (error.value) {
           throw new Error();
