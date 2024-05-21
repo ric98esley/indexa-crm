@@ -38,7 +38,7 @@ export const useConsumable = () => {
       offset?: number;
     }) {
       try {
-        const { data, error } = await useFetch<{
+        const { data, error } = await useApi<{
           total: number;
           rows: Place[];
         }>('/consumables', {
@@ -135,7 +135,7 @@ export const useConsumable = () => {
           ...(offset && { offset: (Number(offset) - 1) * Number(limit) }),
           search,
         });
-        const { data, error } = await useFetch<{
+        const { data, error } = await useApi<{
           rows: Consumable[];
           total: number;
         }>(`/consumables/${id}/products`, {
@@ -170,7 +170,7 @@ export const useConsumable = () => {
           ...(offset && { offset: (Number(offset) - 1) * Number(limit) }),
           search,
         });
-        const { data, error } = await useFetch<{
+        const { data, error } = await useApi<{
           rows: Consumable[];
           total: number;
         }>(`/consumables/${id}/movements`, {
@@ -210,7 +210,7 @@ export const useConsumable = () => {
           description,
           targets: rows,
         });
-        const { data, error } = await useFetch<Lot>(
+        const { data, error } = await useApi<Lot>(
           `/consumables/${id}/checking`,
           {
             method: 'POST',
@@ -271,7 +271,7 @@ export const useConsumable = () => {
           description,
           targets: rows,
         });
-        const { data, error } = await useFetch<Lot>(
+        const { data, error } = await useApi<Lot>(
           `/consumables/${id}/checkout`,
           {
             method: 'POST',
@@ -325,7 +325,7 @@ export const useConsumable = () => {
         const body = {
           min
         }
-        await useFetch<Consumable>(`/consumables/${locationId}/products/${productId}`,
+        await useApi<Consumable>(`/consumables/${locationId}/products/${productId}`,
         {
           method: 'PATCH',
           body
@@ -356,7 +356,7 @@ export const useConsumable = () => {
           type,
           description,
         });
-        const { data, error } = await useFetch<{
+        const { data, error } = await useApi<{
           rows: Lot[];
           total: number;
         }>(`/consumables/${warehouseId}/lots`, {
@@ -376,7 +376,7 @@ export const useConsumable = () => {
     }
     async getOneLot({ id , warehouseId}: { id: number | string , warehouseId: number | string}) {
       try {
-        const { data, error } = await useFetch<Lot>(`/consumables/${warehouseId}/lots/${id}`);
+        const { data, error } = await useApi<Lot>(`/consumables/${warehouseId}/lots/${id}`);
         if (error.value) {
           throw new Error(error.value.data.message);
         }
