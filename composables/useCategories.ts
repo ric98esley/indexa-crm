@@ -12,7 +12,7 @@ export const useCategories = () => {
       type?: string
     }) {
       try {
-        const { data, error } = await useFetch<{ total: number, rows: Category[] }>('/categories',
+        const { data, error } = await useApi<{ total: number, rows: Category[] }>('/categories',
           {
             params: {
               ...(name && {
@@ -46,7 +46,7 @@ export const useCategories = () => {
 
     async getCategory(id: number) {
       try {
-        const { data, error } = await useFetch<Category>(`/categories/${id}`)
+        const { data, error } = await useApi<Category>(`/categories/${id}`)
 
         if (error.value) {
           throw new Error()
@@ -72,7 +72,7 @@ export const useCategories = () => {
       type?: string
     }) {
       try {
-        const { data, error } = await useFetch<Category>('/categories',
+        const { data, error } = await useApi<Category>('/categories',
           {
             method: 'post',
             body: {
@@ -134,7 +134,7 @@ export const useCategories = () => {
           description
         }
 
-        const { data, error } = await useFetch<Category>(`/categories/${id}`,
+        const { data, error } = await useApi<Category>(`/categories/${id}`,
           {
             method: 'PATCH',
             body
@@ -161,7 +161,7 @@ export const useCategories = () => {
 
     async removeCategory(id: number) {
       try {
-        const { data, error } = await useFetch<Category>(`/categories/${id}`, {
+        const { data, error } = await useApi<Category>(`/categories/${id}`, {
           method: 'delete'
         })
 
