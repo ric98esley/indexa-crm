@@ -168,6 +168,7 @@ declare global {
     customer: string;
     type: string;
     description: string;
+    locationId?: number;
     createdBy?: User;
     location?: Place;
     movements: ConsumableMovement[];

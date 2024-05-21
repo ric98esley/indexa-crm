@@ -1,3 +1,5 @@
+import { AnyNaptrRecord } from "dns";
+
 export const useConsumable = () => {
   return class AssetsServices {
     async getLocations({
@@ -108,7 +110,7 @@ export const useConsumable = () => {
           throw new Error(error.value.data.message);
         }
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener los almacenes intente de nuevo mas tarde',
           message: error.message,
@@ -143,7 +145,7 @@ export const useConsumable = () => {
           throw new Error(error.value.data.message);
         }
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener el inventario',
           message: error.message,
@@ -178,7 +180,7 @@ export const useConsumable = () => {
           throw new Error(error.value.data.message);
         }
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener los movimientos',
           message: error.message,
@@ -240,7 +242,7 @@ export const useConsumable = () => {
           );
 
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al crear la orden',
           message: error.message,
@@ -301,7 +303,7 @@ export const useConsumable = () => {
         });
 
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al crear la orden',
           message: error.message,
@@ -364,7 +366,7 @@ export const useConsumable = () => {
           throw new Error(error.value.data.message);
         }
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al cargar el historial',
           message: error.message,
@@ -372,14 +374,14 @@ export const useConsumable = () => {
         });
       }
     }
-    async getOneLot({ id , warehouseId}: { id: number | string , warehouseId: number | stirng}) {
+    async getOneLot({ id , warehouseId}: { id: number | string , warehouseId: number | string}) {
       try {
         const { data, error } = await useFetch<Lot>(`/consumables/${warehouseId}/lots/${id}`);
         if (error.value) {
           throw new Error(error.value.data.message);
         }
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al cargar el historial',
           message: error.message,

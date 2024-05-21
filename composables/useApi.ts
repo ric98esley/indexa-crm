@@ -10,6 +10,7 @@ export function useApi<T>(
   const authStore = useAuthStore();
 
   const userAuth = useCookie('token');
+  console.log(userAuth);
   const config = useRuntimeConfig();
 
   const defaults: UseFetchOptions<T> = {
@@ -17,9 +18,7 @@ export function useApi<T>(
     key: url,
 
     // set user token if connected
-    headers: userAuth.value
-      ? { Authorization: `Bearer ${userAuth.value}` }
-      : {},
+    headers: { Authorization: `Bearer ${authStore.getToken}` },
 
     onResponse(_ctx) {},
 

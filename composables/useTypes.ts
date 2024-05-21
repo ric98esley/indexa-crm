@@ -24,7 +24,7 @@ export const useTypes = () => {
           throw new Error(error.value.data.message);
         }
         return data.value
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           title: 'Error al obtener los tipos intente de nuevo mas tarde',
           message: error?.message
@@ -38,7 +38,7 @@ export const useTypes = () => {
           throw new Error(error.value.data.message);
         }
         return data.value
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           title: 'Error al obtener el tipo intente de nuevo mas tarde',
           message: error?.message
@@ -55,7 +55,7 @@ export const useTypes = () => {
           throw new Error(error.value.data.message);
         }
         return data.value
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           title: 'Error al crear el tipo intente de nuevo mas tarde',
           message: error?.message
@@ -72,7 +72,7 @@ export const useTypes = () => {
           throw new Error(error.value.data.message);
         }
         return data.value
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al actualizar el tipo intente de nuevo mas tarde',
           message: error?.message
@@ -88,7 +88,7 @@ export const useTypes = () => {
           throw new Error(error.value.data.message);
         }
         return data.value
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           title: 'Error al eliminar el tipo intente de nuevo mas tarde',
           message: error?.message

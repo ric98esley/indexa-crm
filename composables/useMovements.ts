@@ -52,7 +52,7 @@ export const useMovements = () => {
           model,
           brand,
           limit,
-          offset: (offset - 1) * Number(limit),
+          offset: ((offset ?? 1 ) - 1) * Number(limit),
           sort,
           order,
           startDate,
@@ -66,7 +66,7 @@ export const useMovements = () => {
           throw new Error(error.value.data.message)
         }
         return data
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al cargar los movimientos',
           message: error.message,
@@ -174,7 +174,7 @@ export const useMovements = () => {
         const year = date.getFullYear();
 
         // Create a temporary link element to trigger the file download
-        const url = window.URL.createObjectURL(new Blob([file.value]));
+        const url = window.URL.createObjectURL(new Blob([file.value ?? '']));
         const link = document.createElement("a");
         link.href = url
         link.setAttribute("download", `${day}-${month}-${year}-asignaciones.xlsx`);
@@ -212,7 +212,7 @@ export const useMovements = () => {
         });
 
         return data.value
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al cargar los movimientos',
           message: error.message,

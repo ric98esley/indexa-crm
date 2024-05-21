@@ -100,7 +100,7 @@ export const useModels = () => {
           type: 'success'
         });
         return data.value
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al crear la Modelo intente de nuevo mas tarde',
           message: error.message,
@@ -134,7 +134,7 @@ export const useModels = () => {
           throw new Error(error.value.data.message);
         }
         return data.value
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al actualizar la Modelo intente de nuevo mas tarde',
           message: error.message,
@@ -156,7 +156,7 @@ export const useModels = () => {
           type: 'success'
         });
         return { data, error }
-      } catch (error) {
+      } catch (error:any) {
         ElNotification({
           title: 'Error al eliminar la Modelo intente de nuevo mas tarde',
           message: error.message,

@@ -10,7 +10,7 @@ export const useOrders = () => {
           throw new Error(error.value.data.message);
         }
         return data;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Ha ocurrido un error al cargar la orden.',
           message: error.message,
@@ -56,7 +56,7 @@ export const useOrders = () => {
           throw new Error(error.value.data.message);
         }
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Ha ocurrido un error al cargar la orden.',
           message: error.message,
@@ -138,7 +138,7 @@ export const useOrders = () => {
           throw new Error(error.value.data.message);
         }
         return data;
-      } catch (error) {
+      } catch (error: any) {
         console.log(error);
         ElNotification({
           title: 'Ha ocurrido un error al cargar la orden.',
@@ -209,7 +209,7 @@ export const useOrders = () => {
               },
             }
           );
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Vuelve a intentarlo mas tarde',
           message: error.message,
@@ -278,7 +278,7 @@ export const useOrders = () => {
               },
             }
           );
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al recibir',
           message: error.message,

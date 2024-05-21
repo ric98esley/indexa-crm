@@ -77,7 +77,7 @@ export const useSpecifications = () => (
         ElNotification({
           message: 'La especificación ha sido borrada.'
         })
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           message: error.message
         })
@@ -106,7 +106,7 @@ export const useSpecifications = () => (
           title: 'La especificación ha sido actualizada.',
           message: data.value?.name
         });
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           title: error.message
         })

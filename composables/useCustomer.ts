@@ -36,7 +36,7 @@ export const useCustomer = () => {
         }
 
         return toReturn
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener los contactos intente de nuevo mas tarde',
           message: error.message
@@ -72,7 +72,7 @@ export const useCustomer = () => {
           type: 'success'
         })
         return data
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener los contactos intente de nuevo mas tarde',
           message: error.message,
@@ -93,7 +93,7 @@ export const useCustomer = () => {
         const toReturn = data.value
 
         return toReturn;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Ha ocurrido un error al cargar el contacto',
           message: error.message
@@ -129,7 +129,7 @@ export const useCustomer = () => {
         })
 
         return data
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener los contactos intente de nuevo mas tarde',
           message: error.message
@@ -155,7 +155,7 @@ export const useCustomer = () => {
         })
 
         return data
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener los contactos intente de nuevo mas tarde',
           message: error.message

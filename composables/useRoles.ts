@@ -10,7 +10,7 @@ export const useUserRoles = () => {
         });
 
         return data.value
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           title: 'Error al obtener los roles',
           message: error.message,
@@ -39,7 +39,7 @@ export const useUserRoles = () => {
           title: 'Role creado correctamente',
           type: 'success'
         })
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           title: 'error al crear rol',
           message: error.message,

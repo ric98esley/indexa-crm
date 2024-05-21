@@ -1,5 +1,6 @@
 export const useAssets = () => {
   return class AssetsServices {
+    private URL = '/assets'
     async getAssets({
       serial,
       limit = 10,
@@ -20,6 +21,7 @@ export const useAssets = () => {
       endDate,
     }: {
       serial?: string;
+      group?: string
       limit?: number;
       offset?: number;
       sort?: string;
@@ -56,10 +58,10 @@ export const useAssets = () => {
           endDate,
         });
 
-        const { data, error } = await useFetch<{
+        const { data, error } = await useApi<{
           rows: Asset[];
           total: number;
-        }>('/assets', {
+        }>(this.URL, {
           params,
         });
 
@@ -77,13 +79,13 @@ export const useAssets = () => {
     }
     async finOne({ id }: { id: number }) {
       try {
-        const { data, error } = await useFetch<Asset>(`/assets/${id}`);
+        const { data, error } = await useApi<Asset>(`/${this.URL}/${id}`);
 
         if (error.value) {
           throw new Error(error.value.data.message);
         }
         return data;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener el activo',
           message: error.message,
@@ -93,15 +95,15 @@ export const useAssets = () => {
     }
     async findOneLogs({ id }: { id: number }) {
       try {
-        const { data, error } = await useFetch<{ total: number; rows: Log[] }>(
-          `/assets/${id}/logs`
+        const { data, error } = await useApi<{ total: number; rows: Log[] }>(
+          `/${this.URL}/${id}/logs`
         );
 
         if (error.value) {
           throw new Error(error.value.data.message);
         }
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener el activo',
           message: error.message,
@@ -111,7 +113,7 @@ export const useAssets = () => {
     }
     async delete({ id, message }: { id: number; message: string }) {
       try {
-        const { data, error } = await useFetch<Asset>(`/assets/${id}`, {
+        const { data, error } = await useApi<Asset>(`/${this.URL}/${id}`, {
           method: 'DELETE',
           body: {
             message,
@@ -126,7 +128,7 @@ export const useAssets = () => {
           type: 'success',
         });
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al ocultar el activo',
           message: error.message,
@@ -136,7 +138,7 @@ export const useAssets = () => {
     }
     async restore({ id, message }: { id: number; message: string }) {
       try {
-        const { data, error } = await useFetch<Asset>(`/assets/${id}/restore`, {
+        const { data, error } = await useApi<Asset>(`/${this.URL}/${id}/restore`, {
           method: 'PATCH',
           body: {
             message,
@@ -151,7 +153,7 @@ export const useAssets = () => {
           type: 'success',
         });
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al restaura el activo',
           message: error.message,
@@ -184,17 +186,17 @@ export const useAssets = () => {
           background: 'rgba(0, 0, 0, 0.7)',
         })
 
-        const { data, error } = await useFetch<{
+        const { data, error } = await useApi<{
           created: Asset[];
           errors: Asset[];
-        }>('/assets', {
+        }>(this.URL, {
           method: 'post',
           body,
         });
 
         loading.close();
 
-        if(error.value) {
+        if (error.value) {
           throw new Error(error.value.data.message);
         }
 
@@ -221,7 +223,7 @@ export const useAssets = () => {
             i++;
           };
         }
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al cargar los activos',
           message: error.message,
@@ -288,10 +290,10 @@ export const useAssets = () => {
           startDate,
           endDate,
         });
-        const { data, error } = await useFetch<{
+        const { data, error } = await useApi<{
           rows: Assignments[];
           total: number;
-        }>(`/assets/${id}/movements`, {
+        }>(`/${this.URL}/${id}/movements`, {
           params,
         });
 
@@ -299,7 +301,7 @@ export const useAssets = () => {
           throw new Error(error.value.data.message);
         }
         return data;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener los movimientos del activo',
           message: error.message,
@@ -362,7 +364,7 @@ export const useAssets = () => {
           startDate,
           endDate,
         });
-        const { data: file, error } = await useFetch<Blob>('/assets/excel', {
+        const { data: file, error } = await useApi<Blob>('/assets/excel', {
           params,
         });
         if (error.value) {
@@ -375,7 +377,7 @@ export const useAssets = () => {
         const year = date.getFullYear();
 
         // Create a temporary link element to trigger the file download
-        const url = window.URL.createObjectURL(new Blob([file.value]));
+        const url = window.URL.createObjectURL(new Blob([file.value ?? '']));
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', `${day}-${month}-${year}-historial.xlsx`);
@@ -414,7 +416,7 @@ export const useAssets = () => {
           }),
         };
 
-        const { data, error } = await useFetch<Asset>(`/assets/${id}`, {
+        const { data, error } = await useApi<Asset>(`/${this.URL}/${id}`, {
           method: 'PATCH',
           body,
         });
@@ -431,7 +433,7 @@ export const useAssets = () => {
         });
 
         return data;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al modificar la zona intente de nuevo mas tarde',
           message: error.message,

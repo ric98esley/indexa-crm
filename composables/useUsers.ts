@@ -1,4 +1,4 @@
-const isObjectEmpty = (objectName) => {
+const isObjectEmpty = (objectName: {[key:string]: any}) => {
   return Object.keys(objectName).length === 0
 }
 export const useUsers = () => {
@@ -151,7 +151,7 @@ export const useUsers = () => {
           message: `${data.value?.username}`
         })
         return { data, error }
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           title: 'Error al crear usuario intente de nuevo mas tarde',
           message: error.message
@@ -160,7 +160,6 @@ export const useUsers = () => {
     }
     async editUser({
       id,
-      username,
       email,
       role,
       isActive,
@@ -194,7 +193,7 @@ export const useUsers = () => {
           message: `${data.value?.username}`
         })
         return { data, error }
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al editar usuario intente de nuevo mas tarde',
           message: error.message,
@@ -214,7 +213,7 @@ export const useUsers = () => {
         ElNotification({
           message: 'El usuario ha sido borrada.'
         })
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al borrar el usuario intente de nuevo mas tarde.',
           message: error.message

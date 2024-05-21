@@ -20,7 +20,7 @@ export const useZones = () => {
           throw new Error(error.value.data.message);
         }
         return data.value
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener las zonas intente de nuevo mas tarde',
           message: error.message,
@@ -52,7 +52,7 @@ export const useZones = () => {
           message: `${data.value?.name}`
         })
         return data.value
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           title: 'Error al crear zona intente de nuevo mas tarde',
           message: error.value
@@ -84,7 +84,7 @@ export const useZones = () => {
         })
 
         return data.value
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al modificar la zona intente de nuevo mas tarde',
           message: error.message

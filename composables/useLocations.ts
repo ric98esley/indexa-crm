@@ -107,7 +107,7 @@ class LocationsService {
         throw new Error(error.value.data.message);
       }
       return { data, error };
-    } catch (error) {
+    } catch (error: any) {
       ElNotification({
         title: 'Error al obtener las agencia intente de nuevo mas tarde',
         message: error.message,
@@ -169,7 +169,7 @@ class LocationsService {
         message: `${data.value?.name}`,
       });
       return { data, error };
-    } catch (error) {
+    } catch (error: any) {
       ElNotification({
         title: 'Error al crear agencia intente de nuevo mas tarde',
         message: error.message,
@@ -187,7 +187,7 @@ class LocationsService {
       }
 
       return data.value;
-    } catch (error) {
+    } catch (error: any) {
       ElNotification({
         title: 'Error al obtener la localización',
         message: error.message,
@@ -211,7 +211,7 @@ class LocationsService {
       });
 
       return data.value;
-    } catch (error) {
+    } catch (error: any) {
       ElNotification({
         title: 'Error al borrar la agencia intente de nuevo mas tarde.',
         message: error.me,
@@ -270,7 +270,7 @@ class LocationsService {
       });
 
       return data.value;
-    } catch (error) {
+    } catch (error: any) {
       ElNotification({
         title: 'Error al modificar el agencia intente de nuevo mas tarde',
         message: error.message,
@@ -351,7 +351,7 @@ class LocationsService {
       }
 
       return data.value;
-    } catch (error) {
+    } catch (error: any) {
       ElNotification({
         title:
           'Error al obtener los activos de la agencia intente de nuevo mas tarde',

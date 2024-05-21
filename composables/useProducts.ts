@@ -38,7 +38,7 @@ export const useProducts = () => {
         });
 
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al crear tipos intente de nuevo mas tarde',
           message: error.message,
@@ -57,7 +57,7 @@ export const useProducts = () => {
         }
 
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener el producto',
           message: error.message,
@@ -107,7 +107,7 @@ export const useProducts = () => {
         })
 
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener el producto',
           message: error.message,
@@ -160,7 +160,7 @@ export const useProducts = () => {
         }
 
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener los tipos intente de nuevo mas tarde',
           message: error.message,

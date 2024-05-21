@@ -5,7 +5,7 @@ export const useGroups = () =>
       manager,
       code,
       parent,
-      limit,
+      limit = 10,
       offset = 0,
     }: {
       name?: string;
@@ -49,7 +49,7 @@ export const useGroups = () =>
           throw new Error(error.value.data.message);
         }
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener las marcas intente de nuevo mas tarde',
           message: error.message,
@@ -64,7 +64,7 @@ export const useGroups = () =>
           throw new Error(error.value.data.message);
         }
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener el grupo intente de nuevo mas tarde',
           message: error.message,
@@ -81,7 +81,7 @@ export const useGroups = () =>
           throw new Error(error.value.data.message);
         }
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener el grupo intente de nuevo mas tarde',
           message: error.message,
@@ -120,7 +120,7 @@ export const useGroups = () =>
         group.name = '';
         group.code = '';
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error el grupo intente de nuevo mas tarde',
           message: error.message,
@@ -153,7 +153,7 @@ export const useGroups = () =>
         });
 
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al modificar el grupo intente de nuevo mas tarde',
           message: error.message,
@@ -177,7 +177,7 @@ export const useGroups = () =>
           type: 'warning',
         });
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al borrar el grupo intente de nuevo mas tarde.',
           message: error.message,
