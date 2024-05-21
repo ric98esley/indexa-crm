@@ -1,5 +1,6 @@
 export const useGroups = () =>
   class GroupsService {
+    private URL = '/groups'
     async getGroups({
       name,
       manager,
@@ -16,10 +17,10 @@ export const useGroups = () =>
       offset?: number;
     }) {
       try {
-        const { data, error } = await useFetch<{
+        const { data, error } = await useApi<{
           total: number;
           rows: Group[];
-        }>('/groups', {
+        }>(this.URL, {
           params: {
             ...(name != '' &&
               name && {
@@ -58,7 +59,7 @@ export const useGroups = () =>
     }
     async getGroup(id: number | string) {
       try {
-        const { data, error } = await useFetch<Group>(`/groups/${id}`);
+        const { data, error } = await useApi<Group>(`/${this.URL}/${id}`);
 
         if (error.value) {
           throw new Error(error.value.data.message);
@@ -75,7 +76,7 @@ export const useGroups = () =>
 
     async getGroupLocation(id: number | string) {
       try {
-        const { data, error } = await useFetch<{rows: Place[], total: number}>(`/groups/${id}/locations`);
+        const { data, error } = await useApi<{rows: Place[], total: number}>(`/${this.URL}/${id}/locations`);
 
         if (error.value) {
           throw new Error(error.value.data.message);
@@ -94,7 +95,7 @@ export const useGroups = () =>
       try {
         if (!group.name || !group.code)
           throw new Error('Debe ingresar el nombre y el código del grupo');
-        const { data, error } = await useFetch<Group>('/groups', {
+        const { data, error } = await useApi<Group>(this.URL, {
           method: 'post',
           body: {
             name: group.name,
@@ -138,7 +139,7 @@ export const useGroups = () =>
           managerId: group.managerId,
         };
 
-        const { data, error } = await useFetch<Group>(`/groups/${group.id}`, {
+        const { data, error } = await useApi<Group>(`/${this.URL}/${group.id}`, {
           method: 'PATCH',
           body,
         });
@@ -164,7 +165,7 @@ export const useGroups = () =>
 
     async deleteGroup(id: number) {
       try {
-        const { data, error } = await useFetch<Group>(`/groups/${id}`, {
+        const { data, error } = await useApi<Group>(`/${this.URL}/${id}`, {
           method: 'delete',
         });
 
