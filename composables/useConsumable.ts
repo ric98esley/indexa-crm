@@ -2,6 +2,7 @@ import { AnyNaptrRecord } from "dns";
 
 export const useConsumable = () => {
   return class AssetsServices {
+    private URL = '/consumables'
     async getLocations({
       status,
       search,
@@ -41,7 +42,7 @@ export const useConsumable = () => {
         const { data, error } = await useApi<{
           total: number;
           rows: Place[];
-        }>('/consumables', {
+        }>(this.URL, {
           params: {
             ...(status &&
               status?.length > 0 && {
@@ -138,7 +139,7 @@ export const useConsumable = () => {
         const { data, error } = await useApi<{
           rows: Consumable[];
           total: number;
-        }>(`/consumables/${id}/products`, {
+        }>(`/${this.URL}/${id}/products`, {
           params,
         });
         if (error.value) {
@@ -173,7 +174,7 @@ export const useConsumable = () => {
         const { data, error } = await useApi<{
           rows: Consumable[];
           total: number;
-        }>(`/consumables/${id}/movements`, {
+        }>(`/${this.URL}/${id}/movements`, {
           params,
         });
         if (error.value) {
@@ -211,7 +212,7 @@ export const useConsumable = () => {
           targets: rows,
         });
         const { data, error } = await useApi<Lot>(
-          `/consumables/${id}/checking`,
+          `/${this.URL}/${id}/checking`,
           {
             method: 'POST',
             body,
@@ -227,7 +228,7 @@ export const useConsumable = () => {
         if (data.value && data.value.id)
           return navigateTo(
             {
-              path: `/consumables/${data.value.locationId}/lot/${data.value.id}/print`,
+              path: `/${this.URL}/${data.value.locationId}/lot/${data.value.id}/print`,
             },
             {
               open: {
@@ -272,7 +273,7 @@ export const useConsumable = () => {
           targets: rows,
         });
         const { data, error } = await useApi<Lot>(
-          `/consumables/${id}/checkout`,
+          `/${this.URL}/${id}/checkout`,
           {
             method: 'POST',
             body,
@@ -282,7 +283,7 @@ export const useConsumable = () => {
         if (data.value && data.value.id)
           return navigateTo(
             {
-              path: `/consumables/${data.value.locationId!}/lot/${data.value.id}/print`,
+              path: `/${this.URL}/${data.value.locationId!}/lot/${data.value.id}/print`,
             },
             {
               open: {
@@ -325,7 +326,7 @@ export const useConsumable = () => {
         const body = {
           min
         }
-        await useApi<Consumable>(`/consumables/${locationId}/products/${productId}`,
+        await useApi<Consumable>(`/${this.URL}/${locationId}/products/${productId}`,
         {
           method: 'PATCH',
           body
@@ -359,7 +360,7 @@ export const useConsumable = () => {
         const { data, error } = await useApi<{
           rows: Lot[];
           total: number;
-        }>(`/consumables/${warehouseId}/lots`, {
+        }>(`/${this.URL}/${warehouseId}/lots`, {
           params,
         });
         if (error.value) {
@@ -376,7 +377,7 @@ export const useConsumable = () => {
     }
     async getOneLot({ id , warehouseId}: { id: number | string , warehouseId: number | string}) {
       try {
-        const { data, error } = await useApi<Lot>(`/consumables/${warehouseId}/lots/${id}`);
+        const { data, error } = await useApi<Lot>(`/${this.URL}/${warehouseId}/lots/${id}`);
         if (error.value) {
           throw new Error(error.value.data.message);
         }
