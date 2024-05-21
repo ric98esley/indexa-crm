@@ -1,5 +1,6 @@
 export const useCustomer = () => {
   return class CustomerService {
+    private URL = '/customers'
     async getCustomers({
       search,
       limit,
@@ -19,7 +20,7 @@ export const useCustomer = () => {
             limit
           })
         })
-        const { data, error } = await useFetch<{ total: number, rows: Profile[] }>('/customers',
+        const { data, error } = await useApi<{ total: number, rows: Profile[] }>(this.URL,
           {
             params
           }
@@ -56,7 +57,7 @@ export const useCustomer = () => {
           cardId,
           phone
         })
-        const { data, error } = await useFetch<Profile>('/customers',
+        const { data, error } = await useApi<Profile>(this.URL,
           {
             method: 'post',
             body
@@ -83,7 +84,7 @@ export const useCustomer = () => {
 
     async getOneCustomer({ id }: { id: number }) {
       try {
-        const { data, error } = await useFetch<Profile>(`/customers/${id}`);
+        const { data, error } = await useApi<Profile>(`/${this.URL}/${id}`);
         if (error.value) {
           throw new Error('Error al cargar el contacto')
         }
@@ -114,7 +115,7 @@ export const useCustomer = () => {
           cardId,
           phone
         })
-        const { data, error } = await useFetch<Profile>(`/customers/${id}`,
+        const { data, error } = await useApi<Profile>(`/${this.URL}/${id}`,
           {
             method: 'patch',
             body
@@ -140,7 +141,7 @@ export const useCustomer = () => {
       id,
     }: Profile) {
       try {
-        const { data, error } = await useFetch<Profile>(`/customers/${id}`,
+        const { data, error } = await useApi<Profile>(`/${this.URL}/${id}`,
           {
             method: 'delete',
           }
