@@ -1,5 +1,6 @@
 export const useMovements = () => {
   return class MovementsService {
+    private URL = '/movements'
     async getMovements ({
       paranoid = false,
       all = false,
@@ -58,7 +59,7 @@ export const useMovements = () => {
           startDate,
           endDate,
         })
-        const { data, error } = await useFetch<{ total: number, rows: Assignments[] }>(`/movements`, {
+        const { data, error } = await useApi<{ total: number, rows: Assignments[] }>(this.URL, {
           params
         });
 
@@ -111,7 +112,7 @@ export const useMovements = () => {
       endDate?: string
     }){
       try {
-        const { data: file, error } = await useFetch<Blob>('/movements/excel',
+        const { data: file, error } = await useApi<Blob>(`${this.URL}/excel`,
           {
             params: {
               ...(serial != '' && serial && {
@@ -207,7 +208,7 @@ export const useMovements = () => {
           search,
           orderType
         })
-        const { data, error } = await useFetch<{ total: number, rows: LocationMovementCount[] }>(`/movements/locations`, {
+        const { data, error } = await useApi<{ total: number, rows: LocationMovementCount[] }>(`${this.URL}/locations`, {
           params
         });
 
