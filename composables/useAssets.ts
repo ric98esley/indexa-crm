@@ -79,7 +79,7 @@ export const useAssets = () => {
     }
     async finOne({ id }: { id: number }) {
       try {
-        const { data, error } = await useApi<Asset>(`/${this.URL}/${id}`);
+        const { data, error } = await useApi<Asset>(`${this.URL}/${id}`);
 
         if (error.value) {
           throw new Error(error.value.data.message);
@@ -113,7 +113,7 @@ export const useAssets = () => {
     }
     async delete({ id, message }: { id: number; message: string }) {
       try {
-        const { data, error } = await useApi<Asset>(`/${this.URL}/${id}`, {
+        const { data, error } = await useApi<Asset>(`${this.URL}/${id}`, {
           method: 'DELETE',
           body: {
             message,
@@ -138,7 +138,7 @@ export const useAssets = () => {
     }
     async restore({ id, message }: { id: number; message: string }) {
       try {
-        const { data, error } = await useApi<Asset>(`/${this.URL}/${id}/restore`, {
+        const { data, error } = await useApi<Asset>(`${this.URL}/${id}/restore`, {
           method: 'PATCH',
           body: {
             message,
@@ -364,7 +364,7 @@ export const useAssets = () => {
           startDate,
           endDate,
         });
-        const { data: file, error } = await useApi<Blob>('/assets/excel', {
+        const { data: file, error } = await useApi<Blob>(`${this.URL}/excel`, {
           params,
         });
         if (error.value) {
@@ -416,7 +416,7 @@ export const useAssets = () => {
           }),
         };
 
-        const { data, error } = await useApi<Asset>(`/${this.URL}/${id}`, {
+        const { data, error } = await useApi<Asset>(`${this.URL}/${id}`, {
           method: 'PATCH',
           body,
         });
