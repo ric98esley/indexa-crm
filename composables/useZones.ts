@@ -1,5 +1,6 @@
 export const useZones = () => {
   return class ZoneServices {
+    private URL = '/locations/zones'
     async getZones({ name, limit = 50, offset }: {
       name?: string,
       limit?: number,
@@ -11,7 +12,7 @@ export const useZones = () => {
           limit,
           ...(offset && { offset: (offset - 1) * Number(limit) })
         })
-        const { data, error } = await useFetch<{ total: number, rows: Zone[] }>('/locations/zones',
+        const { data, error } = await useApi<{ total: number, rows: Zone[] }>(this.URL,
           {
             params
           }
@@ -35,7 +36,7 @@ export const useZones = () => {
     }) {
       try {
 
-        const { data, error } = await useFetch<Zone>('/locations/zones',
+        const { data, error } = await useApi<Zone>(this.URL,
           {
             method: 'post',
             body: {
@@ -67,7 +68,7 @@ export const useZones = () => {
           name,
         }
 
-        const { data, error } = await useFetch<Zone>(`/locations/zones/${id}`,
+        const { data, error } = await useApi<Zone>(`${this.URL}/${id}`,
           {
             method: 'PATCH',
             body
@@ -93,7 +94,7 @@ export const useZones = () => {
     }
     async removeZone(id: number) {
       try {
-        const { data, error } = await useFetch<Zone>(`/locations/zones/${id}`, {
+        const { data, error } = await useApi<Zone>(`${this.URL}/${id}`, {
           method: 'delete'
         })
 
