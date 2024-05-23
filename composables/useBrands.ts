@@ -81,7 +81,7 @@ export const useBrands = () => {
           name,
         }
 
-        const { data, error } = await useApi<Brand>(`/${this.URL}/${id}`,
+        const { data, error } = await useApi<Brand>(`${this.URL}/${id}`,
           {
             method: 'PATCH',
             body
@@ -107,7 +107,7 @@ export const useBrands = () => {
 
     async removeBrand(id: number) {
       try {
-        const { data, error } = await useApi<Brand>(`/${this.URL}/${id}`, {
+        const { data, error } = await useApi<Brand>(`${this.URL}/${id}`, {
           method: 'delete'
         })
 
@@ -127,7 +127,7 @@ export const useBrands = () => {
 
     async getBrand(id: number) {
       try {
-        const { data, error } = await useApi<Brand>(`/${this.URL}/${id}`)
+        const { data, error } = await useApi<Brand>(`${this.URL}/${id}`)
 
         if (error.value) {
           throw new Error();

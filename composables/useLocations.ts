@@ -181,7 +181,7 @@ class LocationsService {
 
   async getLocation({ id }: { id: number }) {
     try {
-      const { data, error } = await useApi<Place>(`/${this.URL}/${id}`);
+      const { data, error } = await useApi<Place>(`${this.URL}/${id}`);
 
       if (error.value) {
         throw new Error(error.value.data.message);
@@ -199,7 +199,7 @@ class LocationsService {
 
   async removePlace(id: number) {
     try {
-      const { data, error } = await useApi<Place>(`/${this.URL}/${id}`, {
+      const { data, error } = await useApi<Place>(`${this.URL}/${id}`, {
         method: 'delete',
       });
 
@@ -256,7 +256,7 @@ class LocationsService {
         address,
       });
 
-      const { data, error } = await useApi<Place>(`/${this.URL}/${id}`, {
+      const { data, error } = await useApi<Place>(`${this.URL}/${id}`, {
         method: 'PATCH',
         body,
       });
@@ -343,7 +343,7 @@ class LocationsService {
       const { data, error } = await useApi<{
         total: number;
         rows: Assignments[];
-      }>(`/${this.URL}/${id}/assets`, {
+      }>(`${this.URL}/${id}/assets`, {
         params: query,
       });
 

@@ -59,7 +59,7 @@ export const useGroups = () =>
     }
     async getGroup(id: number | string) {
       try {
-        const { data, error } = await useApi<Group>(`/${this.URL}/${id}`);
+        const { data, error } = await useApi<Group>(`${this.URL}/${id}`);
 
         if (error.value) {
           throw new Error(error.value.data.message);
@@ -76,7 +76,7 @@ export const useGroups = () =>
 
     async getGroupLocation(id: number | string) {
       try {
-        const { data, error } = await useApi<{rows: Place[], total: number}>(`/${this.URL}/${id}/locations`);
+        const { data, error } = await useApi<{rows: Place[], total: number}>(`${this.URL}/${id}/locations`);
 
         if (error.value) {
           throw new Error(error.value.data.message);
@@ -139,7 +139,7 @@ export const useGroups = () =>
           managerId: group.managerId,
         };
 
-        const { data, error } = await useApi<Group>(`/${this.URL}/${group.id}`, {
+        const { data, error } = await useApi<Group>(`${this.URL}/${group.id}`, {
           method: 'PATCH',
           body,
         });
@@ -165,7 +165,7 @@ export const useGroups = () =>
 
     async deleteGroup(id: number) {
       try {
-        const { data, error } = await useApi<Group>(`/${this.URL}/${id}`, {
+        const { data, error } = await useApi<Group>(`${this.URL}/${id}`, {
           method: 'delete',
         });
 

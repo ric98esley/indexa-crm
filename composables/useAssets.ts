@@ -96,7 +96,7 @@ export const useAssets = () => {
     async findOneLogs({ id }: { id: number }) {
       try {
         const { data, error } = await useApi<{ total: number; rows: Log[] }>(
-          `/${this.URL}/${id}/logs`
+          `${this.URL}/${id}/logs`
         );
 
         if (error.value) {
@@ -293,7 +293,7 @@ export const useAssets = () => {
         const { data, error } = await useApi<{
           rows: Assignments[];
           total: number;
-        }>(`/${this.URL}/${id}/movements`, {
+        }>(`${this.URL}/${id}/movements`, {
           params,
         });
 

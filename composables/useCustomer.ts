@@ -84,7 +84,7 @@ export const useCustomer = () => {
 
     async getOneCustomer({ id }: { id: number }) {
       try {
-        const { data, error } = await useApi<Profile>(`/${this.URL}/${id}`);
+        const { data, error } = await useApi<Profile>(`${this.URL}/${id}`);
         if (error.value) {
           throw new Error('Error al cargar el contacto')
         }
@@ -115,7 +115,7 @@ export const useCustomer = () => {
           cardId,
           phone
         })
-        const { data, error } = await useApi<Profile>(`/${this.URL}/${id}`,
+        const { data, error } = await useApi<Profile>(`${this.URL}/${id}`,
           {
             method: 'patch',
             body
@@ -141,7 +141,7 @@ export const useCustomer = () => {
       id,
     }: Profile) {
       try {
-        const { data, error } = await useApi<Profile>(`/${this.URL}/${id}`,
+        const { data, error } = await useApi<Profile>(`${this.URL}/${id}`,
           {
             method: 'delete',
           }

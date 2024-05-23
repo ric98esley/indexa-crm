@@ -60,7 +60,7 @@ export const useModels = () => {
     }
     async getModel(id: number) {
       try {
-        const { data, error } = await useApi<Model>(`/${this.URL}/${id}`);
+        const { data, error } = await useApi<Model>(`${this.URL}/${id}`);
         if (error.value) {
           ElNotification({
             message: 'Error al obtener la Modelo intente de nuevo mas tarde'
@@ -127,7 +127,7 @@ export const useModels = () => {
           categoryId,
           brandId,
         });
-        const { data, error } = await useApi<Model>(`/${this.URL}/${id}`, {
+        const { data, error } = await useApi<Model>(`${this.URL}/${id}`, {
           method: 'PATCH',
           body
         });
@@ -145,7 +145,7 @@ export const useModels = () => {
     }
     async deleteModel(id: number) {
       try {
-        const { data, error } = await useApi<Model>(`/${this.URL}/${id}`, {
+        const { data, error } = await useApi<Model>(`${this.URL}/${id}`, {
           method: 'DELETE'
         });
         if (error.value) {

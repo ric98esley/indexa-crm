@@ -47,7 +47,7 @@ export const useCategories = () => {
 
     async getCategory(id: number) {
       try {
-        const { data, error } = await useApi<Category>(`/${this.URL}/${id}`)
+        const { data, error } = await useApi<Category>(`${this.URL}/${id}`)
 
         if (error.value) {
           throw new Error()
@@ -135,7 +135,7 @@ export const useCategories = () => {
           description
         }
 
-        const { data, error } = await useApi<Category>(`/${this.URL}/${id}`,
+        const { data, error } = await useApi<Category>(`${this.URL}/${id}`,
           {
             method: 'PATCH',
             body
@@ -162,7 +162,7 @@ export const useCategories = () => {
 
     async removeCategory(id: number) {
       try {
-        const { data, error } = await useApi<Category>(`/${this.URL}/${id}`, {
+        const { data, error } = await useApi<Category>(`${this.URL}/${id}`, {
           method: 'delete'
         })
 
