@@ -1,6 +1,5 @@
 export const useUserRoles = () => {
   const baseURL = '/roles';
-
   return class RoleService {
     async find({}: {}) {
       try {
