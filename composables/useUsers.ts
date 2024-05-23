@@ -3,6 +3,7 @@ const isObjectEmpty = (objectName: {[key:string]: any}) => {
 }
 export const useUsers = () => {
   return class UsersService {
+    private URL = '/users'
     async getUsers({
       username,
       group,
@@ -43,7 +44,7 @@ export const useUsers = () => {
       endDate?: string,
     }) {
       try {
-        const { data, error } = await useFetch<{ total: number, rows: User[] }>('/users',
+        const { data, error } = await useApi<{ total: number, rows: User[] }>(this.URL,
           {
             params: {
               ...(username != '' && username && {
@@ -136,7 +137,7 @@ export const useUsers = () => {
         body.profile = useFilterObject(user.profile)
 
         if (isObjectEmpty(body.profile)) delete body.profile;
-        const { data, error } = await useFetch<User>('/users',
+        const { data, error } = await useApi<User>(this.URL,
           {
             method: 'POST',
             body
@@ -179,7 +180,7 @@ export const useUsers = () => {
           isActive,
           groupId
         };
-        const { data, error } = await useFetch<User>(`/users/${id}`,
+        const { data, error } = await useApi<User>(`${this.URL}/${id}`,
           {
             method: 'patch',
             body
@@ -202,7 +203,7 @@ export const useUsers = () => {
     }
     async removeUser ({ id }: { id: number }) {
       try {
-        const { data, error } = await useFetch<User>(`/users/${id}`, {
+        const { data, error } = await useApi<User>(`${this.URL}/${id}`, {
           method: 'delete'
         })
 
