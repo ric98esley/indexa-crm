@@ -1,5 +1,6 @@
 export const useProducts = () => {
   return class ProductService {
+    private URL = '/products'
     async createProduct({
       name,
       code,
@@ -24,7 +25,7 @@ export const useProducts = () => {
           categoryId,
           unit,
         });
-        const { data, error } = await useFetch<Product>('/products', {
+        const { data, error } = await useApi<Product>(this.URL, {
           method: 'post',
           body,
         });
@@ -48,7 +49,7 @@ export const useProducts = () => {
 
     async findOne({ id }: { id: number }) {
       try {
-        const { data, error } = await useFetch<Product>(`/products/${id}`, {
+        const { data, error } = await useApi<Product>(`${this.URL}/${id}`, {
           method: 'get',
         });
 
@@ -92,7 +93,7 @@ export const useProducts = () => {
           categoryId,
           unit,
         });
-        const { data, error } = await useFetch<Product>(`/products/${id}`, {
+        const { data, error } = await useApi<Product>(`${this.URL}/${id}`, {
           method: 'patch',
           body,
         });
@@ -149,10 +150,10 @@ export const useProducts = () => {
           limit,
           offset,
         });
-        const { data, error } = await useFetch<{
+        const { data, error } = await useApi<{
           total: number;
           rows: Product[];
-        }>('/products', {
+        }>(this.URL, {
           params,
         });
         if (error.value) {
