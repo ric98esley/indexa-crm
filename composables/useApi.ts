@@ -9,8 +9,6 @@ export function useApi<T>(
 ) {
   const authStore = useAuthStore();
 
-  const userAuth = useCookie('token');
-  console.log(userAuth);
   const config = useRuntimeConfig();
 
   const defaults: UseFetchOptions<T> = {

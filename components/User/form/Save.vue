@@ -123,12 +123,18 @@ const editUser = async () => {
 }
 
 const saveUser = async () => {
-  if(props.editUser) {
-    await editUser()
-  } else {
-    await createUser()
+  try {
+    if(props.editUser) {
+      await editUser()
+    } else {
+      await createUser()
+    }
+    
+  } catch (error) {
+    
+  } finally {
+    emit('onSubmit')
   }
-  emit('onSubmit')
 }
 
 const validateUser = (props: FormItemProp, isValid: boolean, message: string) => {

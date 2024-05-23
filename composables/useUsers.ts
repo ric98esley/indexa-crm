@@ -147,6 +147,8 @@ export const useUsers = () => {
           console.log(error)
           throw new Error(error.value.data.message)
         }
+
+        console.log (data.value);
         ElNotification({
           title: 'Usuario creada correctamente',
           message: `${data.value?.username}`
