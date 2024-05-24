@@ -12,6 +12,13 @@
       <el-col class="lg:p-4">
         <el-card class="w-full">
           <el-form label-position="top" @submit.prevent="() => { }">
+            <el-form-item label="Status del activo a recibir">
+              <el-select class="w-full" v-model="status">
+                <el-option label="Asignado (Desde taquillas)" value="asignado" />
+                <el-option label="Desplegable (Desde depósitos)" value="desplegable" />
+                <el-option label="Pendiente (Desde revisión)" value="pendiente" />
+              </el-select>
+            </el-form-item>
             <el-form-item label="Deposito (Por defecto)">
               <el-select class="w-full" v-model="assignments.place" filterable remote placeholder="Elige un deposito"
                 :loading="loadingPlace" :remote-method="setPlaces">
@@ -88,6 +95,8 @@ definePageMeta({
 const loadingAssets = ref(true)
 const loadingPlace = ref(false);
 
+const status = ref('asignado');
+
 const AssetsServices = useAssets();
 const LocationsServices = useLocation();
 const OrdersServices = useOrders();
@@ -129,7 +138,7 @@ const filters = reactive({
 const getAssets = async (query: string, cb: (arg: any) => void) => {
   try {
     loadingAssets.value = true;
-    const data = await assetService.getAssets({ serial: query, status: 'asignado' })
+    const data = await assetService.getAssets({ serial: query, status: status.value })
     const rows = data?.value?.rows || [];
     loadingAssets.value = false;
 
