@@ -132,7 +132,7 @@
           </el-table-column>
           <el-table-column width="50">
             <template #default="{ row }">
-              <el-button type="danger" circle @click="deleteAssignment(row)" v-role="['superuser', 'auditor']">
+              <el-button type="danger" circle @click="deleteAssignment(row)">
                 <Icon name="ep:delete" />
               </el-button>
             </template>
