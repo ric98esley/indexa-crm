@@ -150,7 +150,7 @@ const rules = {
         </el-row>
       </el-form-item>
       <el-form-item label="Cantidad" prop="quantity">
-        <el-input v-model="toAdd.quantity" type="number">
+        <el-input v-model="toAdd.quantity">
         </el-input>
       </el-form-item>
       <el-form-item label="Mínimo" v-if="props.showMin" prop="min">
