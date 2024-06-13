@@ -107,7 +107,7 @@ const rules = {
   ],
   quantity: [
     { required: true, message: 'Por introduce una cantidad', trigger: 'blur' },
-    { pattern: /^[0-9]+$/, message: 'Debe de ser de tipo numérico' }
+    { pattern: /^\d+(\.\d+)?$/, message: 'Debe de ser de tipo numérico' }
   ],
   min: [
     { pattern: /^[0-9]+$/, message: 'Debe de ser de tipo numérico' }
