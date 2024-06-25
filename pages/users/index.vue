@@ -23,20 +23,12 @@
             </el-table-column>
             <el-table-column prop="username" label="Usuario" :min-width="minWidth">
               <template #header>
-                <el-input v-model="filters.name" placeholder="Nombre" clearable />
+                <el-input v-model="filters.username" placeholder="Nombre" clearable />
               </template>
             </el-table-column>
-            <el-table-column prop="profile.name" label="Nombre" :min-width="minWidth">
-              <template #header>
-                <el-input v-model="filters.name" placeholder="Nombre" clearable />
-              </template>
-            </el-table-column>
-            <el-table-column label="Apellido" prop="profile.lastName" :min-width="minWidth">
-              <template #header>
-                <el-input v-model="filters.lastName" placeholder="Apellido" clearable />
-              </template>
-            </el-table-column>
-            <el-table-column label="Rol" prop="role" v-role="['superuser', 'auditor']" :min-width="minWidth">
+            <el-table-column prop="profile.name" label="Nombre" :min-width="minWidth" />
+            <el-table-column label="Apellido" prop="profile.lastName" :min-width="minWidth"/>
+            <el-table-column label="Rol" prop="role" :min-width="minWidth">
               <template #header>
                 <el-input v-model="filters.role" placeholder="Rol" clearable />
               </template>
@@ -52,11 +44,11 @@
                   <el-button type="info" circle @click="editUser(row)" v-can="['users:update']">
                     <Icon name="ep:edit" />
                   </el-button>
-                  <NuxtLink :to="`/users/${row.id}`">
+                  <!-- <NuxtLink :to="`/users/${row.id}`">
                     <el-button type="primary" circle>
                       <Icon name="ep:view" />
                     </el-button>
-                  </NuxtLink>
+                  </NuxtLink> -->
                   <el-button type="danger" circle @click="removeUser(row.id)" v-can="['users:delete']">
                     <Icon name="ep:delete" />
                   </el-button>

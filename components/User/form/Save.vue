@@ -42,11 +42,13 @@ const groups = reactive<{
 });
 
 const roles = [
-  { label: "Taquilla", value: "taquilla" },
-  // { label: "Técnico", value: "tecnico" },
   { label: "Auditor", value: "auditor" },
   { label: "Receptor", value: "receptor" },
-  // { label: "Asistente", value: "asistente" },
+  { label: "Asistente", value: "asistente" },
+  { label: "Observador", value: "observador" },
+  { label: "Administrador", value: "administrador"},
+  { label: "Secretaria", value: "secretaria"},
+  { label: "Taquilla", value: "taquilla" },
 ];
 
 const rules = {
