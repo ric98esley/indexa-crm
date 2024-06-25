@@ -113,7 +113,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor', 'receptor'],
+  permissions: ['movements:read']
 })
 
 const assignments = ref<Assignments[]>([])

@@ -38,7 +38,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'auditor', 'receptor'],
+  permissions: ['consumables:read', 'consumables:history']
 });
 
 const ConsumableService = useConsumable();
