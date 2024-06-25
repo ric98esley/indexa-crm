@@ -107,7 +107,7 @@ const rules = {
   ],
   quantity: [
     { required: true, message: 'Por introduce una cantidad', trigger: 'blur' },
-    { pattern: /^[0-9]+$/, message: 'Debe de ser de tipo numérico' }
+    { pattern: /^\d+(\.\d+)?$/, message: 'Debe de ser de tipo numérico' }
   ],
   min: [
     { pattern: /^[0-9]+$/, message: 'Debe de ser de tipo numérico' }
@@ -150,7 +150,7 @@ const rules = {
         </el-row>
       </el-form-item>
       <el-form-item label="Cantidad" prop="quantity">
-        <el-input v-model="toAdd.quantity" type="number">
+        <el-input v-model="toAdd.quantity">
         </el-input>
       </el-form-item>
       <el-form-item label="Mínimo" v-if="props.showMin" prop="min">
