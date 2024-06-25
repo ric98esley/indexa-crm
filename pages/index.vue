@@ -17,6 +17,5 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  roles: ['superuser', 'admin', 'tecnico', 'receptor', 'auditor'],
 })
 </script>
