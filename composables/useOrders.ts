@@ -1,16 +1,17 @@
 export const useOrders = () => {
   return class OrderService {
+    private URL = '/orders'
     async getOrder({ id }: { id?: number }) {
       try {
         if (!id) {
           throw new Error('Debes cargar un id');
         }
-        const { data, error } = await useFetch<Order>(`/orders/${id}`);
+        const { data, error } = await useApi<Order>(`${this.URL}/${id}`);
         if (error.value) {
           throw new Error(error.value.data.message);
         }
         return data;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Ha ocurrido un error al cargar la orden.',
           message: error.message,
@@ -49,14 +50,14 @@ export const useOrders = () => {
           startDate,
           endDate,
         })
-        const { data, error } = await useFetch<{rows: Order[], total: number}>(`/orders`, {
+        const { data, error } = await useApi<{rows: Order[], total: number}>(this.URL, {
           params
         });
         if (error.value) {
           throw new Error(error.value.data.message);
         }
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Ha ocurrido un error al cargar la orden.',
           message: error.message,
@@ -128,17 +129,17 @@ export const useOrders = () => {
           startDate,
           endDate,
         });
-        const { data, error } = await useFetch<{
+        const { data, error } = await useApi<{
           total: number;
           rows: Assignments[];
-        }>(`/orders/${id}/movements`, {
+        }>(`${this.URL}/${id}/movements`, {
           params,
         });
         if (error.value) {
           throw new Error(error.value.data.message);
         }
         return data;
-      } catch (error) {
+      } catch (error: any) {
         console.log(error);
         ElNotification({
           title: 'Ha ocurrido un error al cargar la orden.',
@@ -179,7 +180,7 @@ export const useOrders = () => {
           notes,
           content,
         });
-        const { data, error } = await useFetch<Order>('/orders/checkout', {
+        const { data, error } = await useApi<Order>(`${this.URL}/checkout`, {
           method: 'post',
           body,
         });
@@ -209,7 +210,7 @@ export const useOrders = () => {
               },
             }
           );
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Vuelve a intentarlo mas tarde',
           message: error.message,
@@ -248,7 +249,7 @@ export const useOrders = () => {
           text: 'Guardando',
           background: 'rgba(0, 0, 0, 0.7)',
         });
-        const { data, error } = await useFetch<Order>('/orders/checking', {
+        const { data, error } = await useApi<Order>(`${this.URL}/checking`, {
           method: 'post',
           body
         });
@@ -278,7 +279,7 @@ export const useOrders = () => {
               },
             }
           );
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al recibir',
           message: error.message,

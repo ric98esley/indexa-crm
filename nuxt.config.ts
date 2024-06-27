@@ -17,7 +17,6 @@ export default defineNuxtConfig({
       link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
     }
   },
-  plugins: ['~/plugins/ofetch.ts'],
   runtimeConfig: {
     public: {
       apiUrl: process.env.BASE_URL,

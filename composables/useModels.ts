@@ -1,5 +1,6 @@
 export const useModels = () => {
   return class ModelsService {
+    private URL = '/assets/models'
     async getModels({
       name,
       limit,
@@ -18,7 +19,7 @@ export const useModels = () => {
       brandId?: number,
     }) {
       try {
-        const { data, error } = await useFetch<{ total: number, rows: Model[] }>('/assets/models',
+        const { data, error } = await useApi<{ total: number, rows: Model[] }>(this.URL,
           {
             params: {
               ...(name != '' && name && {
@@ -59,7 +60,7 @@ export const useModels = () => {
     }
     async getModel(id: number) {
       try {
-        const { data, error } = await useFetch<Model>(`/assets/models/${id}`);
+        const { data, error } = await useApi<Model>(`${this.URL}/${id}`);
         if (error.value) {
           ElNotification({
             message: 'Error al obtener la Modelo intente de nuevo mas tarde'
@@ -87,7 +88,7 @@ export const useModels = () => {
           categoryId,
           brandId,
         })
-        const { data, error } = await useFetch<Model>('/assets/models', {
+        const { data, error } = await useApi<Model>(this.URL, {
           method: 'POST',
           body
         });
@@ -100,7 +101,7 @@ export const useModels = () => {
           type: 'success'
         });
         return data.value
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al crear la Modelo intente de nuevo mas tarde',
           message: error.message,
@@ -126,7 +127,7 @@ export const useModels = () => {
           categoryId,
           brandId,
         });
-        const { data, error } = await useFetch<Model>(`/assets/models/${id}`, {
+        const { data, error } = await useApi<Model>(`${this.URL}/${id}`, {
           method: 'PATCH',
           body
         });
@@ -134,7 +135,7 @@ export const useModels = () => {
           throw new Error(error.value.data.message);
         }
         return data.value
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al actualizar la Modelo intente de nuevo mas tarde',
           message: error.message,
@@ -144,7 +145,7 @@ export const useModels = () => {
     }
     async deleteModel(id: number) {
       try {
-        const { data, error } = await useFetch<Model>(`/assets/models/${id}`, {
+        const { data, error } = await useApi<Model>(`${this.URL}/${id}`, {
           method: 'DELETE'
         });
         if (error.value) {
@@ -156,7 +157,7 @@ export const useModels = () => {
           type: 'success'
         });
         return { data, error }
-      } catch (error) {
+      } catch (error:any) {
         ElNotification({
           title: 'Error al eliminar la Modelo intente de nuevo mas tarde',
           message: error.message,

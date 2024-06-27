@@ -1,5 +1,8 @@
+import { AnyNaptrRecord } from "dns";
+
 export const useConsumable = () => {
   return class AssetsServices {
+    private URL = '/consumables'
     async getLocations({
       status,
       search,
@@ -36,10 +39,10 @@ export const useConsumable = () => {
       offset?: number;
     }) {
       try {
-        const { data, error } = await useFetch<{
+        const { data, error } = await useApi<{
           total: number;
           rows: Place[];
-        }>('/consumables', {
+        }>(this.URL, {
           params: {
             ...(status &&
               status?.length > 0 && {
@@ -108,7 +111,7 @@ export const useConsumable = () => {
           throw new Error(error.value.data.message);
         }
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener los almacenes intente de nuevo mas tarde',
           message: error.message,
@@ -133,17 +136,17 @@ export const useConsumable = () => {
           ...(offset && { offset: (Number(offset) - 1) * Number(limit) }),
           search,
         });
-        const { data, error } = await useFetch<{
+        const { data, error } = await useApi<{
           rows: Consumable[];
           total: number;
-        }>(`/consumables/${id}/products`, {
+        }>(`${this.URL}/${id}/products`, {
           params,
         });
         if (error.value) {
           throw new Error(error.value.data.message);
         }
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener el inventario',
           message: error.message,
@@ -168,17 +171,17 @@ export const useConsumable = () => {
           ...(offset && { offset: (Number(offset) - 1) * Number(limit) }),
           search,
         });
-        const { data, error } = await useFetch<{
+        const { data, error } = await useApi<{
           rows: Consumable[];
           total: number;
-        }>(`/consumables/${id}/movements`, {
+        }>(`${this.URL}/${id}/movements`, {
           params,
         });
         if (error.value) {
           throw new Error(error.value.data.message);
         }
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al obtener los movimientos',
           message: error.message,
@@ -208,8 +211,8 @@ export const useConsumable = () => {
           description,
           targets: rows,
         });
-        const { data, error } = await useFetch<Lot>(
-          `/consumables/${id}/checking`,
+        const { data, error } = await useApi<Lot>(
+          `${this.URL}/${id}/checking`,
           {
             method: 'POST',
             body,
@@ -225,7 +228,7 @@ export const useConsumable = () => {
         if (data.value && data.value.id)
           return navigateTo(
             {
-              path: `/consumables/${data.value.locationId}/lot/${data.value.id}/print`,
+              path: `${this.URL}/${data.value.locationId}/lot/${data.value.id}/print`,
             },
             {
               open: {
@@ -240,7 +243,7 @@ export const useConsumable = () => {
           );
 
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al crear la orden',
           message: error.message,
@@ -269,8 +272,8 @@ export const useConsumable = () => {
           description,
           targets: rows,
         });
-        const { data, error } = await useFetch<Lot>(
-          `/consumables/${id}/checkout`,
+        const { data, error } = await useApi<Lot>(
+          `${this.URL}/${id}/checkout`,
           {
             method: 'POST',
             body,
@@ -280,7 +283,7 @@ export const useConsumable = () => {
         if (data.value && data.value.id)
           return navigateTo(
             {
-              path: `/consumables/${data.value.locationId!}/lot/${data.value.id}/print`,
+              path: `${this.URL}/${data.value.locationId!}/lot/${data.value.id}/print`,
             },
             {
               open: {
@@ -301,7 +304,7 @@ export const useConsumable = () => {
         });
 
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al crear la orden',
           message: error.message,
@@ -323,7 +326,7 @@ export const useConsumable = () => {
         const body = {
           min
         }
-        await useFetch<Consumable>(`/consumables/${locationId}/products/${productId}`,
+        await useApi<Consumable>(`${this.URL}/${locationId}/products/${productId}`,
         {
           method: 'PATCH',
           body
@@ -354,17 +357,17 @@ export const useConsumable = () => {
           type,
           description,
         });
-        const { data, error } = await useFetch<{
+        const { data, error } = await useApi<{
           rows: Lot[];
           total: number;
-        }>(`/consumables/${warehouseId}/lots`, {
+        }>(`${this.URL}/${warehouseId}/lots`, {
           params,
         });
         if (error.value) {
           throw new Error(error.value.data.message);
         }
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al cargar el historial',
           message: error.message,
@@ -372,14 +375,14 @@ export const useConsumable = () => {
         });
       }
     }
-    async getOneLot({ id , warehouseId}: { id: number | string , warehouseId: number | stirng}) {
+    async getOneLot({ id , warehouseId}: { id: number | string , warehouseId: number | string}) {
       try {
-        const { data, error } = await useFetch<Lot>(`/consumables/${warehouseId}/lots/${id}`);
+        const { data, error } = await useApi<Lot>(`${this.URL}/${warehouseId}/lots/${id}`);
         if (error.value) {
           throw new Error(error.value.data.message);
         }
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al cargar el historial',
           message: error.message,

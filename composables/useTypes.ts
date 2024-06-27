@@ -1,5 +1,6 @@
 export const useTypes = () => {
   return class TypesServices {
+    private URL = '/locations/types'
     async getTypes({
       name,
       status
@@ -8,7 +9,7 @@ export const useTypes = () => {
       status?: string[]
     }) {
       try {
-        const { data, error } = await useFetch<{ total: number, rows: Type[] }>('/locations/types',
+        const { data, error } = await useApi<{ total: number, rows: Type[] }>(this.URL,
           {
             params: {
               ...(name != '' && name && {
@@ -24,7 +25,7 @@ export const useTypes = () => {
           throw new Error(error.value.data.message);
         }
         return data.value
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           title: 'Error al obtener los tipos intente de nuevo mas tarde',
           message: error?.message
@@ -33,12 +34,12 @@ export const useTypes = () => {
     }
     async getType(id: number) {
       try {
-        const { data, error } = await useFetch<Type>(`/locations/types/${id}`);
+        const { data, error } = await useApi<Type>(`${this.URL}/${id}`);
         if (error.value) {
           throw new Error(error.value.data.message);
         }
         return data.value
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           title: 'Error al obtener el tipo intente de nuevo mas tarde',
           message: error?.message
@@ -47,7 +48,7 @@ export const useTypes = () => {
     }
     async createType(type: Type) {
       try {
-        const { data, error } = await useFetch<Type>('/locations/types', {
+        const { data, error } = await useApi<Type>(this.URL, {
           method: 'POST',
           body: type
         });
@@ -55,7 +56,7 @@ export const useTypes = () => {
           throw new Error(error.value.data.message);
         }
         return data.value
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           title: 'Error al crear el tipo intente de nuevo mas tarde',
           message: error?.message
@@ -64,7 +65,7 @@ export const useTypes = () => {
     }
     async updateType(type: Type) {
       try {
-        const { data, error } = await useFetch<Type>(`/locations/types/${type.id}`, {
+        const { data, error } = await useApi<Type>(`${this.URL}/${type.id}`, {
           method: 'PUT',
           body: type
         });
@@ -72,7 +73,7 @@ export const useTypes = () => {
           throw new Error(error.value.data.message);
         }
         return data.value
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al actualizar el tipo intente de nuevo mas tarde',
           message: error?.message
@@ -81,14 +82,14 @@ export const useTypes = () => {
     }
     async deleteType(id: number) {
       try {
-        const { data, error } = await useFetch<Type>(`/locations/types/${id}`, {
+        const { data, error } = await useApi<Type>(`${this.URL}/${id}`, {
           method: 'DELETE'
         });
         if (error.value) {
           throw new Error(error.value.data.message);
         }
         return data.value
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           title: 'Error al eliminar el tipo intente de nuevo mas tarde',
           message: error?.message

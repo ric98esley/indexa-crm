@@ -1,11 +1,12 @@
 export const useAuth = () => {
+  const baseURL = '/auth';
   return class AuthService {
     async login(username: string, password: string) {
-      const { data, pending, error } = await useFetch<{
+      const { data, pending, error } = await useApi<{
         token: string;
         user: User;
         ability: string[];
-      }>('/auth/login', {
+      }>(baseURL + '/login', {
         method: 'post',
         body: {
           username,
@@ -16,11 +17,11 @@ export const useAuth = () => {
     }
     async recovery(email: string) {
       try {
-        const { data, error } = await useFetch<{
+        const { data, error } = await useApi<{
           token: string;
           user: User;
           ability: string[];
-        }>('/auth/recovery', {
+        }>(baseURL + '/recovery', {
           method: 'post',
           body: {
             email
@@ -36,7 +37,7 @@ export const useAuth = () => {
           type: 'success'
         })
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error en la recuperación de la contraseña',
           message: error.message,
@@ -54,11 +55,11 @@ export const useAuth = () => {
     }) {
       try {
         if(!token || token == '') throw new Error('No es posible cambiar la contraseña');
-        const { data, error } = await useFetch<{
+        const { data, error } = await useApi<{
           token: string;
           user: User;
           ability: string[];
-        }>('/auth/change-password', {
+        }>(baseURL + '/change-password', {
           method: 'post',
           body: {
             token,
@@ -75,7 +76,7 @@ export const useAuth = () => {
           type: 'success'
         })
         return data.value;
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error en la recuperación de la contraseña',
           message: error.message,

@@ -1,8 +1,9 @@
-const isObjectEmpty = (objectName) => {
+const isObjectEmpty = (objectName: {[key:string]: any}) => {
   return Object.keys(objectName).length === 0
 }
 export const useUsers = () => {
   return class UsersService {
+    private URL = '/users'
     async getUsers({
       username,
       group,
@@ -43,7 +44,7 @@ export const useUsers = () => {
       endDate?: string,
     }) {
       try {
-        const { data, error } = await useFetch<{ total: number, rows: User[] }>('/users',
+        const { data, error } = await useApi<{ total: number, rows: User[] }>(this.URL,
           {
             params: {
               ...(username != '' && username && {
@@ -136,7 +137,7 @@ export const useUsers = () => {
         body.profile = useFilterObject(user.profile)
 
         if (isObjectEmpty(body.profile)) delete body.profile;
-        const { data, error } = await useFetch<User>('/users',
+        const { data, error } = await useApi<User>(this.URL,
           {
             method: 'POST',
             body
@@ -146,12 +147,14 @@ export const useUsers = () => {
           console.log(error)
           throw new Error(error.value.data.message)
         }
+
+        console.log (data.value);
         ElNotification({
           title: 'Usuario creada correctamente',
           message: `${data.value?.username}`
         })
         return { data, error }
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           title: 'Error al crear usuario intente de nuevo mas tarde',
           message: error.message
@@ -160,7 +163,6 @@ export const useUsers = () => {
     }
     async editUser({
       id,
-      username,
       email,
       role,
       isActive,
@@ -180,7 +182,7 @@ export const useUsers = () => {
           isActive,
           groupId
         };
-        const { data, error } = await useFetch<User>(`/users/${id}`,
+        const { data, error } = await useApi<User>(`${this.URL}/${id}`,
           {
             method: 'patch',
             body
@@ -194,7 +196,7 @@ export const useUsers = () => {
           message: `${data.value?.username}`
         })
         return { data, error }
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al editar usuario intente de nuevo mas tarde',
           message: error.message,
@@ -203,7 +205,7 @@ export const useUsers = () => {
     }
     async removeUser ({ id }: { id: number }) {
       try {
-        const { data, error } = await useFetch<User>(`/users/${id}`, {
+        const { data, error } = await useApi<User>(`${this.URL}/${id}`, {
           method: 'delete'
         })
 
@@ -214,7 +216,7 @@ export const useUsers = () => {
         ElNotification({
           message: 'El usuario ha sido borrada.'
         })
-      } catch (error) {
+      } catch (error: any) {
         ElNotification({
           title: 'Error al borrar el usuario intente de nuevo mas tarde.',
           message: error.message

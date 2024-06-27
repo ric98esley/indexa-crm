@@ -1,5 +1,6 @@
 export const useSpecifications = () => (
   class SpecificationsService {
+    private URL = '/categories/specifications'
     getSpecification = async ({
       name,
       offset,
@@ -10,7 +11,7 @@ export const useSpecifications = () => (
       limit?: number
     }) => {
       try {
-        const { data, error } = await useFetch<{ total: number, rows: Specification[] }>('/categories/specifications',
+        const { data, error } = await useApi<{ total: number, rows: Specification[] }>(this.URL,
           {
             params: {
               ...(name != '' && name && {
@@ -48,7 +49,7 @@ export const useSpecifications = () => (
         const body = {
           name
         }
-        const { data, error } = await useFetch<Specification>('/categories/specifications',
+        const { data, error } = await useApi<Specification>(this.URL,
           {
             method: 'post',
             body
@@ -68,7 +69,7 @@ export const useSpecifications = () => (
 
     removeSpecification = async (id: number) => {
       try {
-        const { data, error } = await useFetch<Specification>(`/categories/specifications/${id}`, {
+        const { data, error } = await useApi<Specification>(`${this.URL}/${id}`, {
           method: 'delete'
         })
         if (error.value) {
@@ -77,7 +78,7 @@ export const useSpecifications = () => (
         ElNotification({
           message: 'La especificación ha sido borrada.'
         })
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           message: error.message
         })
@@ -91,7 +92,7 @@ export const useSpecifications = () => (
           name
         }
 
-        const { data, error } = await useFetch<Specification>(`/categories/specifications/${id}`,
+        const { data, error } = await useApi<Specification>(`${this.URL}/${id}`,
           {
             method: 'PATCH',
             body
@@ -106,7 +107,7 @@ export const useSpecifications = () => (
           title: 'La especificación ha sido actualizada.',
           message: data.value?.name
         });
-      } catch (error) {
+      } catch (error : any) {
         ElNotification({
           title: error.message
         })

@@ -1,4 +1,5 @@
 class LocationsService {
+  private URL = '/locations'
   async getLocations({
     status,
     search,
@@ -35,8 +36,8 @@ class LocationsService {
     offset?: number;
   }) {
     try {
-      const { data, error } = await useFetch<{ total: number; rows: Place[] }>(
-        '/locations',
+      const { data, error } = await useApi<{ total: number; rows: Place[] }>(
+        this.URL,
         {
           params: {
             ...(status &&
@@ -107,7 +108,7 @@ class LocationsService {
         throw new Error(error.value.data.message);
       }
       return { data, error };
-    } catch (error) {
+    } catch (error: any) {
       ElNotification({
         title: 'Error al obtener las agencia intente de nuevo mas tarde',
         message: error.message,
@@ -152,7 +153,7 @@ class LocationsService {
         address,
       });
 
-      const { data, error } = await useFetch<Place>('/locations', {
+      const { data, error } = await useApi<Place>(this.URL, {
         method: 'POST',
         body,
       });
@@ -169,7 +170,7 @@ class LocationsService {
         message: `${data.value?.name}`,
       });
       return { data, error };
-    } catch (error) {
+    } catch (error: any) {
       ElNotification({
         title: 'Error al crear agencia intente de nuevo mas tarde',
         message: error.message,
@@ -180,14 +181,14 @@ class LocationsService {
 
   async getLocation({ id }: { id: number }) {
     try {
-      const { data, error } = await useFetch<Place>('/locations/' + id);
+      const { data, error } = await useApi<Place>(`${this.URL}/${id}`);
 
       if (error.value) {
         throw new Error(error.value.data.message);
       }
 
       return data.value;
-    } catch (error) {
+    } catch (error: any) {
       ElNotification({
         title: 'Error al obtener la localización',
         message: error.message,
@@ -198,7 +199,7 @@ class LocationsService {
 
   async removePlace(id: number) {
     try {
-      const { data, error } = await useFetch<Place>(`/locations/${id}`, {
+      const { data, error } = await useApi<Place>(`${this.URL}/${id}`, {
         method: 'delete',
       });
 
@@ -211,7 +212,7 @@ class LocationsService {
       });
 
       return data.value;
-    } catch (error) {
+    } catch (error: any) {
       ElNotification({
         title: 'Error al borrar la agencia intente de nuevo mas tarde.',
         message: error.me,
@@ -255,7 +256,7 @@ class LocationsService {
         address,
       });
 
-      const { data, error } = await useFetch<Place>(`/locations/${id}`, {
+      const { data, error } = await useApi<Place>(`${this.URL}/${id}`, {
         method: 'PATCH',
         body,
       });
@@ -270,7 +271,7 @@ class LocationsService {
       });
 
       return data.value;
-    } catch (error) {
+    } catch (error: any) {
       ElNotification({
         title: 'Error al modificar el agencia intente de nuevo mas tarde',
         message: error.message,
@@ -339,10 +340,10 @@ class LocationsService {
         endDate,
       });
 
-      const { data, error } = await useFetch<{
+      const { data, error } = await useApi<{
         total: number;
         rows: Assignments[];
-      }>(`/locations/${id}/assets`, {
+      }>(`${this.URL}/${id}/assets`, {
         params: query,
       });
 
@@ -351,7 +352,7 @@ class LocationsService {
       }
 
       return data.value;
-    } catch (error) {
+    } catch (error: any) {
       ElNotification({
         title:
           'Error al obtener los activos de la agencia intente de nuevo mas tarde',

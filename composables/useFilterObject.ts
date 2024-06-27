@@ -1,3 +1,5 @@
+import { stringify } from "querystring";
+
 export const useFilterObject = (obj: any) => {
   // Crea un objeto vacío para almacenar los valores filtrados
   let filtered = {};

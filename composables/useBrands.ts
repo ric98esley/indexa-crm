@@ -1,5 +1,6 @@
 export const useBrands = () => {
   return class BrandService {
+    private URL = '/brands'
     async getBrands({
       name,
       offset,
@@ -10,7 +11,7 @@ export const useBrands = () => {
       limit?: number,
     }) {
       try {
-        const { data, error } = await useFetch<{ total: number, rows: Brand[] }>('/brands',
+        const { data, error } = await useApi<{ total: number, rows: Brand[] }>(this.URL,
           {
             params: {
               ...(name != '' && name && {
@@ -42,7 +43,7 @@ export const useBrands = () => {
       name: string
     }) {
       try {
-        const { data, error } = await useFetch<Brand>('/brands',
+        const { data, error } = await useApi<Brand>(this.URL,
           {
             method: 'post',
             body: {
@@ -80,7 +81,7 @@ export const useBrands = () => {
           name,
         }
 
-        const { data, error } = await useFetch<Brand>(`/brands/${id}`,
+        const { data, error } = await useApi<Brand>(`${this.URL}/${id}`,
           {
             method: 'PATCH',
             body
@@ -106,7 +107,7 @@ export const useBrands = () => {
 
     async removeBrand(id: number) {
       try {
-        const { data, error } = await useFetch<Brand>(`/brands/${id}`, {
+        const { data, error } = await useApi<Brand>(`${this.URL}/${id}`, {
           method: 'delete'
         })
 
@@ -126,7 +127,7 @@ export const useBrands = () => {
 
     async getBrand(id: number) {
       try {
-        const { data, error } = await useFetch<Brand>(`/brands/${id}`)
+        const { data, error } = await useApi<Brand>(`${this.URL}/${id}`)
 
         if (error.value) {
           throw new Error();
