@@ -1,11 +1,10 @@
-import { ofetch } from 'ofetch';
-
 import { useAuthStore } from '@/stores/authStore';
 
 
 export default defineNuxtPlugin(() => {
   const authStore = useAuthStore()
-  globalThis.$fetch = ofetch.create({
+
+  const api = $fetch.create({
     baseURL: useRuntimeConfig().public.apiUrl,
     onRequest ({ request, options }) {
       if (authStore.getToken) {
@@ -28,4 +27,10 @@ export default defineNuxtPlugin(() => {
       }
     }
   })
+
+  return {
+    provide: {
+      api
+    }
+  }
 })

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { PropType } from 'nuxt/dist/app/compat/capi';
-
 interface Menu {
   icon: string;
   title: string;
