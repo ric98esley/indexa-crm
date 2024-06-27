@@ -1,5 +1,7 @@
 <script setup lang="ts">
 
+const route = useRoute();
+
 const props = defineProps({
   data: {
     type: Array,
@@ -70,12 +72,12 @@ const modals = reactive({
   checking: false
 });
 
-const enumOrderType = {
+const enumOrderType: { [key: string]: string } = {
   checking: 'Entrada',
   checkout: 'Salida'
 }
 
-const enumOrderDescription = {
+const enumOrderDescription: { [key: string]: string } = {
   sale: 'Venta',
   warranty: 'Garantía',
   purchase: 'Compra',
@@ -137,7 +139,7 @@ const setOrder = async (id: number) => {
       <el-table-column label="Total" width="100" prop="count">
 
       </el-table-column>
-      <el-table-column label="Agencia" width="180" prop="count">
+      <el-table-column v-if="route.query.type == 'checkout'" label="Agencia" width="180" prop="count">
         <template #header>
           <el-input v-model="filters.location" placeholder="Lugar" clearable />
         </template>
