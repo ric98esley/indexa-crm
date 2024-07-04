@@ -1,9 +1,8 @@
 <script setup lang="ts" >
-import { FormInstance, FormRules } from 'element-plus';
 import { useAuthStore } from '@/stores/authStore'
 const auth = useAuthStore();
 
-const formUser = ref<FormInstance>()
+const formUser = ref()
 
 const AuthService = useAuth();
 const authService = new AuthService();
@@ -13,7 +12,7 @@ interface UserForm {
   password: string
 }
 
-const rules = reactive<FormRules<UserForm>>({
+const rules = reactive({
   username: [
     {
       required: true,
@@ -44,10 +43,10 @@ const userCredencials = reactive<UserForm>(
 )
 let loading = ref(false);
 
-const login = async (formEl: FormInstance | undefined) => {
+const login = async (formEl: any | undefined) => {
   if (!formEl) return
 
-  await formEl.validate((valid, fields) => {
+  await formEl.validate((valid: any, fields: any) => {
     if (!valid) return;
   })
 

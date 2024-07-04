@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { FormInstance } from 'element-plus';
-
 const props = defineProps({
   id: {
     type: Number,
@@ -18,7 +16,7 @@ const modelsServices = new ModelsServices();
 const categoryServices = new CategoryServices();
 const brandServices = new BrandServices();
 
-const refFormModel = ref<FormInstance>();
+const refFormModel = ref();
 
 const loadingCategories = ref(false);
 const loadingModels = ref(false);

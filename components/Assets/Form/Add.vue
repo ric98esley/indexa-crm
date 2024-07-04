@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { FormInstance, FormRules } from 'element-plus';
-
 const emit = defineEmits({
   submit: ({ serial, modelId, locationId, notes }) => {
     if (modelId < 1 || locationId < 1) {
@@ -17,7 +15,7 @@ const emit = defineEmits({
   }
 })
 
-const ruleFormRef = ref<FormInstance>();
+const ruleFormRef = ref();
 
 const modelSelected = reactive({
   categoryId: undefined,
@@ -49,7 +47,7 @@ const locationFilters = ({
   status: ['desplegable', 'pendiente']
 });
 
-const rules = reactive<FormRules<NewAsset>>({
+const rules = reactive({
   serial: [
     {
       required: true,

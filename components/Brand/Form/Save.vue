@@ -1,7 +1,4 @@
 <script setup lang="ts">
-
-import { FormInstance } from 'element-plus';
-
 const props = defineProps({
   id: {
     type: Number,
@@ -13,7 +10,7 @@ const emit = defineEmits(['submit']);
 const BrandService = useBrands();
 const brandService = new BrandService();
 
-const formRefBrand = ref<FormInstance>()
+const formRefBrand = ref()
 const loadingBrand = ref(false);
 
 

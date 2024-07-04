@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { FormInstance } from 'element-plus';
-
 const props = defineProps({
   id: {
     type: Number,
@@ -9,7 +7,7 @@ const props = defineProps({
 
 const emit = defineEmits(['submit'])
 
-const saveCategoryRef =  ref<FormInstance>();
+const saveCategoryRef =  ref();
 
 const CategoriesService = useCategories();
 const SpecificationService = useSpecifications();
