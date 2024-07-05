@@ -1,7 +1,4 @@
 <script setup lang="ts">
-
-import type { FormInstance } from 'element-plus';
-
 const props = defineProps({
   showMin: {
     type: Boolean
@@ -21,7 +18,7 @@ const productService = new ProductService();
 const consumableService = new ConsumableService();
 
 
-const addFormRef = ref<FormInstance>();
+const addFormRef = ref();
 
 const emit = defineEmits({
   submit: ({

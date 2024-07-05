@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { FormInstance } from 'element-plus';
-
 interface lote {
   customer: string;
   description: string;
@@ -11,7 +9,7 @@ const target = reactive({
   description: ''
 })
 
-const lotFormRef = ref<FormInstance>();
+const lotFormRef = ref();
 
 const rules = {
   customer: [
@@ -36,7 +34,7 @@ const emit = defineEmits({
 })
 
 const submit = async () => {
-  await lotFormRef.value?.validate((valid) => {
+  await lotFormRef.value?.validate((valid: any) => {
     if (valid) {
       emit('submit', {
         customer: target.customer,

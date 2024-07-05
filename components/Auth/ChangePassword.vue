@@ -1,6 +1,4 @@
 <script setup lang="ts" >
-import { FormInstance, FormRules } from 'element-plus';
-
 const props = defineProps({
   token: {
     type: String,
@@ -8,7 +6,7 @@ const props = defineProps({
   }
 })
 
-const formUser = ref<FormInstance>()
+const formUser = ref()
 
 const AuthService = useAuth();
 const authService = new AuthService();

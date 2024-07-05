@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { FormItemProp } from 'element-plus';
-
 const ContactService = useCustomer();
 const contactService = new ContactService();
 
@@ -48,7 +46,7 @@ const rules = {
   ],
 }
 
-const validateUser = (props: FormItemProp, isValid: boolean, message: string) => {
+const validateUser = (props: any, isValid: boolean, message: string) => {
   allowSubmit.value = isValid;
 }
 

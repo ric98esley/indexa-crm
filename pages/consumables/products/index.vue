@@ -38,9 +38,6 @@
               <el-button type="info" circle @click="editProduct(props.row)">
                 <Icon name="ep:edit" />
               </el-button>
-              <el-button type="primary" circle>
-                <Icon name="ep:view" />
-              </el-button>
               <el-button type="danger" circle @click="removeProduct(props.row.id)" v-role="['superuser', 'auditor']">
                 <Icon name="ep:delete" />
               </el-button>

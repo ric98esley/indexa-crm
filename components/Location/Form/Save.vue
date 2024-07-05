@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { FormInstance } from 'element-plus'
-
 const props = defineProps({
   id: {
     type: Number || String || undefined
@@ -55,7 +53,7 @@ const place = reactive<{
   address: '',
 });
 
-const savePlace = ref<FormInstance>();
+const savePlace = ref();
 
 const loadingPlace = ref(false);
 const loadingGroup = ref(false);

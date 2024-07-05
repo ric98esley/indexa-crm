@@ -1,8 +1,7 @@
 <script setup lang="ts" >
-import { FormInstance, FormRules } from 'element-plus';
 import { useAuthStore } from '@/stores/authStore'
 
-const formUser = ref<FormInstance>()
+const formUser = ref()
 
 const AuthService = useAuth();
 const authService = new AuthService();

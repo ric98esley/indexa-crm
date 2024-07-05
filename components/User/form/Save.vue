@@ -1,8 +1,7 @@
 <script lang="ts" setup>
-import type { FormInstance, FormItemProp } from 'element-plus';
 import { useUserStore } from '~/stores/userStore.js';
 
-const userFormRef = ref<FormInstance>()
+const userFormRef = ref()
 
 const allowSubmit = ref<boolean>(false);
 
