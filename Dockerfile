@@ -10,8 +10,10 @@ WORKDIR /app
 # Copy all the files (excluding those defined in the .dockerignore file)
 COPY . .
 
+ARG BASE_URL
+
 ENV NODE_ENV=PRODUCTION
-ENV BASE_URL=$BASE_URL
+ENV BASE_URL=${BASE_URL}
 
 # Build the NuxtJS application, including devDependencies and create a production build
 RUN yarn install && \
