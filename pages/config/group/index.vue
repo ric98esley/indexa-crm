@@ -150,7 +150,7 @@ const getGroups = async ({
 }) => {
   try {
     loadingGroup.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Group[] }>('/groups',
+    const { data, error } = await useApi<{ total: number, rows: Group[] }>('/groups',
       {
         params: {
           ...(name != '' && !name && id && {

@@ -10,48 +10,60 @@
         </PageHeader>
       </el-col>
       <el-col>
-          <el-card class="w-full">
-            <el-form label-width="120px" @submit.prevent="() => { }" label-position="top">
-              <el-form-item label="Grupo">
-                <el-select class="w-full" v-model="assignments.groupId" filterable remote placeholder="Elige un grupo"
-                  :loading="loadingGroup" :remote-method="setGroup">
-                  <el-option v-for="item in groups.rows" :key="item.id" :label="`${item.code} - ${item.name}`"
-                    :value="item.id!">
-                    <span style="float: left">{{ item.code }}</span>
-                    <span style="
+        <el-card class="w-full">
+          <el-form label-width="120px" @submit.prevent="() => { }" label-position="top">
+            <el-form-item label="Grupo">
+              <el-select class="w-full" v-model="assignments.groupId" filterable remote placeholder="Elige un grupo"
+                :loading="loadingGroup" :remote-method="setGroup">
+                <el-option v-for="item in groups.rows" :key="item.id" :label="`${item.code} - ${item.name}`"
+                  :value="item.id!">
+                  <span style="float: left">{{ item.code }}</span>
+                  <span style="
                       float: right;
                       color: var(--el-text-color-secondary);
                       font-size: 13px;
                   ">{{ item.name }}</span> </el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item label="Agencia" v-if="assignments.groupId">
-                <el-autocomplete v-model="assignments.location" value-key="name" :fetch-suggestions="setPlaces"
-                  @select="handleSelectPlace" class="w-full">
-                  <template #default="{ item }">
-                    <span style="float: left">{{ item.code }} {{ item.name }}</span>
-                    <span style="
+              </el-select>
+            </el-form-item>
+            <el-form-item label="Lugar o agencia" v-if="assignments.groupId">
+              <el-autocomplete v-model="assignments.location" value-key="name" :fetch-suggestions="setPlaces"
+                @select="handleSelectPlace" class="w-full">
+                <template #default="{ item }">
+                  <span style="float: left">{{ item.code }} {{ item.name }}</span>
+                  <span style="
                       float: right;
                       color: var(--el-text-color-secondary);
                       font-size: 13px;
                   ">{{ item.group?.code }}</span>
-                  </template>
-                </el-autocomplete>
-              </el-form-item>
-            </el-form>
-            <el-form label-position="top" @submit.prevent="() => { }" v-if="assignments.location">
-              <el-form-item label="Serial">
-                <el-autocomplete v-model="filters.serial" value-key="serial" :fetch-suggestions="getAssets"
-                  @select="handleSelectAsset" class="w-full">
-                  <template #default="{ item }">
-                    <li>{{ item.serial }} - {{ item.model.category.name }} - {{ item.model.brand.name }} - {{
-                      item.model.name }}</li>
-                  </template>
-                </el-autocomplete>
-              </el-form-item>
-            </el-form>
-          </el-card>
-        </el-col>
+                </template>
+              </el-autocomplete>
+            </el-form-item>
+            <el-form-item label="Serial" v-if="assignments.place">
+              <el-select
+                v-model="selectedAsset"
+                class="w-full"
+                filterable
+                remote
+                placeholder="Busca un serial"
+                :loading="loadingAssets"
+                :remote-method="setAssets">
+                <el-option
+                  :class="assetStatus({ row: item })"
+                  v-for="item in assets.rows" :key="item.id"
+                  :label="`${item.id}- ${item.serial} - ${item.location?.name}`"
+                  :disabled="assignments.assets.some(e => e.id === item.id) || item.location?.type?.status != 'desplegable'"
+                  :value="item.serial">
+                  <div class="flex justify-between">
+                    <span><b>{{ item.serial }}</b>- {{ item?.model?.category.name }} - {{ item?.model?.brand.name }} -
+                      {{ item.model?.name }}</span>
+                    <span>{{ item.location?.type?.status }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-form>
+        </el-card>
+      </el-col>
       <el-col :span="24" class="mt-4 md:p-4">
         <el-descriptions class="w-full" :column="width > 768 ? 3 : 1" border>
           <template #title>
@@ -141,7 +153,7 @@
       </el-col>
     </el-row>
     <el-dialog v-model="modals.confirm">
-      <OrderFormSave default-type="borrowing" @submit="checkout"/>
+      <OrderFormSave default-type="borrowing" @submit="checkout" />
     </el-dialog>
   </el-container>
 </template>
@@ -169,6 +181,14 @@ const width = ref<number>(window.screen.width);
 
 const LocationsServices = useLocation();
 const locationsServices = new LocationsServices();
+
+const assets = reactive<{
+  rows: Asset[],
+  total: number
+}>({
+  rows: [],
+  total: 0
+})
 
 const groups = reactive<{
   rows: Group[],
@@ -210,18 +230,15 @@ const handleSelectAsset = (row: Asset) => {
   filters.serial = '';
 }
 
-const getAssets = async (query: string, cb: (arg: any) => void) => {
-  try {
-    loadingAssets.value = true;
-    const data = await assetService.getAssets({ serial: query, status: 'desplegable' })
-    const rows = data?.value?.rows || [];
-    loadingAssets.value = false;
-
-    cb(rows)
-  } catch (error) {
-    loadingAssets.value = false;
+const selectedAsset = computed<string>({
+  get() {
+    return '';
+  },
+  set(value: string ) {
+    const item = assets.rows.filter((asset) => asset.serial == value)[0];
+    if(item) handleSelectAsset(item)
   }
-}
+})
 
 const deleteAssignment = (row: Asset) => {
   const index = assignments.assets.indexOf(row);
@@ -279,6 +296,19 @@ const setPlaces = async (search: string, cb: (arg: any) => void) => {
   }
 }
 
+const setAssets = async (query: string) => {
+  try {
+    loadingAssets.value = true;
+    const data = await assetService.getAssets({ serial: query })
+
+    assets.rows = data?.value?.rows || [];
+    assets.total = data?.value?.total || 0;
+    loadingAssets.value = false;
+  } catch (error) {
+    loadingAssets.value = false;
+  }
+}
+
 const resize = (e: any) => {
   width.value = window.screen.width;
 }
@@ -296,9 +326,26 @@ const checkout = async (orderData: OrderData) => {
   })
 
   assignments.assets = [];
+  assets.rows = [];
   assignments.groupId = undefined;
   assignments.location = undefined;
   assignments.place = undefined
+}
+
+
+const assetStatus = ({
+  row,
+}: {
+  row: Asset,
+}) => {
+  if (row.location && row.location.type && row.location.type.status === 'archivado') {
+    return 'danger-row'
+  } else if (row.location && row.location.type && row.location.type.status === 'pendiente') {
+    return 'warning-row'
+  } else if (row.location && row.location.type && row.location.type.status == 'asignado') {
+    return 'success-row'
+  }
+  return ''
 }
 
 onMounted(() => {
@@ -309,3 +356,26 @@ onUnmounted(() => {
   window.removeEventListener("resize", resize);
 })
 </script>
+
+<style>
+.warning-row {
+  background-color: var(--el-color-warning-light-5);
+}
+
+.success-row {
+  background-color: var(--el-color-success-light-5);
+}
+
+.danger-row {
+  background-color: var(--el-color-danger-light-5);
+}
+
+.info-row {
+  background-color: var(--el-color-info-light-5);
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+}
+</style>

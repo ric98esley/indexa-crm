@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { FormInstance } from 'element-plus';
 
 const props = defineProps({
   id: { type: Number || undefined, }
@@ -16,7 +15,7 @@ const group = reactive<Group>({
   managerId: undefined,
 });
 
-const saveGroupRef =  ref<FormInstance>();
+const saveGroupRef =  ref();
 
 
 const GroupService = useGroups();

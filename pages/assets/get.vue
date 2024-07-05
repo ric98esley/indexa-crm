@@ -22,21 +22,34 @@
             <el-form-item label="Deposito (Por defecto)">
               <el-select class="w-full" v-model="assignments.place" filterable remote placeholder="Elige un deposito"
                 :loading="loadingPlace" :remote-method="setPlaces">
-                <el-option v-for="item in places.rows" :key="item.id" :label="`${item.id} - ${item.name}`"
+                <el-option v-for="item in places.rows" :key="item.id" :label="`${item.id}- ${item.code} - ${item.name}`"
                   :value="item.id!">
                   {{ item.id }} - {{ item.code }} - {{ item.name }}
                 </el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="Serial" v-if="assignments.place">
-              <el-autocomplete v-model="filters.serial" value-key="serial" :fetch-suggestions="getAssets"
-                @select="handleSelectAsset" class="w-full">
-                <template #default="{ item }">
-                  <li><strong>{{ item.serial }}</strong> - {{ item.model.category.name }} - {{ item.model.brand.name }} -
-                    {{
-                      item.model.name }}</li>
-                </template>
-              </el-autocomplete>
+              <el-select
+                v-model="selectedAsset"
+                class="w-full"
+                filterable
+                remote
+                placeholder="Busca un serial"
+                :loading="loadingAssets"
+                :remote-method="setAssets"
+                >
+                <el-option
+                  :class="assetStatus({ row: item })"
+                  v-for="item in assets.rows"
+                  :key="item.id" :label="`${item.id}- ${item.serial} - ${item.location?.name}`"
+                  :disabled="assignments.assets.some(e => e.id === item.id) || item.location?.type?.status != status"
+                  :value="item.serial!">
+                  <div class="flex justify-between">
+                    <span><b>{{ item.serial }}</b>- {{ item?.model?.category.name }} - {{ item?.model?.brand.name }} - {{ item.model?.name }}</span>
+                    <span>{{ item.location?.type?.status }}</span>
+                  </div>
+                </el-option>
+              </el-select>
             </el-form-item>
           </el-form>
         </el-card>
@@ -104,6 +117,13 @@ const locationsServices = new LocationsServices();
 const assetService = new AssetsServices();
 const orderService = new OrdersServices();
 
+const assets = reactive<{
+  rows: Asset[],
+  total: number
+}>({
+  rows: [],
+  total: 0
+})
 
 const places = reactive<{
   rows: Place[],
@@ -135,17 +155,19 @@ const filters = reactive({
   serial: '',
 })
 
-const getAssets = async (query: string, cb: (arg: any) => void) => {
-  try {
-    loadingAssets.value = true;
-    const data = await assetService.getAssets({ serial: query, status: status.value })
-    const rows = data?.value?.rows || [];
-    loadingAssets.value = false;
-
-    cb(rows)
-  } catch (error) {
-    loadingAssets.value = false;
+const assetStatus = ({
+  row,
+}: {
+  row: Asset,
+}) => {
+  if (row.location && row.location.type && row.location.type.status === 'archivado') {
+    return 'danger-row'
+  } else if (row.location && row.location.type && row.location.type.status === 'pendiente') {
+    return 'warning-row'
+  } else if (row.location && row.location.type && row.location.type.status == 'asignado') {
+    return 'success-row'
   }
+  return ''
 }
 
 const handleSelectAsset = (row: Asset) => {
@@ -154,9 +176,26 @@ const handleSelectAsset = (row: Asset) => {
     type: 'warning',
   });
 
-  assignments.assets.push({ ...JSON.parse(JSON.stringify(row)), locationId: assignments.place });
+  if (row.location?.type?.status != status.value) {
+    return ElMessage({
+      message: `Activo no se encuentra en estado ${status.value}`,
+      type: 'warning',
+    });
+  }
+
+  assignments.assets.unshift({ ...JSON.parse(JSON.stringify(row)), locationId: assignments.place });
   filters.serial = '';
 }
+
+const selectedAsset = computed<string>({
+  get() {
+    return '';
+  },
+  set(value: string ) {
+    const item = assets.rows.filter((asset) => asset.serial == value)[0];
+    if(item) handleSelectAsset(item)
+  }
+})
 
 const deleteAssignment = (row: Asset) => {
   const index = assignments.assets.indexOf(row);
@@ -190,6 +229,18 @@ const setPlaces = async (search: string) => {
   }
 }
 
+const setAssets = async (query: string) => {
+  try {
+    loadingAssets.value = true;
+    const data = await assetService.getAssets({ serial: query })
+
+    assets.rows = data?.value?.rows || [];
+    assets.total = data?.value?.total || 0;
+    loadingAssets.value = false;
+  } catch (error) {
+    loadingAssets.value = false;
+  }
+}
 
 const checking = async (orderData: OrderData) => {
   const targets = assignments.assets.map((asset) => {
@@ -209,6 +260,7 @@ const checking = async (orderData: OrderData) => {
 
   modals.assign = false
   assignments.assets = [];
+  assets.rows = [];
   assignments.place = undefined;
   assignments.locationId = undefined;
 }
@@ -218,3 +270,26 @@ onMounted(() => {
 })
 
 </script>
+
+<style>
+.warning-row {
+  background-color: var(--el-color-warning-light-5);
+}
+
+.success-row {
+  background-color: var(--el-color-success-light-5);
+}
+
+.danger-row {
+  background-color: var(--el-color-danger-light-5);
+}
+
+.info-row {
+  background-color: var(--el-color-info-light-5);
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+}
+</style>
