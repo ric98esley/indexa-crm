@@ -9,6 +9,7 @@ class LocationsService {
     manager,
     groupId,
     type,
+    zone,
     rif,
     address,
     order,
@@ -26,6 +27,7 @@ class LocationsService {
     groupId?: number;
     manager?: string;
     type?: string;
+    zone?: string;
     rif?: string;
     address?: string;
     order?: string;
@@ -70,6 +72,10 @@ class LocationsService {
             ...(type != '' &&
               type && {
                 type,
+              }),
+            ...(zone != '' &&
+              zone && {
+                zone,
               }),
             ...(rif != '' &&
               rif && {

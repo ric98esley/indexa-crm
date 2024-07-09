@@ -172,7 +172,7 @@ const menusA = reactive([
     ],
   },
   {
-    title: 'Agencias',
+    title: 'Lugares',
     icon: 'ep:school',
     ability: [
       'locations:read',
@@ -189,6 +189,14 @@ const menusA = reactive([
             ],
             title: 'Agencias',
             route: { path: '/places' }
+          },
+          {
+            ability: [
+              'warehouses:read',
+              'warehouses:create',
+            ],
+            title: 'Almacenes',
+            route: { path: '/config/warehouse' }
           },
           {
             ability: [
@@ -351,7 +359,7 @@ const menusA = reactive([
 
 </script>
 
-<style scoped >
+<style scoped>
 .layout-container-demo .el-main {
   padding: 0;
 }

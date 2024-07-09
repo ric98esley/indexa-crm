@@ -357,7 +357,7 @@ onMounted(async () => {
         <el-form-item>
           <el-button :loading="loadingPlace" type="primary"
             :disabled="!place.name && !place.code && !place.zoneId && !place.typeId"
-            native-type="submit">Crear</el-button>
+            native-type="submit">Guardar</el-button>
         </el-form-item>
       </el-form>
     </el-col>

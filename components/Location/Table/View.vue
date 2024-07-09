@@ -24,6 +24,7 @@ const props = defineProps({
       offset: 1,
       code: '',
       group: '',
+      manager: '',
       name: '',
       address: '',
       email: '',
@@ -79,7 +80,7 @@ const filters = computed({
           <template #default="{ row }">
             <el-row :span="24" :gutter="24">
               <el-col :span="22" :offset="2">
-                Creado por: {{ row.createdBy.name }} {{ row.createdBy.lastName }}
+                Creado por: {{ row.createdBy.username }}
               </el-col>
               <el-col :span="22" :offset="2">
                 Fecha de creación: {{ new Date(row.createdAt).toLocaleString('es-VE') }}
@@ -98,9 +99,20 @@ const filters = computed({
             <el-input v-model="filters.code" placeholder="Código" clearable />
           </template>
         </el-table-column>
-        <el-table-column label="Grupo" prop="group.name" min-width="120">
+        <el-table-column label="Grupo" prop="group.code" min-width="120">
           <template #header>
             <el-input v-model="filters.group" placeholder="Grupo" clearable />
+          </template>
+          <template #default="{ row }">
+            {{ row.group.code }} - {{ row.group.name }}
+          </template>
+        </el-table-column>
+        <el-table-column label="Responsable" min-width="120">
+          <template #header>
+            <el-input v-model="filters.manager" placeholder="Responsable" clearable />
+          </template>
+          <template #default="{ row }">
+            {{ row.manager?.name }} {{ row.manager?.lastName }}
           </template>
         </el-table-column>
         <el-table-column label="Acciones" width="150">

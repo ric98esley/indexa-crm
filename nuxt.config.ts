@@ -2,6 +2,7 @@
 export default defineNuxtConfig({
   ssr: false,
   spaLoadingTemplate: 'spa-loading.html',
+
   app: {
     // head
     head: {
@@ -17,12 +18,15 @@ export default defineNuxtConfig({
       link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
     }
   },
+
   runtimeConfig: {
     public: {
       apiUrl: process.env.BASE_URL,
     },
   },
+
   devtools: { enabled: true },
+
   modules: [
     '@element-plus/nuxt',
     '@nuxtjs/tailwindcss',
@@ -31,6 +35,7 @@ export default defineNuxtConfig({
     'nuxt-icon',
     'nuxt-permissions',
   ],
+
   googleFonts: {
     families: {
       Roboto: true,
@@ -42,4 +47,6 @@ export default defineNuxtConfig({
       },
     }
   },
+
+  compatibilityDate: '2024-07-09',
 })

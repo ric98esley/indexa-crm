@@ -9,6 +9,7 @@ export const useTypes = () => {
       status?: string[]
     }) {
       try {
+        console.log('url', this.URL)
         const { data, error } = await useApi<{ total: number, rows: Type[] }>(this.URL,
           {
             params: {

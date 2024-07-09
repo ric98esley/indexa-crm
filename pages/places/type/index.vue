@@ -166,7 +166,7 @@ const type = reactive<{
 const getTypes = async () => {
   try {
     loadingType.value = true;
-    const { data, error } = await useFetch<{ total: number, rows: Type[] }>('/locations/types',
+    const { data, error } = await useApi<{ total: number, rows: Type[] }>('/locations/types',
       {
         params: {
           ...(filters.name != '' && filters.name && {
@@ -199,7 +199,7 @@ const createType = async () => {
   try {
     loadingType.value = true;
 
-    const { data, error } = await useFetch<Type>('/locations/types',
+    const { data, error } = await useApi<Type>('/locations/types',
       {
         method: 'post',
         body: {
@@ -242,7 +242,7 @@ const patchType = async () => {
       status: type.status
     }
 
-    const { data, error } = await useFetch<Type>(`/locations/types/${type.id}`,
+    const { data, error } = await useApi<Type>(`/locations/types/${type.id}`,
       {
         method: 'PATCH',
         body
@@ -280,7 +280,7 @@ const editType = (row: Type) => {
 
 const removeType = async (id: number) => {
   try {
-    const { data, error } = await useFetch<Type>(`/locations/types/${id}`, {
+    const { data, error } = await useApi<Type>(`/locations/types/${id}`, {
       method: 'delete'
     })
 

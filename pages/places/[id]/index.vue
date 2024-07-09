@@ -1,5 +1,5 @@
 <template>
-  <el-container class="p-4">
+  <el-container direction="vertical" class="p-4">
     <el-row :gutter="10">
       <el-col :span="24">
         <el-row>
@@ -14,8 +14,7 @@
             </template>
             <template #extra>
               <div class="flex items-center">
-                <el-button @click="print()">Imprimir inventario</el-button>
-                <!-- <el-button type="primary" class="ml-2">Editar</el-button> -->
+                <el-button @click="print()" :disabled="currentAssignments.total == 0">Imprimir inventario</el-button>
               </div>
             </template>
             <LocationDescription :place="place" />
@@ -27,12 +26,12 @@
           <el-tab-pane label="Inventario" name="current">
             <h2 class="m-4">Activos en préstamo</h2>
             <AssignmentsTableView :assignments="currentAssignments.rows" :loading="loadingAssignments"
-            v-model:filters="filters" :total="currentAssignments.total" />
+              v-model:filters="filters" :total="currentAssignments.total" />
           </el-tab-pane>
           <el-tab-pane label="Historial" name="lasted">
             <h2 class="m-4">Préstamos anteriores</h2>
             <AssignmentsTableView :assignments="lastAssignments.rows" :loading="loadingAssignmentsLast"
-            v-model:filters="filters2" :total="lastAssignments.total" />
+              v-model:filters="filters2" :total="lastAssignments.total" />
           </el-tab-pane>
         </el-tabs>
       </el-col>
@@ -136,7 +135,7 @@ const filters2 = reactive<{
 
 const setPlace = async (placeId: number) => {
   const data = await locationService.getLocation({ id: placeId });
-  if(data) {
+  if (data) {
     place.isActive = data.isActive;
     place.code = data.code;
     place.phone = data.phone;
@@ -229,16 +228,15 @@ watch(filters2, useDebounce(async () => {
 }, 500
 ))
 
-watch(activeName, () =>
-{
-  if(activeName.value == 'current') setPlaceAssignments(Number(route.params.id));
-  if(activeName.value == 'lasted') setPlaceAssignmentsLast(Number(route.params.id));
+watch(activeName, () => {
+  if (activeName.value == 'current') setPlaceAssignments(Number(route.params.id));
+  if (activeName.value == 'lasted') setPlaceAssignmentsLast(Number(route.params.id));
 })
 
 onMounted(() => {
   setPlace(Number(route.params.id));
 
-  if(activeName.value == 'current') setPlaceAssignments(Number(route.params.id));
-  if(activeName.value == 'lasted') setPlaceAssignmentsLast(Number(route.params.id));
+  if (activeName.value == 'current') setPlaceAssignments(Number(route.params.id));
+  if (activeName.value == 'lasted') setPlaceAssignmentsLast(Number(route.params.id));
 })
 </script>
