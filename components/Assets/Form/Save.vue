@@ -164,10 +164,10 @@ const patchAsset = async () => {
 }
 
 watch(() => modelSelected.categoryId, () => {
-  if (!modelSelected.categoryId) {
-    modelSelected.brandId = undefined;
-    modelSelected.modelId = undefined;
-  }
+  modelSelected.modelId = undefined;
+})
+watch(() => modelSelected.brandId, () => {
+  modelSelected.modelId = undefined;
 })
 
 watch(() => props.open, async () => {

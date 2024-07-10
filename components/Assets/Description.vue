@@ -10,6 +10,7 @@ const getModal = ref(false);
 const editModal = ref(false);
 const restoreModal = ref(false);
 const deleteModal = ref(false);
+const addSpecificationModal = ref(false);
 
 const width = ref<number>(window.screen.width);
 
@@ -150,7 +151,10 @@ onMounted(async () => {
         </el-descriptions>
       </el-col>
       <el-col class="my-4" :span="24">
-        <h2> Especificaciones</h2>
+        <div class="flex items-center justify-between">
+          <h2> Especificaciones</h2>
+          <el-button type="primary" @click="editModal = true" v-can="['assets:update']">Agregar</el-button>
+        </div>
         <el-descriptions :column="1" border>
           <el-descriptions-item v-for="item in asset.specifications">
             <template #label>
