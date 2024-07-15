@@ -231,6 +231,92 @@ export const useAssets = () => {
         });
       }
     }
+    async getAssetSpecifications({id}: {id: number}) {
+      try {
+        const { data, error } = await useApi<{rows: Specification[], total: number}>(`${this.URL}/${id}/specifications`);
+
+        if (error.value) {
+          throw new Error(error.value.data.message);
+        }
+
+        return data.value;
+      } catch (error: any) {
+        ElNotification({
+          title: 'Error al cargar los activos',
+          message: error.message,
+        });
+      }
+    }
+    async addAssetSpecification({
+      id,
+      typeId,
+      value,
+    }: {
+      id: number;
+      typeId: number;
+      value: string;
+    }) {
+      try {
+        const body = {
+          typeId,
+          value,
+        };
+
+        const { data, error } = await useApi<Specification>(`${this.URL}/${id}/specifications`, {
+          method: 'PATCH',
+          body,
+        });
+
+        if (error.value) {
+          throw new Error(error.value.data.message);
+        }
+
+        ElNotification({
+          title: 'Especificación agregada correctamente',
+          type: 'success',
+        });
+
+        return data;
+      } catch (error: any) {
+        ElNotification({
+          title: 'Error al agregar la especificación',
+          message: error.message,
+          type: 'error',
+        });
+      }
+    } 
+    async removeAssetSpecification({
+      id,
+      typeId,
+    }: {
+      id: number;
+      typeId: number;
+    }) {
+      try {
+        const { data, error } = await useApi<Specification>(`${this.URL}/${id}/specifications`, {
+          method: 'DELETE',
+          params: {
+            typeId,
+          },
+        });
+
+        if (error.value) {
+          throw new Error(error.value.data.message);
+        }
+
+        ElNotification({
+          title: 'Especificación eliminada correctamente',
+          type: 'success',
+        });
+
+        return data;
+      } catch (error: any) {
+        ElNotification({
+          title: 'Error al eliminar la especificación',
+          type: 'error',
+        });
+      }
+    }
     async getAssetMovements({
       id,
       paranoid,

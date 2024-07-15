@@ -53,9 +53,22 @@
             </el-row>
           </el-col>
         </el-tab-pane>
+        <el-tab-pane label="Especificaciones" name="spec">
+          <el-col v-can="['assets:read']">
+            <div class="flex items-center justify-between">
+              <h2> Especificaciones del activo</h2>
+              <el-button type="primary" @click="addSpecificationModal = true"
+                v-can="['assets:update']">Agregar</el-button>
+            </div>
+            <AssetsTableSpecs :data="spec?.rows" @delete="handlerDeleteSpecification" />
+          </el-col>
+        </el-tab-pane>
       </el-tabs>
       <el-col>
       </el-col>
+      <el-dialog v-model="addSpecificationModal">
+        <AssetsFormSpec @submit="handlerAddSpecification" />
+      </el-dialog>
     </el-row>
   </el-container>
 </template>
@@ -72,6 +85,7 @@ definePageMeta({
 const AssetServices = useAssets();
 const assetServices = new AssetServices();
 
+const addSpecificationModal = ref(false);
 
 const route = useRoute();
 
@@ -87,6 +101,14 @@ const movements = reactive<{
 })
 const logs = reactive<{
   rows: object[],
+  total: number
+}>({
+  rows: [],
+  total: 0
+})
+
+const spec = reactive<{
+  rows: Specification[],
   total: number
 }>({
   rows: [],
@@ -147,18 +169,49 @@ const getLogs = async (id: number) => {
   } finally { }
 }
 
+const handlerAddSpecification = async (data: { typeId: number, value: string }) => {
+  try {
+    const id = Number(route.params.id)
+    await assetServices.addAssetSpecification({ id, ...data });
+    await setSpecification(id);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const handlerDeleteSpecification = async (typeId: number) => {
+  try {
+    await assetServices.removeAssetSpecification({ id: Number(route.params.id), typeId });
+    await setSpecification(Number(route.params.id));
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const setSpecification = async (id: number) => {
+  try {
+    const res = await assetServices.getAssetSpecifications({ id });
+    spec.rows = res?.rows || [];
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
 watch(filters, useDebounce(async () => {
   await getAssetMovements(Number(route.params.id))
 }, 500
 ))
 
 watch(activeName, () => {
-  if(activeName.value == 'history') getAssetMovements(Number(route.params.id));
-  if(activeName.value == 'log') getLogs(Number(route.params.id));
+  if (activeName.value == 'history') getAssetMovements(Number(route.params.id));
+  if (activeName.value == 'log') getLogs(Number(route.params.id));
+  if (activeName.value == 'spec') setSpecification(Number(route.params.id));
 })
 
 onMounted(async () => {
-  if(activeName.value == 'history') getAssetMovements(Number(route.params.id));
-  if(activeName.value == 'log') getLogs(Number(route.params.id));
+  if (activeName.value == 'history') getAssetMovements(Number(route.params.id));
+  if (activeName.value == 'log') getLogs(Number(route.params.id));
+  if (activeName.value == 'spec') setSpecification(Number(route.params.id));
 })
 </script>

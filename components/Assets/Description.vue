@@ -10,14 +10,13 @@ const getModal = ref(false);
 const editModal = ref(false);
 const restoreModal = ref(false);
 const deleteModal = ref(false);
-const addSpecificationModal = ref(false);
 
 const width = ref<number>(window.screen.width);
 
 const AssetServices = useAssets();
 const assetServices = new AssetServices();
 
-const asset = reactive<{ data?: Asset, specifications: Specification[] }>({
+const asset = reactive<{ data?: Asset }>({
   data: {
     enabled: false,
     specifications: [],
@@ -26,8 +25,7 @@ const asset = reactive<{ data?: Asset, specifications: Specification[] }>({
     location: undefined,
     model: undefined,
   },
-  specifications: []
-})
+});
 
 const setAsset = async () => {
   try {
@@ -37,6 +35,7 @@ const setAsset = async () => {
     console.log(error);
   }
 }
+
 
 watch(getModal, () => {
   if (getModal.value == false) setAsset();
@@ -147,23 +146,6 @@ onMounted(async () => {
               </div>
             </template>
             {{ asset.data?.notes }}
-          </el-descriptions-item>
-        </el-descriptions>
-      </el-col>
-      <el-col class="my-4" :span="24">
-        <div class="flex items-center justify-between">
-          <h2> Especificaciones</h2>
-          <el-button type="primary" @click="editModal = true" v-can="['assets:update']">Agregar</el-button>
-        </div>
-        <el-descriptions :column="1" border>
-          <el-descriptions-item v-for="item in asset.specifications">
-            <template #label>
-              <div class="cell-item">
-                <Icon name="ep:tools" />
-                {{ item.type.name }}
-              </div>
-            </template>
-            {{ item.value }}
           </el-descriptions-item>
         </el-descriptions>
       </el-col>
