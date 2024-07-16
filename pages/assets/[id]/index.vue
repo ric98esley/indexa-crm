@@ -58,7 +58,7 @@
             <div class="flex items-center justify-between">
               <h2> Especificaciones del activo</h2>
               <el-button type="primary" @click="addSpecificationModal = true"
-                v-can="['assets:update']">Agregar</el-button>
+                v-can="['assets:update']">Agregar o Modificar</el-button>
             </div>
             <AssetsTableSpecs :data="spec?.rows" @delete="handlerDeleteSpecification" />
           </el-col>
