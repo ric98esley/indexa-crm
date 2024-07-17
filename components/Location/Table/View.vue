@@ -115,6 +115,19 @@ const filters = computed({
             {{ row.manager?.name }} {{ row.manager?.lastName }}
           </template>
         </el-table-column>
+        <el-table-column label="Zona" min-width="120">
+          <template #header>
+            <el-input v-model="filters.zone" placeholder="Zona" clearable />
+          </template>
+          <template #default="{ row }">
+            <el-row>
+              <el-col :span="24">
+                <Icon name="ep:location" />
+                {{ row.zone.name }}
+              </el-col>
+            </el-row>
+          </template>
+        </el-table-column>
         <el-table-column label="Acciones" width="150">
           <template #default="{ row }">
             <el-row justify="space-around">

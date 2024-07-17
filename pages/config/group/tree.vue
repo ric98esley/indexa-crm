@@ -1,4 +1,4 @@
-<template >
+<template>
   <el-container direction="vertical" class="p-3">
     <el-row :gutter="4">
       <PageHeader name="Árbol del sistema">
@@ -10,12 +10,7 @@
         </el-row>
         <el-row>
           <el-card class="w-120">
-            <el-tree
-              :data="tree.rows"
-              node-key="id"
-              accordion
-              :default-expanded-keys="[1]"
-              >
+            <el-tree :data="tree.rows" node-key="id" accordion :default-expanded-keys="[1]">
               <template #default="{ node, data }">
                 <span class="custom-tree-node">
                   <span>{{ data.name }}</span> -
@@ -31,7 +26,6 @@
 </template>
 
 <script setup lang="ts">
-import Node from 'element-plus/es/components/tree/src/model/node';
 
 const GroupService = useGroups();
 const groupService = new GroupService();
@@ -55,6 +49,7 @@ const tree = reactive<{
 const getGroups = async () => {
   try {
     const data = await groupService.getGroups({
+      limit: 1000
     });
     groups.rows = data?.rows || [];
     groups.total = data?.total || 0;
@@ -63,18 +58,16 @@ const getGroups = async () => {
   }
 };
 
-const handleNodeClick = (data: any) => {
-  console.log(data)
-}
-
 const makeTree = (rows: Group[]) => {
   // Crear un objeto para almacenar los nodos por su id
-  const nodosById = {};
+  const nodosById: { [key: string]: any } = {};
 
   // Primero, crear un mapa de nodos por su id para facilitar la búsqueda
   rows.forEach((row) => {
-    nodosById[row.id] = row;
-    row.children = []; // Agregar una propiedad para almacenar los hijos de este nodo
+    if (row.id) {
+      nodosById[String(row.id)] = row;
+      row.children = [];
+    } // Agregar una propiedad para almacenar los hijos de este nodo
   });
 
   // Luego, recorrer los nodos para construir el árbol
@@ -98,16 +91,6 @@ const makeTree = (rows: Group[]) => {
   const nodosRaiz = rows.filter((row) => !row.parent);
 
   return nodosRaiz;
-}
-
-const loadNode = (node: Node, resolve: (data: Group[]) => void) => {
-  if (node.level === 0) {
-    const groups = groupService.getGroups({
-      parent: 'null'
-    });
-    return resolve(groups);
-  }
-  resolve(node.data.children);
 }
 
 
