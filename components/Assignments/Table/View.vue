@@ -133,11 +133,16 @@ const movementStatus = ({
           <el-input v-model="filters.location" placeholder="Agencia" clearable />
         </template>
         <template #default="{ row }">
-          {{ row.to?.code }}
-          - {{ row.to?.name }}
+          <NuxtLink :href="`/places/${row.to.id}`" target="_blank">
+            <span class="text-teal-500 underline">
+              {{ row.to?.code }}
+              - {{ row.to?.name }}
+            </span>
+          </NuxtLink>
         </template>
       </el-table-column>
-      <el-table-column label="group" :min-width="minWidth" sortable prop="to.group.code" resizable class-name="break-words">
+      <el-table-column label="group" :min-width="minWidth" sortable prop="to.group.code" resizable
+        class-name="break-words">
         <template #header>
           <el-input v-model="filters.group" placeholder="Grupo" clearable />
         </template>
@@ -153,9 +158,14 @@ const movementStatus = ({
       <el-table-column width="120">
         <template #default="{ row }">
           <el-row>
-            <el-button type="primary" circle @click="setOrder(row.order.id)">
-              <Icon name="ep:view" />
+            <el-button class="mr-2" type="primary" circle @click="setOrder(row.order.id)">
+              <Icon name="ep:memo" />
             </el-button>
+            <NuxtLink :href="`/assets/${row.asset.id}`" target="_blank">
+              <el-button type="success" circle>
+                <Icon name="ep:view" />
+              </el-button>
+            </NuxtLink>
           </el-row>
         </template>
       </el-table-column>
