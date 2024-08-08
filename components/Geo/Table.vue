@@ -65,7 +65,7 @@ watch(filters, () => {
         </el-table-column>
         <el-table-column prop="location.code" label="Coordenadas">
           <template #default="{ row }">
-            {{ row.location.code }} - {{ row.location.name }}
+            {{ row.location?.code ?? 'Activo no encontrado' }} - {{ row.location?.name }}
           </template>
         </el-table-column>
         <el-table-column prop="createdAt" label="Fecha">
