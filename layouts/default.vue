@@ -69,7 +69,14 @@ const menusA = reactive([
             ],
             title: 'Todos los activos',
             route: { path: '/assets' }
-          }
+          },
+          {
+            ability: [
+              'geolocation:read'
+            ],
+            title: 'Alertas',
+            route: { path: '/assets/alerts' }
+          },
         ]
       }
     ],

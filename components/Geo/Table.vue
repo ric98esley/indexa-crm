@@ -63,6 +63,11 @@ watch(filters, () => {
             {{ row.latitude }} ,{{ row.longitude }}
           </template>
         </el-table-column>
+        <el-table-column prop="location.code" label="Coordenadas">
+          <template #default="{ row }">
+            {{ row.location.code }} - {{ row.location.name }}
+          </template>
+        </el-table-column>
         <el-table-column prop="createdAt" label="Fecha">
           <template #default="{ row }">
             {{ new Date(row.createdAt).toLocaleString() }}

@@ -236,11 +236,14 @@ declare global {
     latitude: string;
     longitude: string;
     createdAt: Date;
+    location: Place
   }
   interface FindGeoAlert {
     serial?: string;
     alert?: boolean;
     alertType?: string;
+    limit?: number;
+    offset?: number;
     ip?: string;
   }
 
