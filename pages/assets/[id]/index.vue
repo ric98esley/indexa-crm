@@ -57,19 +57,38 @@
           <el-col v-can="['assets:read']">
             <div class="flex items-center justify-between">
               <h2> Especificaciones del activo</h2>
-              <el-button type="primary" @click="addSpecificationModal = true"
-                v-can="['assets:update']">Agregar o Modificar</el-button>
+              <el-button type="primary" @click="addSpecificationModal = true" v-can="['assets:update']">Agregar o
+                Modificar</el-button>
             </div>
             <AssetsTableSpecs :data="spec?.rows" @delete="handlerDeleteSpecification" />
           </el-col>
         </el-tab-pane>
-        <el-tab-pane label="Alertas" name = "alerts">
+        <el-tab-pane label="Alertas" name="alerts">
           <el-col v-can="['assets:read']">
             <h2 class="m-4">Alertas del activo</h2>
             <el-row>
-              <GeoTable :data="geoAlerts.rows" :total="geoAlerts.total" @filters="(filters)=>getGeoAlerts(Number(route.params.id), filters)"/>
+              <GeoTable :data="geoAlerts.rows" :total="geoAlerts.total"
+                @filters="(filters) => getGeoAlerts(Number(route.params.id), filters)" />
             </el-row>
           </el-col>
+        </el-tab-pane>
+        <el-tab-pane label="Mapa" name="map">
+          <el-alert title="Primero carga las alertas para mostrar las ubicaciones" type="warning" />
+          <div style="height:80vh; width:100vw">
+            <LMap ref="map" :zoom="13" :center="[7.766944, -72.225]" :use-global-leaflet="false">
+              <LMarker v-for="alert in geoAlerts.rows" :lat-lng="[Number(alert.latitude), Number(alert.longitude)]">
+                <LIcon v-if="alert.alert" class-name="bg-transparent text-red-500 text-4xl" :icon-size="[40, 80]">
+                  <Icon name="material-symbols:location-on" />
+                </LIcon>
+                <LIcon v-else class-name="bg-transparent text-blue-600 text-xl" :icon-size="[21, 21]">
+                  <Icon name="material-symbols:location-on" />
+                </LIcon>
+              </LMarker>
+              <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution="&amp;copy; <a href=&quot;https://www.openstreetmap.org/&quot;>OpenStreetMap</a> contributors"
+                layer-type="base" name="OpenStreetMap" />
+            </LMap>
+          </div>
         </el-tab-pane>
       </el-tabs>
       <el-col>
@@ -89,16 +108,19 @@ definePageMeta({
   permissions: ['assets:read']
 });
 
+const route = useRoute();
 
 const AssetServices = useAssets();
 const assetServices = new AssetServices();
 
 const addSpecificationModal = ref(false);
-
-const route = useRoute();
+const map = ref(null) as any;
 
 const activeName = ref('history')
 const loadingAssignments = ref(false)
+
+const iconWidth = ref(21);
+const iconHeight = ref(42);
 
 const movements = reactive<{
   rows: Assignments[],
@@ -231,10 +253,14 @@ watch(filters, useDebounce(async () => {
 ))
 
 const getData = async () => {
-  await getAssetMovements(Number(route.params.id));
-  await getLogs(Number(route.params.id));
-  await getGeoAlerts(Number(route.params.id));
-  await setSpecification(Number(route.params.id));
+  if (!route.params.id) return;
+  if (activeName.value === 'history') await getAssetMovements(Number(route.params.id));
+  if (activeName.value === 'log') await getLogs(Number(route.params.id));
+  if (activeName.value === 'alerts') await getGeoAlerts(Number(route.params.id));
+  if (activeName.value === 'spec') await setSpecification(Number(route.params.id));
+  if (activeName.value === 'map') {
+    setTimeout(function () { window.dispatchEvent(new Event('resize')) }, 250);
+  }
 }
 
 watch(activeName, () => {

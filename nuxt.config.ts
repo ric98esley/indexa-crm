@@ -32,9 +32,14 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
     '@nuxtjs/google-fonts',
+    '@nuxtjs/leaflet',
     'nuxt-icon',
     'nuxt-permissions',
   ],
+
+  leaflet: {
+    markerCluster: true
+  },
 
   googleFonts: {
     families: {

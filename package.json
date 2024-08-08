@@ -21,8 +21,10 @@
   },
   "dependencies": {
     "@nuxtjs/google-fonts": "3.0.1",
+    "@nuxtjs/leaflet": "^1.2.0",
     "@pinia/nuxt": "0.5.1",
     "dotenv": "16.3.1",
+    "leaflet.markercluster": "^1.5.3",
     "nuxt-permissions": "0.2.4"
   }
 }
