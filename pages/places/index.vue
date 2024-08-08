@@ -14,7 +14,7 @@
               </el-form-item>
               <el-form-item class="w-64 sm:w-auto ml-4">
                 <el-date-picker v-model="filters.startDate" type="datetime" placeholder="Fecha de inicio"
-                  format="YYYY/MM/DD" value-format="x" :shortcuts="shortcuts" />
+                  format="YYYY/MM/DD" value-format="x" />
               </el-form-item>
               <div class="ml-4 w-10 flex items-center sm:items-start sm:mt-1">
                 <span class="ml-2">al</span>
@@ -41,7 +41,7 @@
           </template>
         </el-dialog>
       </el-container>
-      <LeftButton @click="modals.create = true" />
+      <LeftButton @click="modals.create = true" v-can="['locations:create']" />
     </el-row>
     <el-container>
       <el-dialog v-model="modals.filters">
@@ -68,7 +68,7 @@
             <el-col :span="12">
               <el-form-item label="Fecha de inicio">
                 <el-date-picker v-model="filters.startDate" type="datetime" placeholder="Fecha de inicio"
-                  format="YYYY/MM/DD" value-format="x" :shortcuts="shortcuts" />
+                  format="YYYY/MM/DD" value-format="x" />
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -106,6 +106,9 @@ const filters = reactive({
   limit: 10,
   offset: 1,
   code: '',
+  zone: '',
+  type: '',
+  status: '',
   group: '',
   name: '',
   manager: '',

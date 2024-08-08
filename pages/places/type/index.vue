@@ -34,9 +34,6 @@
               <el-button type="info" circle @click="editType(props.row)" v-can="['locations_types:update']">
                 <Icon name="ep:edit" />
               </el-button>
-              <el-button type="primary" circle>
-                <Icon name="ep:view" />
-              </el-button>
               <el-button type="danger" circle @click="removeType(props.row.id)" v-can="['locations_types:delete']">
                 <Icon name="ep:delete" />
               </el-button>

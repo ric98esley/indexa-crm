@@ -43,10 +43,10 @@
             <el-table-column label="Acciones" width="150">
               <template #default="props">
                 <el-row>
-                  <el-button type="info" circle @click="editCategory(props.row)">
+                  <el-button type="info" circle @click="editCategory(props.row)" v-can="['categories:update']">
                     <Icon name="ep:edit" />
                   </el-button>
-                  <el-button type="danger" circle @click="removeCategory(props.row.id)">
+                  <el-button type="danger" circle @click="removeCategory(props.row.id)" v-can="['categories:delete']">
                     <Icon name="ep:delete" />
                   </el-button>
                 </el-row>
@@ -73,7 +73,7 @@
             <CategoryFormSave @submit="submitHandler" :id="categoryToEdit" ></CategoryFormSave>
           </template>
         </el-dialog>
-        <LeftButton @click="createCategory"/>
+        <LeftButton @click="createCategory" v-can="['categories:create']"/>
       </el-container>
     </el-row>
   </el-container>
@@ -94,7 +94,7 @@ const categoryToEdit = ref<number>(0);
 
 const loadingCategory = ref(false);
 
-const CATEGORIES_TYPES = {
+const CATEGORIES_TYPES: { [key: string]: string } = {
   asset: 'Activo',
   consumable: 'Consumible',
   accessory: 'Accesorio'

@@ -25,13 +25,10 @@
           <el-table-column label="Acciones" width="180">
             <template #default="props">
               <el-row>
-                <el-button type="info" circle @click="editModel(props.row)">
+                <el-button type="info" circle @click="editModel(props.row)" v-can="['models:update']">
                   <Icon name="ep:edit" />
                 </el-button>
-                <el-button type="primary" circle>
-                  <Icon name="ep:view" />
-                </el-button>
-                <el-button type="danger" circle @click="removeCategory(props.row.id)">
+                <el-button type="danger" circle @click="removeCategory(props.row.id)" v-can="['models:update']">
                   <Icon name="ep:delete" />
                 </el-button>
               </el-row>
@@ -58,7 +55,7 @@
           <ModelFormSave :id="modelToEdit" @submit="submitHandler"></ModelFormSave>
         </template>
       </el-dialog>
-      <LeftButton @click="modals.create = true" />
+      <LeftButton @click="modals.create = true" v-can="['models:create']" />
     </el-container>
   </el-container>
 </template>

@@ -24,10 +24,10 @@
           <el-table-column label="Acciones" width="120">
             <template #default="props">
               <el-row>
-                <el-button type="info" circle @click="editBrand(props.row)">
+                <el-button type="info" circle @click="editBrand(props.row)" v-can="['brands:update']">
                   <Icon name="ep:edit" />
                 </el-button>
-                <el-button type="danger" circle @click="removeBrand(props.row.id)">
+                <el-button type="danger" circle @click="removeBrand(props.row.id)" v-can="['brands:delete']">
                   <Icon name="ep:delete" />
                 </el-button>
               </el-row>

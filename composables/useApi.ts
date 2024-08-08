@@ -2,11 +2,13 @@ import type { UseFetchOptions } from '#app';
 
 export function useApi<T>(
   url: string | (() => string),
-  options: UseFetchOptions<T> = {}
+  options?: any,
 ) {
   const { $api } = useNuxtApp();
-  return useFetch(url, {
+
+  return useFetch<T>(url, {
     ...options,
+    query: {},
     $fetch: $api
   });
 }

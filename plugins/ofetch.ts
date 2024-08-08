@@ -9,8 +9,6 @@ export default defineNuxtPlugin(() => {
     onRequest ({ request, options }) {
       if (authStore.getToken) {
         options.headers = { Authorization: `Bearer ${authStore.getToken}` }
-      } else {
-        console.log('Not authenticated')
       }
     },
     onRequestError({ request, options, error }) {
@@ -22,7 +20,6 @@ export default defineNuxtPlugin(() => {
       console.log('[fetch response error]', request, response.status, response.body)
       const code = response.status;
       if (code === 401) {
-        console.log("logout");
         authStore.reset()
       }
     }

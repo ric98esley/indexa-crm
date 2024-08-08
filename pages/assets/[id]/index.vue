@@ -63,6 +63,14 @@
             <AssetsTableSpecs :data="spec?.rows" @delete="handlerDeleteSpecification" />
           </el-col>
         </el-tab-pane>
+        <el-tab-pane label="Alertas" name = "alerts">
+          <el-col v-can="['assets:read']">
+            <h2 class="m-4">Alertas del activo</h2>
+            <el-row>
+              <GeoTable :data="geoAlerts.rows" :total="geoAlerts.total" @filters="(filters)=>getGeoAlerts(Number(route.params.id), filters)"/>
+            </el-row>
+          </el-col>
+        </el-tab-pane>
       </el-tabs>
       <el-col>
       </el-col>
@@ -101,6 +109,14 @@ const movements = reactive<{
 })
 const logs = reactive<{
   rows: object[],
+  total: number
+}>({
+  rows: [],
+  total: 0
+})
+
+const geoAlerts = reactive<{
+  rows: GeoAlert[],
   total: number
 }>({
   rows: [],
@@ -169,6 +185,17 @@ const getLogs = async (id: number) => {
   } finally { }
 }
 
+const getGeoAlerts = async (id: number, filters = {}) => {
+  try {
+    const data = await assetServices.findOneGeo(id, filters);
+
+    geoAlerts.rows = data?.rows || [];
+    geoAlerts.total = data?.total || 0;
+  } catch (error) {
+
+  } finally { }
+}
+
 const handlerAddSpecification = async (data: { typeId: number, value: string }) => {
   try {
     const id = Number(route.params.id)
@@ -203,15 +230,18 @@ watch(filters, useDebounce(async () => {
 }, 500
 ))
 
+const getData = async () => {
+  await getAssetMovements(Number(route.params.id));
+  await getLogs(Number(route.params.id));
+  await getGeoAlerts(Number(route.params.id));
+  await setSpecification(Number(route.params.id));
+}
+
 watch(activeName, () => {
-  if (activeName.value == 'history') getAssetMovements(Number(route.params.id));
-  if (activeName.value == 'log') getLogs(Number(route.params.id));
-  if (activeName.value == 'spec') setSpecification(Number(route.params.id));
+  getData()
 })
 
 onMounted(async () => {
-  if (activeName.value == 'history') getAssetMovements(Number(route.params.id));
-  if (activeName.value == 'log') getLogs(Number(route.params.id));
-  if (activeName.value == 'spec') setSpecification(Number(route.params.id));
+  await getData()
 })
 </script>

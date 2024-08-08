@@ -227,4 +227,21 @@ declare global {
     content: string;
   }
 
+  interface GeoAlert {
+    id: number;
+    ip: string;
+    serial: string;
+    alert: boolean;
+    alertType: string;
+    latitude: string;
+    longitude: string;
+    createdAt: Date;
+  }
+  interface FindGeoAlert {
+    serial?: string;
+    alert?: boolean;
+    alertType?: string;
+    ip?: string;
+  }
+
 }

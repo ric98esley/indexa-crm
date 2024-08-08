@@ -13,10 +13,10 @@
           <el-table-column label="Acciones" width="120">
             <template #default="props">
               <el-row>
-                <el-button type="info" circle @click="editSpecification(props.row)">
+                <el-button type="info" circle @click="editSpecification(props.row)" v-can="['specifications:update']">
                   <Icon name="ep:edit" />
                 </el-button>
-                <el-button type="danger" circle @click="removeSpecification(props.row.id)">
+                <el-button type="danger" circle @click="removeSpecification(props.row.id)" v-can="['specifications:delete']">
                   <Icon name="ep:delete" />
                 </el-button>
               </el-row>
