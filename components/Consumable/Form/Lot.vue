@@ -22,8 +22,6 @@ const rules = {
   ]
 }
 
-
-
 const emit = defineEmits({
   submit: ({ customer, description }: lote) => {
     if (!customer && !description) {

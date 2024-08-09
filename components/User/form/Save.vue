@@ -46,8 +46,9 @@ const roles = [
   { label: "Asistente", value: "asistente" },
   { label: "Observador", value: "observador" },
   { label: "Administrador", value: "administrador"},
-  { label: "Secretaria", value: "secretaria"},
   { label: "Taquilla", value: "taquilla" },
+  { label: "Tecnico", value: "tecnico"},
+  { label: "Secretaria", value: "secretaria"},
 ];
 
 const rules = {

@@ -1,6 +1,6 @@
 export const useFindMaintenanceType = async () => {
   try {
-    const { data, error } = await useApi<MaintenanceType>('/maintenances/types')
+    const { data, error } = await useApi<{ rows: MaintenanceType[], total: number }>('/maintenances/types')
 
     return data.value
   } catch (error) {
@@ -14,12 +14,13 @@ export const useFindMaintenanceType = async () => {
 export const useCreateMaintenanceType = async (maintenance: CreateMaintenanceType) => {
   try {
     const { data, error } = await useApi<MaintenanceType>('/maintenances/types', {
-      methods: 'POST',
-      body: maintenance
+      method: 'POST',
+      body: useFilterObject(maintenance)
     })
 
     return data.value
   } catch (error) {
+    console.log(error)
     ElNotification({
       title: 'Error al crear el tipo de mantenimiento',
       type: 'error'
@@ -33,6 +34,10 @@ export const useUpdateMaintenanceType = async (id: number, maintenance: CreateMa
       methods: 'PATCH',
       body: maintenance
     })
+
+    if(error.value) {
+      throw new Error(error.value.data.message)
+    }
 
     return data.value
   } catch (error) {
@@ -48,6 +53,11 @@ export const useDeleteMaintenanceType = async (id: number) => {
     const { data, error } = await useApi<MaintenanceType>(`/maintenances/types/${id}`, {
       methods: 'DELETE'
     })
+
+    
+    if(error.value) {
+      throw new Error(error.value.data.message)
+    }
 
     return data.value
   } catch (error) {

@@ -8,7 +8,6 @@ export function useApi<T>(
 
   return useFetch<T>(url, {
     ...options,
-    query: {},
     $fetch: $api
   });
 }
