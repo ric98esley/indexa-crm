@@ -27,9 +27,6 @@
               <el-button type="info" circle @click="editZone(props.row)" v-can="['zones:delete']">
                 <Icon name="ep:edit" />
               </el-button>
-              <el-button type="primary" circle>
-                <Icon name="ep:view" />
-              </el-button>
               <el-button type="danger" circle @click="removeZone(props.row.id)" v-can="['zones:read']">
                 <Icon name="ep:delete" />
               </el-button>

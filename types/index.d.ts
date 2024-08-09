@@ -247,4 +247,24 @@ declare global {
     ip?: string;
   }
 
+  interface MaintenanceType {
+    id: number;
+    name: string;
+    description?: string;
+  }
+  interface Maintenance {
+    id: number;
+    description: string;
+    cost?: string;
+    createdAt: string;
+    createdBy: User;
+    maintenanceType: MaintenanceType;
+    asset: Asset;
+  }
+
+  interface CreateMaintenanceType {
+    name: string;
+    description?: string;
+  }
+
 }

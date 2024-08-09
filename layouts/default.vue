@@ -117,6 +117,37 @@ const menusA = reactive([
     ]
   },
   {
+    title: 'Mantenimientos',
+    icon: 'ep:tools',
+    ability: [
+      'maintenances:read',
+      'maintenances:create',
+    ],
+    groups: [
+      {
+        title: 'Ver y crear',
+        items: [
+          {
+            ability: [
+              'maintenances:read',
+              'maintenances:create',
+            ],
+            title: 'Mantenimientos',
+            route: { path: '/maintenances' }
+          },
+          {
+            ability: [
+              'maintenances:read',
+              'maintenances:create',
+            ],
+            title: 'Tipos',
+            route: { path: '/maintenances/type' }
+          }
+        ]
+      }
+    ],
+  },
+  {
     title: 'Usuarios',
     icon: 'ep:user',
     ability: [
@@ -125,7 +156,7 @@ const menusA = reactive([
     ],
     groups: [
       {
-        title: 'Ver y crear usuarios',
+        title: 'Ver y crear',
         items: [
           {
             ability: [

@@ -63,7 +63,7 @@ watch(filters, () => {
             {{ row.latitude }} ,{{ row.longitude }}
           </template>
         </el-table-column>
-        <el-table-column prop="location.code" label="Coordenadas">
+        <el-table-column prop="location.code" label="Lugar">
           <template #default="{ row }">
             {{ row.location?.code ?? 'Activo no encontrado' }} - {{ row.location?.name }}
           </template>
