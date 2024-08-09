@@ -267,4 +267,28 @@ declare global {
     description?: string;
   }
 
+  interface FindMaintenanceType {
+    limit?: number;
+    offset?: number;
+    name?: string;
+    description?: string;
+  }
+
+  interface CreateMaintenance {
+    description: string;
+    cost?: string;
+    maintenanceTypeId?: number;
+    assetId?: number;
+  }
+
+  interface FindMaintenance {
+    limit?: number;
+    offset?: number;
+    serial?: string;
+    description?: string;
+    cost?: string;
+    maintenanceTypeId?: number;
+    assetId?: number;
+  }
+
 }

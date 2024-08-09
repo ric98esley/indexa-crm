@@ -1,6 +1,8 @@
-export const useFindMaintenanceType = async () => {
+export const useFindMaintenanceType = async (filters: FindMaintenanceType = {}) => {
   try {
-    const { data, error } = await useApi<{ rows: MaintenanceType[], total: number }>('/maintenances/types')
+    const { data, error } = await useApi<{ rows: MaintenanceType[], total: number }>('/maintenances/types', {
+      params: useFilterObject(filters)
+    })
 
     return data.value
   } catch (error) {
@@ -68,9 +70,11 @@ export const useDeleteMaintenanceType = async (id: number) => {
   }
 }
 
-export const useFindMaintenance = async () => {
+export const useFindMaintenance = async (filters: FindMaintenance = {}) => {
   try {
-    const { data, error } = await useApi<Maintenance>('/maintenances')
+    const { data, error } = await useApi<{rows:Maintenance[], total: number}>('/maintenances', {
+      params: useFilterObject(filters)
+    })
 
     return data.value
   } catch (error) {
@@ -81,11 +85,11 @@ export const useFindMaintenance = async () => {
   }
 }
 
-export const useCreateMaintenance = async (maintenance: Maintenance) => {
+export const useCreateMaintenance = async (maintenance: CreateMaintenance) => {
   try {
     const { data, error } = await useApi<Maintenance>('/maintenances', {
-      methods: 'POST',
-      body: maintenance
+      method: 'POST',
+      body: useFilterObject(maintenance)
     })
 
     return data.value
