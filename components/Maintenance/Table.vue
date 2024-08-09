@@ -25,11 +25,14 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['refresh', 'update:filters'])
+const emit = defineEmits(['refresh', 'update:filters', 'refresh'])
 
 const filters = computed({
   get: () => props.filters,
-  set: (value) => emit('update:filters', value)
+  set: (value) => {
+    emit('update:filters', value)
+    emit('refresh', value)
+  }
 })
 
 const editHandler = async (row: Maintenance) => {

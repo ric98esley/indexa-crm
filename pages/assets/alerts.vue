@@ -6,7 +6,7 @@ const geoAlerts = reactive<{ rows: GeoAlert[], total: number }>({
 
 
 const getGeoAlerts = async (filters: FindGeoAlert) => {
-  const data = await useFindGeo({})
+  const data = await useFindGeo(filters)
 
   if(!data) return
 

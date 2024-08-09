@@ -245,6 +245,8 @@ declare global {
     limit?: number;
     offset?: number;
     ip?: string;
+    limit?: number;
+    offset?: number; 
   }
 
   interface MaintenanceType {

@@ -285,6 +285,24 @@ export const useAssets = () => {
         });
       }
     }
+    async getAssetMaintenance(id: number, filter: FindMaintenance){
+      try {
+        const { data, error } = await useApi<{rows: Maintenance[], total: number}>(`${this.URL}/${id}/maintenances`, {
+          params: useFilterObject(filter),
+        });
+
+        if (error.value) {
+          throw new Error(error.value.data.message);
+        }
+        return data.value;
+      } catch (error: any) {
+        ElNotification({
+          title: 'Error al obtener el activo',
+          message: error.message,
+          type: 'error',
+        });
+      }
+    }
     async findOneGeo(id: number, filters: FindGeoAlert) {
       try {
         const { data, error } = await useApi<{rows: GeoAlert[], total: number}>(`${this.URL}/${id}/geo`, {

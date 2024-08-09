@@ -58,7 +58,7 @@ const deleteHandler = async (row: MaintenanceType) => {
         <template #default="{ row }">
           <el-row justify="space-around">
             <el-button type="info" @click="editHandler(row)" circle v-can="['maintenances:update']">
-              <Icon name="ip:edit" />
+              <Icon name="ep:edit" />
             </el-button>
             <el-button type="danger" @click="deleteHandler(row)" circle v-can="['maintenances:delete']">
               <Icon name="ep:delete" />

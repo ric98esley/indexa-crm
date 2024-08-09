@@ -63,6 +63,15 @@
             <AssetsTableSpecs :data="spec?.rows" @delete="handlerDeleteSpecification" />
           </el-col>
         </el-tab-pane>
+        <el-tab-pane label="Mantenimientos" name="maintenance">
+          <el-col v-can="['maintenances:read']">
+            <h2 class="m-4">Mantenimientos del activo</h2>
+            <el-row>
+              <MaintenanceTable :data="maintenances.rows" :total="maintenances.total"
+                v-model:filters="maintenanceFilters" @refresh="getData" />
+            </el-row>
+          </el-col>
+        </el-tab-pane>
         <el-tab-pane label="Alertas" name="alerts">
           <el-col v-can="['assets:read']">
             <h2 class="m-4">Alertas del activo</h2>
@@ -119,9 +128,6 @@ const map = ref(null) as any;
 const activeName = ref('history')
 const loadingAssignments = ref(false)
 
-const iconWidth = ref(21);
-const iconHeight = ref(42);
-
 const movements = reactive<{
   rows: Assignments[],
   total: number
@@ -131,6 +137,14 @@ const movements = reactive<{
 })
 const logs = reactive<{
   rows: object[],
+  total: number
+}>({
+  rows: [],
+  total: 0
+})
+
+const maintenances = reactive<{
+  rows: Maintenance[],
   total: number
 }>({
   rows: [],
@@ -173,6 +187,13 @@ const filters = reactive<{
   offset: 0
 })
 
+const maintenanceFilters = reactive<FindMaintenance>({
+  limit: 10,
+  offset: 0,
+  serial: '',
+  description: '',
+})
+
 const getAssetMovements = async (assetId?: number) => {
   try {
     if (!assetId) return;
@@ -202,6 +223,17 @@ const getLogs = async (id: number) => {
 
     logs.rows = data?.rows || [];
     logs.total = data?.total || 0;
+  } catch (error) {
+
+  } finally { }
+}
+
+const getMaintenances = async (id: number) => {
+  try {
+    const data = await assetServices.getAssetMaintenance(id, maintenanceFilters);
+
+    maintenances.rows = data?.rows || [];
+    maintenances.total = data?.total || 0;
   } catch (error) {
 
   } finally { }
@@ -258,6 +290,7 @@ const getData = async () => {
   if (activeName.value === 'log') await getLogs(Number(route.params.id));
   if (activeName.value === 'alerts') await getGeoAlerts(Number(route.params.id));
   if (activeName.value === 'spec') await setSpecification(Number(route.params.id));
+  if (activeName.value === 'maintenance') await getMaintenances(Number(route.params.id));
   if (activeName.value === 'map') {
     setTimeout(function () { window.dispatchEvent(new Event('resize')) }, 250);
   }
