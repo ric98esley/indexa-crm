@@ -27,7 +27,7 @@ const props = defineProps({
 })
 
 const toEdit = ref<CreateMaintenance | undefined>()
-const idToEdit = ref<CreateMaintenance | undefined>()
+const idToEdit = ref<number>()
 const editModal = ref(false)
 
 const emit = defineEmits(['refresh', 'update:filters', 'refresh'])
@@ -51,6 +51,7 @@ const editHandler = async (row: Maintenance) => {
 }
 
 const updateMaintenance = async (data: CreateMaintenance) => {
+  if (!idToEdit.value) return
   const res = await useUpdateMaintenance(idToEdit.value, data)
   emit('refresh')
 }

@@ -101,7 +101,7 @@ export const useCreateMaintenance = async (maintenance: CreateMaintenance) => {
   }
 }
 
-export const useUpdateMaintenance = async (id: number, maintenance: Maintenance) => {
+export const useUpdateMaintenance = async (id: number, maintenance: CreateMaintenance) => {
   try {
     const { data, error } = await useApi<Maintenance>(`/maintenances/${id}`, {
       method: 'PATCH',
