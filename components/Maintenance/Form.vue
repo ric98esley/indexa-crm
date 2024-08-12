@@ -7,6 +7,10 @@ const props = defineProps({
       maintenanceTypeId: undefined,
       assetId: undefined,
     })
+  },
+  showAsset : {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -33,6 +37,7 @@ const rules = {
 }
 
 const submit = () => {
+  console.log(formState)
   if (formState.description && formState.maintenanceTypeId && formState.assetId) {
     emit('submit', {
       description: formState.description,
@@ -50,7 +55,7 @@ const submit = () => {
 
 <template>
   <el-form :rules="rules" :model="formState" label-position="top" require-asterisk-position="right" @submit.prevent="submit">
-    <el-form-item prop="assetId" label="Activo">
+    <el-form-item prop="assetId" label="Activo" v-if="props.showAsset">
       <AssetsSelect v-model="formState.assetId" />
     </el-form-item>
     <el-form-item prop="maintenanceTypeId" label="Tipo de mantenimiento">

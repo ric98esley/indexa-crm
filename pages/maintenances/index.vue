@@ -49,7 +49,7 @@ watch(filters, () => {
     <el-row :span="24" :gutter="12">
       <PageHeader name="Mantenimientos" />
       <el-col>
-        <MaintenanceTable :data="maintenances.rows" :total="maintenances.total" v-model:filters="filters"/>
+        <MaintenanceTable :data="maintenances.rows" :total="maintenances.total" v-model:filters="filters" @refresh="getMaintenances"/>
       </el-col>
     </el-row>
     <LeftButton @click="createModal = true" />

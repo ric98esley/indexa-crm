@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+const userStore = useUserStore()
 const props = defineProps({
   data: {
     type: Array as PropType<Maintenance[]>,
@@ -25,6 +26,10 @@ const props = defineProps({
   }
 })
 
+const toEdit = ref<CreateMaintenance | undefined>()
+const idToEdit = ref<CreateMaintenance | undefined>()
+const editModal = ref(false)
+
 const emit = defineEmits(['refresh', 'update:filters', 'refresh'])
 
 const filters = computed({
@@ -36,10 +41,18 @@ const filters = computed({
 })
 
 const editHandler = async (row: Maintenance) => {
-  console.log(row)
+  toEdit.value = {
+    description: row.description,
+    maintenanceTypeId: row.maintenanceType.id,
+    assetId: row.asset.id,
+  }
+  idToEdit.value = row.id
+  editModal.value = true
 }
-const deleteHandler = async (row: Maintenance) => {
-  console.log(row)
+
+const updateMaintenance = async (data: CreateMaintenance) => {
+  const res = await useUpdateMaintenance(idToEdit.value, data)
+  emit('refresh')
 }
 </script>
 
@@ -49,21 +62,22 @@ const deleteHandler = async (row: Maintenance) => {
       <el-table-column prop="index" type="index"></el-table-column>
       <el-table-column prop="asset.serial" label="Serial" min-width="200">
         <template #header>
-          <el-input v-model="filters.serial" placeholder="Buscar por serial" clearable/>
+          <el-input v-model="filters.serial" placeholder="Buscar por serial" clearable />
         </template>
         <template #default="{ row }">
-          <NuxtLink class="text-blue-600" :to="`/assets/${row.asset.id}`">{{ row.asset.serial }} - {{ row.asset?.model?.category.name }} - {{
-            row.asset?.model.brand.name }} - {{ row.asset.model.name }}</NuxtLink>
+          <NuxtLink class="text-blue-600" :to="`/assets/${row.asset.id}`">{{ row.asset.serial }} - {{
+            row.asset?.model?.category.name }} - {{
+              row.asset?.model.brand.name }} - {{ row.asset.model.name }}</NuxtLink>
         </template>
       </el-table-column>
       <el-table-column prop="description" label="Descripción" min-width="200">
         <template #header>
-          <el-input v-model="filters.description" placeholder="Buscar por descripción" clearable/>
+          <el-input v-model="filters.description" placeholder="Buscar por descripción" clearable />
         </template>
       </el-table-column>
       <el-table-column prop="createdBy.username" label="Creado por" min-width="120">
         <template #header>
-          <el-input v-model="filters.createdBy" placeholder="Buscar por usuario" clearable/>
+          <el-input v-model="filters.createdBy" placeholder="Buscar por usuario" clearable />
         </template>
       </el-table-column>
       <el-table-column prop="maintenanceType.name" label="Tipo" min-width="120"></el-table-column>
@@ -78,13 +92,16 @@ const deleteHandler = async (row: Maintenance) => {
             <el-button type="info" @click="editHandler(row)" circle v-can="['maintenances:update']">
               <Icon name="ep:edit" />
             </el-button>
-            <el-button type="danger" @click="deleteHandler(row)" circle v-can="['maintenances:delete']">
-              <Icon name="ep:delete" />
-            </el-button>
           </el-row>
         </template>
       </el-table-column>
     </el-table>
     <Pagination v-model:offset="filters.offset" v-model:limit="filters.limit" :total="props.total" />
+    <el-dialog v-model="editModal" destroy-on-close>
+      <template #header>
+        <h2>Editar mantenimiento</h2>
+      </template>
+      <MaintenanceForm :form="toEdit" @submit="updateMaintenance" :show-asset="false" />
+    </el-dialog>
   </el-col>
 </template>
