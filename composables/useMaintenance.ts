@@ -33,7 +33,7 @@ export const useCreateMaintenanceType = async (maintenance: CreateMaintenanceTyp
 export const useUpdateMaintenanceType = async (id: number, maintenance: CreateMaintenanceType) => {
   try {
     const { data, error } = await useApi<MaintenanceType>(`/maintenances/types/${id}`, {
-      methods: 'PATCH',
+      method: 'PATCH',
       body: maintenance
     })
 
@@ -53,7 +53,7 @@ export const useUpdateMaintenanceType = async (id: number, maintenance: CreateMa
 export const useDeleteMaintenanceType = async (id: number) => {
   try {
     const { data, error } = await useApi<MaintenanceType>(`/maintenances/types/${id}`, {
-      methods: 'DELETE'
+      method: 'DELETE'
     })
 
     
@@ -104,7 +104,7 @@ export const useCreateMaintenance = async (maintenance: CreateMaintenance) => {
 export const useUpdateMaintenance = async (id: number, maintenance: Maintenance) => {
   try {
     const { data, error } = await useApi<Maintenance>(`/maintenances/${id}`, {
-      methods: 'PATCH',
+      method: 'PATCH',
       body: maintenance
     })
 
