@@ -246,7 +246,7 @@ declare global {
     offset?: number;
     ip?: string;
     limit?: number;
-    offset?: number; 
+    offset?: number;
   }
 
   interface MaintenanceType {
@@ -289,8 +289,13 @@ declare global {
     serial?: string;
     description?: string;
     cost?: string;
-    maintenanceTypeId?: number;
     assetId?: number;
+    startDate?: string;
+    endDate?: string;
+    category?: string;
+    brand?: string;
+    type?: string;
+    model?: string;
   }
 
 }

@@ -78,10 +78,14 @@ const updateMaintenance = async (data: CreateMaintenance) => {
       </el-table-column>
       <el-table-column prop="createdBy.username" label="Creado por" min-width="120">
         <template #header>
-          <el-input v-model="filters.createdBy" placeholder="Buscar por usuario" clearable />
+          <el-input v-model="filters.createdBy" placeholder="Usuario" clearable />
         </template>
       </el-table-column>
-      <el-table-column prop="maintenanceType.name" label="Tipo" min-width="120"></el-table-column>
+      <el-table-column prop="maintenanceType.name" label="Tipo" min-width="120">
+        <template #header>
+          <el-input v-model="filters.type" placeholder="Tipo" clearable />
+        </template>
+      </el-table-column>
       <el-table-column prop="createdAt" label="Fecha" min-width="120">
         <template #default="{ row }">
           {{ new Date(row.createdAt).toLocaleString() }}
