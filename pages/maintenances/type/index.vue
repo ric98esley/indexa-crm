@@ -1,5 +1,12 @@
 <script setup lang="ts">
 
+definePageMeta({
+  middleware: [
+    'nuxt-permissions'
+  ],
+  permissions: ['maintenances:read', 'maintenances:create']
+});
+
 const types = reactive<{
   rows: MaintenanceType[],
   total: number

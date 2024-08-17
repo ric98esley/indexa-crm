@@ -1,4 +1,12 @@
 <script setup lang="ts">
+definePageMeta({
+  middleware: [
+    'nuxt-permissions'
+  ],
+  permissions: ['alerts:read']
+});
+
+
 const geoAlerts = reactive<{ rows: GeoAlert[], total: number }>({
   rows: [],
   total: 0,
