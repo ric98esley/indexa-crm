@@ -8,12 +8,12 @@ export default defineNuxtRouteMiddleware((to) => {
   const auth = useAuthStore();
   auth.readToken();
   if (to.meta.layout == 'auth') {
-    if (auth.getToken) {
+    if (auth.getRefreshToken) {
       return navigateTo("/");
     }
   }
   else{
-    if (!auth.getToken) {
+    if (!auth.getRefreshToken) {
       return navigateTo("/login");
     }
   }

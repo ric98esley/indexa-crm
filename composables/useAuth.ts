@@ -1,20 +1,8 @@
+import type { NuxtError } from "#app";
+
+const baseURL = '/auth';
 export const useAuth = () => {
-  const baseURL = '/auth';
   return class AuthService {
-    async login(username: string, password: string) {
-      const { data, pending, error } = await useApi<{
-        token: string;
-        user: User;
-        ability: string[];
-      }>(baseURL + '/login', {
-        method: 'post',
-        body: {
-          username,
-          password,
-        },
-      });
-      return { data, pending, error };
-    }
     async recovery(email: string) {
       try {
         const { data, error } = await useApi<{
@@ -27,7 +15,7 @@ export const useAuth = () => {
             email
           },
         });
-        if(error.value) {
+        if (error.value) {
           throw new Error(error.value.data.message);
         }
 
@@ -49,12 +37,12 @@ export const useAuth = () => {
       token,
       password
     }:
-    {
-      token:string,
-      password:string
-    }) {
+      {
+        token: string,
+        password: string
+      }) {
       try {
-        if(!token || token == '') throw new Error('No es posible cambiar la contraseña');
+        if (!token || token == '') throw new Error('No es posible cambiar la contraseña');
         const { data, error } = await useApi<{
           token: string;
           user: User;
@@ -66,7 +54,7 @@ export const useAuth = () => {
             password
           },
         });
-        if(error.value) {
+        if (error.value) {
           throw new Error(error.value.data.message);
         }
 
@@ -86,3 +74,64 @@ export const useAuth = () => {
     }
   };
 };
+
+export const useLogin = async (username: string, password: string) => {
+  try {
+    const { data, error } = await useApi<{
+      token: string;
+      refreshToken: string;
+      user: User;
+      ability: string[];
+    }>(baseURL + '/login', {
+      method: 'post',
+      body: {
+        username,
+        password,
+      },
+    });
+
+    if (error.value || !data.value) {
+      throw new Error(error.value?.data.message);
+    }
+    return data.value;
+  } catch (error) {
+    ElNotification({
+      title: 'Error en el inicio de sesión',
+      type: 'error'
+    });
+  }
+}
+
+export const useRefreshToken = async () => {
+
+  const { data, error } = await useFetch<{
+    token: string;
+    user: User;
+    refreshToken: string;
+    ability: string[];
+  }>(baseURL + '/check', {
+    headers: {
+      Authorization: 'Bearer ' + localStorage.getItem('indexa-refresh')
+    },
+    baseURL: useRuntimeConfig().public.apiUrl,
+    method: 'POST',
+  });
+
+  if (error.value) {
+    if (error.value.statusCode === 401) {
+      throw createError({
+        message: 'Sección expirada',
+        statusCode: 401,
+      });
+    }
+  }
+
+  if (!data.value) {
+    throw createError({
+      message: 'Error al refrescar el token',
+      statusCode: 401,
+    });
+  }
+
+  return data.value
+}

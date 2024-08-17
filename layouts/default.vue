@@ -26,7 +26,7 @@
         <div class="lg:hidden w-12" @click="app.$state.tabMenu = !app.$state.tabMenu">
           <Icon name="ep:menu" size="24px" />
         </div>
-        <Header :name="user.username" :logout="() => auth.reset()" />
+        <Header :name="user?.username" :logout="() => auth.reset()" />
       </el-header>
       <ClientOnly>
         <el-main>

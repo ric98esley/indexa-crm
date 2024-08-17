@@ -1,11 +1,8 @@
-<script setup lang="ts" >
+<script setup lang="ts">
 import { useAuthStore } from '@/stores/authStore'
 const auth = useAuthStore();
 
 const formUser = ref()
-
-const AuthService = useAuth();
-const authService = new AuthService();
 
 interface UserForm {
   username: string,
@@ -35,7 +32,7 @@ const rules = reactive({
   ]
 })
 
-const userCredencials = reactive<UserForm>(
+const userCredencial = reactive<UserForm>(
   {
     username: "",
     password: ""
@@ -52,45 +49,14 @@ const login = async (formEl: any | undefined) => {
 
   loading.value = true;
 
-  try {
-    const { data, pending, error } = await authService.login(userCredencials.username, userCredencials.password)
+  const data = await useLogin(userCredencial.username, userCredencial.password)
 
-    if (error.value) {
-      throw new Error('Usuario o contraseña incorrecto');
-    }
-    const token = data.value?.token;
-    const user = data.value?.user;
+  if (!data) return loading.value = false;
 
-    const userRoles = useRoles();
-    const userPermissions = usePermissions();
+  auth.setAuthState(data);
 
-    userRoles.value = [user!.role];
-    userPermissions.value = data.value?.ability || ['user:self'];
-
-
-
-    auth.setAuthState(token, user);
-    loading.value = false;
-    navigateTo('/',
-      {
-        open: {
-          target: '_self',
-          windowFeatures: {
-            popup: false,
-            noopener: true,
-            noreferrer: true,
-          }
-        }
-      }
-    );
-  } catch (error) {
-    ElNotification({
-      title: 'Ha ocurrido un error',
-      message: error?.message || ''
-    })
-    loading.value = false;
-    console.log(error)
-  }
+  loading.value = false;
+  navigateTo('/');
 }
 </script>
 
@@ -98,17 +64,17 @@ const login = async (formEl: any | undefined) => {
   <div class="login">
     <el-card>
       <Logo width="w-32" margin="m-3" />
-      <el-form class="login-form" :model="userCredencials" :rules="rules" ref="formUser" status-icon
+      <el-form class="login-form" :model="userCredencial" :rules="rules" ref="formUser" status-icon
         @submit.native.prevent="login(formUser)">
         <el-form-item prop="username">
-          <el-input v-model="userCredencials.username" placeholder="Nombre de usuario">
+          <el-input v-model="userCredencial.username" placeholder="Nombre de usuario">
             <template #prepend>
               <Icon name="carbon:user"></Icon>
             </template>
           </el-input>
         </el-form-item>
         <el-form-item prop="password">
-          <el-input v-model="userCredencials.password" placeholder="Contraseña" type="password" show-password>
+          <el-input v-model="userCredencial.password" placeholder="Contraseña" type="password" show-password>
             <template #prepend>
               <Icon name="carbon:password"></Icon>
             </template></el-input>
@@ -119,7 +85,7 @@ const login = async (formEl: any | undefined) => {
         </el-form-item>
       </el-form>
       <el-row justify="center">
-        <NuxtLink href="/recovery" >
+        <NuxtLink href="/recovery">
           Recuperar contraseña
         </NuxtLink>
       </el-row>
