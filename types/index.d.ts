@@ -298,4 +298,30 @@ declare global {
     model?: string;
   }
 
+  interface Paths {
+    id: number;
+    name: string;
+    path: string;
+    isAllow: boolean;
+    createdAt: string;
+  }
+
+  interface CreatePaths {
+    name: string;
+    path: string;
+    isAllow: boolean;
+  }
+
+  interface FindPaths {
+    search: string;
+    limit: number;
+    offset: number;
+  }
+
+  interface UpdatePaths {
+    name?: string;
+    path?: string;
+    isAllow?: boolean;
+  }
+
 }

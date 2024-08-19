@@ -311,6 +311,8 @@ const menusA = reactive([
       'warehouses:create',
       'groups:read',
       'groups:create',
+      'paths:read',
+      'paths:create',
     ],
     submenus: [
       {
@@ -356,6 +358,20 @@ const menusA = reactive([
           {
             title: 'Ver y crear',
             route: { path: '/config/model' }
+          }
+        ]
+      },
+      {
+        title: 'Rutas de escaneo',
+        icon: 'ep:document',
+        ability: [
+          'paths:read',
+          'paths:create',
+        ],
+        items: [
+          {
+            title: 'Ver y crear',
+            route: { path: '/config/paths' }
           }
         ]
       },
