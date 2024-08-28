@@ -36,7 +36,7 @@ const asset = reactive<NewAsset>({
 
 const getTag = async (business: string) => {
   try {
-    const { data } = await useFetch<{ tag: string }>('/assets/tag');
+    const { data } = await useApi<{ tag: string }>('/assets/tag');
     if (data.value) asset.serial = data.value.tag;
   } catch (error) {
     console.log(error)
