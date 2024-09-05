@@ -15,6 +15,12 @@ const types = reactive<{
   total: 0
 })
 
+const filters = reactive({
+  limit: 10,
+  offset: 1,
+  search: ''
+})
+
 const createModal = ref(false)
 
 const getTypes = async () => {

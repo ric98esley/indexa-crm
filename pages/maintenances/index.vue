@@ -15,7 +15,7 @@ const maintenances = reactive<{
 
 const filters = reactive<FindMaintenance>({
   limit: 10,
-  offset: 0,
+  offset: 1,
   serial: '',
   description: '',
   startDate: '',
