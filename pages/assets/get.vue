@@ -29,23 +29,16 @@
               </el-select>
             </el-form-item>
             <el-form-item label="Serial" v-if="assignments.place">
-              <el-select
-                v-model="selectedAsset"
-                class="w-full"
-                filterable
-                remote
-                placeholder="Busca un serial"
-                :loading="loadingAssets"
-                :remote-method="setAssets"
-                >
-                <el-option
-                  :class="assetStatus({ row: item })"
-                  v-for="item in assets.rows"
-                  :key="item.id" :label="`${item.id}- ${item.serial} - ${item.location?.name}`"
+              <el-select v-model="selectedAsset" class="w-full" filterable remote placeholder="Busca un serial"
+                :loading="loadingAssets" :remote-method="setAssets">
+                <el-option :class="assetStatus({ row: item })" v-for="item in assets.rows" :key="item.id"
+                  :label="`${item.id}- ${item.serial} - ${item.location?.name}`"
                   :disabled="assignments.assets.some(e => e.id === item.id) || item.location?.type?.status != status"
                   :value="item.serial!">
                   <div class="flex justify-between">
-                    <span><b>{{ item.serial }}</b>- {{ item?.model?.category.name }} - {{ item?.model?.brand.name }} - {{ item.model?.name }}</span>
+                    <span><b>{{ item.serial }}</b>- {{ item?.model?.category.name }} - {{ item?.model?.brand.name }} -
+                      {{
+                      item.model?.name }}</span>
                     <span>{{ item.location?.type?.status }}</span>
                   </div>
                 </el-option>
@@ -191,9 +184,9 @@ const selectedAsset = computed<string>({
   get() {
     return '';
   },
-  set(value: string ) {
+  set(value: string) {
     const item = assets.rows.filter((asset) => asset.serial == value)[0];
-    if(item) handleSelectAsset(item)
+    if (item) handleSelectAsset(item)
   }
 })
 
@@ -252,17 +245,21 @@ const checking = async (orderData: OrderData) => {
     };
     return target
   });
+  try {
+    await orderService.checking({
+      ...orderData,
+      targets
+    })
 
-  await orderService.checking({
-    ...orderData,
-    targets
-  })
-
-  modals.assign = false
-  assignments.assets = [];
-  assets.rows = [];
-  assignments.place = undefined;
-  assignments.locationId = undefined;
+    modals.assign = false
+    assignments.assets = [];
+    assets.rows = [];
+    assignments.place = undefined;
+    assignments.locationId = undefined;
+  } catch (error) {
+    const { $errorHandler } = useNuxtApp();
+    $errorHandler(error);
+  }
 }
 
 onMounted(() => {

@@ -280,10 +280,9 @@ export const useOrders = () => {
             }
           );
       } catch (error: any) {
-        ElNotification({
-          title: 'Error al recibir',
-          message: error.message,
-          type: 'error'
+        throw createError({
+          message: 'Vuelve a intentarlo mas tarde',
+          status: 400,
         });
       }
     }
