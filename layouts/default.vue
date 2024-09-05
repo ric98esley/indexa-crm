@@ -430,7 +430,10 @@ const menusA = reactive([
   right: 20px;
 }
 
-.el-select-dropdown__item:hover {
-  background-color: var(--el-color-primary);
+</style>
+
+<style>
+.el-select-dropdown__item.hover, .el-select-dropdown__item:hover {
+  background-color: var(--el-color-primary-light-7);
 }
 </style>
