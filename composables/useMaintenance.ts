@@ -1,7 +1,10 @@
 export const useFindMaintenanceType = async (filters: FindMaintenanceType = {}) => {
   try {
     const { data, error } = await useApi<{ rows: MaintenanceType[], total: number }>('/maintenances/types', {
-      params: useFilterObject(filters)
+      params: useFilterObject({
+        ...filters,
+        offset: ((filters.offset ?? 1) - 1) * (filters.limit ?? 10)
+      })
     })
 
     return data.value
@@ -73,7 +76,10 @@ export const useDeleteMaintenanceType = async (id: number) => {
 export const useFindMaintenance = async (filters: FindMaintenance = {}) => {
   try {
     const { data, error } = await useApi<{rows:Maintenance[], total: number}>('/maintenances', {
-      params: useFilterObject(filters)
+      params: useFilterObject({
+        ...filters,
+        offset: ((filters.offset ?? 1) - 1) * (filters.limit ?? 10)
+      })
     })
 
     return data.value
