@@ -176,6 +176,7 @@ declare global {
 
 
   interface Role extends Base {
+    name: string;
     ability: Object
   }
   interface Count {
@@ -242,8 +243,8 @@ declare global {
     serial?: string;
     alert?: boolean;
     alertType?: string;
-    limit?: number;
-    offset?: number;
+    limit: number;
+    offset: number;
     ip?: string;
     limit?: number;
     offset?: number;
