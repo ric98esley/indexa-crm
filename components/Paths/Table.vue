@@ -12,33 +12,30 @@ const props = defineProps({
     type: Object as PropType<FindPaths>,
     default: () => ({
       limit: 10,
-      offset: 0,
+      offset: 1,
       search: '',
     }),
   },
 });
 const emit = defineEmits(['refresh', 'update:filters']);
 
-const filters = computed({
-  get: () => props.filters,
-  set: (value: FindPaths) => {
-    emit('update:filters', value);
-    emit('refresh');
-  },
+const filters = reactive({
+  limit: props.filters.limit,
+  offset: props.filters.offset,
+  search: props.filters.search,
 });
-
-const PathToEdit = ref<Paths | null>(null);
+const selectedPath = ref<Paths | null>(null);
 
 
 const handlerEdit = (row: Paths) => {
-  PathToEdit.value = row;
+  selectedPath.value = row;
   updateModal.value = true;
 };
 
 const handlerDelete = async (row: Paths) => {
   try {
     await useDeletePath(row.id);
-    emit('refresh');
+    emit('refresh', filters);
   } catch (error: any) {
     const { $errorHandler } = useNuxtApp();
     $errorHandler(error);
@@ -47,15 +44,22 @@ const handlerDelete = async (row: Paths) => {
 
 const updatePath = async (form: CreatePaths) => {
   try {
-    if (!PathToEdit.value) return;
-    await useUpdatePath(PathToEdit.value.id, form);
-    emit('refresh');
+    if (!selectedPath.value) return;
+    await useUpdatePath(selectedPath.value.id, form);
+    emit('refresh', filters);
     updateModal.value = false;
   } catch (error: any) {
     const { $errorHandler } = useNuxtApp();
     $errorHandler(error);
   }
 };
+
+watch(filters, (value) => {
+  emit('refresh', value);
+  console.log(value);
+  console.log('watch');
+  console.log(props.filters);
+});
 
 </script>
 
@@ -95,8 +99,8 @@ const updatePath = async (form: CreatePaths) => {
     </el-table>
     <Pagination v-model:offset="filters.offset" v-model:limit="filters.limit" :total="props.total" />
     <el-dialog v-model="updateModal" destroy-on-close title="Editar ruta">
-      <PathsForm v-if="PathToEdit" @submit="updatePath"
-        :form="{ name: PathToEdit.name, path: PathToEdit.path, isAllow: PathToEdit.isAllow }" />
+      <PathsForm v-if="selectedPath" @submit="updatePath"
+        :form="{ name: selectedPath.name, path: selectedPath.path, isAllow: selectedPath.isAllow }" />
     </el-dialog>
   </el-col>
 </template>

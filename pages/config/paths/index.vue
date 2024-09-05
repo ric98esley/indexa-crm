@@ -23,14 +23,14 @@ const paths = reactive<{
 
 const filters = reactive({
   limit: 10,
-  offset: 0,
+  offset: 1,
   search: ''
 })
 
 const loadingPaths = ref(false);
 
 
-const getPaths = async () => {
+const getPaths = async (filters: FindPaths) => {
   try {
     loadingPaths.value = true;
 
@@ -52,19 +52,16 @@ const createPath = async (form: CreatePaths) => {
     await useCreatePath(form);
     modals.create = false;
 
-    getPaths();
+    getPaths(filters);
   } catch (error: any) {
     const { $errorHandler } = useNuxtApp();
     $errorHandler(error);
   }
 }
 onMounted(() => {
-  getPaths();
+  getPaths(filters);
 })
-
 </script>
-
-
 <template>
   <el-container direction="vertical" class="p-3">
     <el-row>

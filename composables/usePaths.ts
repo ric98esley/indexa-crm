@@ -2,7 +2,10 @@ export const useFindPath = async (find: FindPaths) => {
   const { data, error } = await useApi<{ total: number, rows: Paths[] }>('/paths',
     {
       method: 'GET',
-      params: useFilterObject(find),
+      params: useFilterObject({
+        ...find,
+        offset: (find.offset - 1 ) * find.limit,
+      }),
     },
   );
 
