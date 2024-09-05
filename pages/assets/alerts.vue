@@ -3,7 +3,7 @@ definePageMeta({
   middleware: [
     'nuxt-permissions'
   ],
-  permissions: ['alerts:read']
+  permissions: ['geolocation:read']
 });
 
 
