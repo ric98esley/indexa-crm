@@ -16,7 +16,7 @@
               <el-select class="w-full" v-model="status">
                 <el-option label="Asignado (Desde taquillas)" value="asignado" />
                 <el-option label="Desplegable (Desde depósitos)" value="desplegable" />
-                <el-option label="Pendiente (Desde revisión)" value="pendiente" />
+                <el-option label="Pendiente (Desde depósitos de revisión)" value="pendiente" />
               </el-select>
             </el-form-item>
             <el-form-item label="Deposito (Por defecto)">
@@ -29,20 +29,18 @@
               </el-select>
             </el-form-item>
             <el-form-item label="Serial" v-if="assignments.place">
-              <el-select v-model="selectedAsset" class="w-full" filterable remote placeholder="Busca un serial"
-                :loading="loadingAssets" :remote-method="setAssets">
-                <el-option :class="assetStatus({ row: item })" v-for="item in assets.rows" :key="item.id"
-                  :label="`${item.id}- ${item.serial} - ${item.location?.name}`"
-                  :disabled="assignments.assets.some(e => e.id === item.id) || item.location?.type?.status != status"
-                  :value="item.serial!">
-                  <div class="flex justify-between">
-                    <span><b>{{ item.serial }}</b>- {{ item?.model?.category.name }} - {{ item?.model?.brand.name }} -
+              <el-autocomplete v-model="filters.serial" highlight-first-item value-key="serial"
+                :fetch-suggestions="setAssets" @select="handleSelectAsset" class="w-full">
+                <template #default="{ item }">
+                  <div :class="assetStatus({ row: item })">
+                    <li><strong>{{ item.serial }}</strong> - {{ item.model.category.name }} - {{ item.model.brand.name
+                      }}
+                      -
                       {{
-                      item.model?.name }}</span>
-                    <span>{{ item.location?.type?.status }}</span>
+                        item.model.name }}</li>
                   </div>
-                </el-option>
-              </el-select>
+                </template>
+              </el-autocomplete>
             </el-form-item>
           </el-form>
         </el-card>
@@ -177,18 +175,9 @@ const handleSelectAsset = (row: Asset) => {
   }
 
   assignments.assets.unshift({ ...JSON.parse(JSON.stringify(row)), locationId: assignments.place });
+
   filters.serial = '';
 }
-
-const selectedAsset = computed<string>({
-  get() {
-    return '';
-  },
-  set(value: string) {
-    const item = assets.rows.filter((asset) => asset.serial == value)[0];
-    if (item) handleSelectAsset(item)
-  }
-})
 
 const deleteAssignment = (row: Asset) => {
   const index = assignments.assets.indexOf(row);
@@ -222,14 +211,14 @@ const setPlaces = async (search: string) => {
   }
 }
 
-const setAssets = async (query: string) => {
+const setAssets = async (query: string, cb: (arg: any) => void) => {
   try {
     loadingAssets.value = true;
     const data = await assetService.getAssets({ serial: query })
 
-    assets.rows = data?.value?.rows || [];
-    assets.total = data?.value?.total || 0;
     loadingAssets.value = false;
+
+    cb(data?.value?.rows || [])
   } catch (error) {
     loadingAssets.value = false;
   }
