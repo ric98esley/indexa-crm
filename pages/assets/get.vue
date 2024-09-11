@@ -211,7 +211,7 @@ const setPlaces = async (search: string) => {
   }
 }
 
-const setAssets = async (query: string, cb: (arg: any) => void) => {
+const setAssets = async (query: string, cb: (arg: Asset[]) => void) => {
   try {
     loadingAssets.value = true;
     const data = await assetService.getAssets({ serial: query })

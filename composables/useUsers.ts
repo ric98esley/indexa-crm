@@ -1,4 +1,4 @@
-const isObjectEmpty = (objectName: {[key:string]: any}) => {
+const isObjectEmpty = (objectName: { [key: string]: any }) => {
   return Object.keys(objectName).length === 0
 }
 export const useUsers = () => {
@@ -118,70 +118,53 @@ export const useUsers = () => {
       }
     }
 
-    async createUser(user: {
-      username: string,
-      email: string,
-      role: string,
-      password: string,
-      isActive?: false,
-      groupId?: number,
-      profile?: {
-        name: string,
-        lastName: string,
-        cardId: string,
-        phone: string,
+    async getUser(id: number) {
+      const { data, error } = await useApi<User>(`${this.URL}/${id}`);
+      if (error.value) {
+        throw createError('Error al cargar el usuario')
       }
-    }) {
-      try {
-        const body = useFilterObject(user);
-        body.profile = useFilterObject(user.profile)
+      return data.value
+    }
 
-        if (isObjectEmpty(body.profile)) delete body.profile;
-        const { data, error } = await useApi<User>(this.URL,
-          {
-            method: 'POST',
-            body
-          },
-        )
-        if (error.value) {
-          console.log(error)
-          throw new Error(error.value.data.message)
+    async createUser(user: CreateUser) {
+      const body = useFilterObject(user);
+      const profile = useFilterObject(user.profile);
+      body.profile = profile
+      if (isObjectEmpty(body.profile)) {
+        delete body.profile
+      }
+
+      const { data, error } = await useApi<User>(this.URL,
+        {
+          method: 'POST',
+          body: {
+            ...body,
+          }
+        },
+      )
+      if (error.value) {
+        throw createError({
+          message: 'Error al crear el usuario',
+          statusCode: error.value.statusCode
+        })
+      }
+
+      ElNotification({
+        title: 'Usuario creada correctamente',
+        message: `${data.value?.username}`
+      })
+      return data.value
+    }
+    async editUser(id: number, changes: CreateUser) {
+      try {
+
+        const body = useFilterObject(changes);
+        const profile = useFilterObject(changes.profile);
+        body.profile = profile
+        if (isObjectEmpty(body.profile)) {
+          delete body.profile
         }
 
-        console.log (data.value);
-        ElNotification({
-          title: 'Usuario creada correctamente',
-          message: `${data.value?.username}`
-        })
-        return { data, error }
-      } catch (error : any) {
-        ElNotification({
-          title: 'Error al crear usuario intente de nuevo mas tarde',
-          message: error.message
-        })
-      }
-    }
-    async editUser({
-      id,
-      email,
-      role,
-      isActive,
-      groupId,
-    }: {
-      email?: string,
-      role?: string,
-      isActive?: false,
-      groupId?: number,
-      id: number
-    },
-     ) {
-      try {
-        const body = {
-          email,
-          role,
-          isActive,
-          groupId
-        };
         const { data, error } = await useApi<User>(`${this.URL}/${id}`,
           {
             method: 'patch',
@@ -203,7 +186,7 @@ export const useUsers = () => {
         })
       }
     }
-    async removeUser ({ id }: { id: number }) {
+    async removeUser({ id }: { id: number }) {
       try {
         const { data, error } = await useApi<User>(`${this.URL}/${id}`, {
           method: 'delete'

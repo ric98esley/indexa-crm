@@ -39,27 +39,18 @@
               </el-autocomplete>
             </el-form-item>
             <el-form-item label="Serial" v-if="assignments.place">
-              <el-select
-                v-model="selectedAsset"
-                class="w-full"
-                filterable
-                remote
-                placeholder="Busca un serial"
-                :loading="loadingAssets"
-                :remote-method="setAssets">
-                <el-option
-                  :class="assetStatus({ row: item })"
-                  v-for="item in assets.rows" :key="item.id"
-                  :label="`${item.id}- ${item.serial} - ${item.location?.name}`"
-                  :disabled="assignments.assets.some(e => e.id === item.id) || item.location?.type?.status != 'desplegable'"
-                  :value="item.serial">
-                  <div class="flex justify-between">
-                    <span><b>{{ item.serial }}</b>- {{ item?.model?.category.name }} - {{ item?.model?.brand.name }} -
-                      {{ item.model?.name }}</span>
-                    <span>{{ item.location?.type?.status }}</span>
+              <el-autocomplete v-model="filters.serial" highlight-first-item value-key="serial"
+                :fetch-suggestions="setAssets" @select="handleSelectAsset" class="w-full">
+                <template #default="{ item }">
+                  <div :class="assetStatus({ row: item })">
+                    <li><strong>{{ item.serial }}</strong> - {{ item.model.category.name }} - {{ item.model.brand.name
+                      }}
+                      -
+                      {{
+                        item.model.name }}</li>
                   </div>
-                </el-option>
-              </el-select>
+                </template>
+              </el-autocomplete>
             </el-form-item>
           </el-form>
         </el-card>
@@ -224,21 +215,20 @@ const filters = reactive({
 })
 
 const handleSelectAsset = (row: Asset) => {
-  if (targets.value.some(e => e.assetId === row.id)) return;
+  if (assignments.assets.some(e => e.id === row.id)) return ElMessage({
+    message: 'Activo ya agregado a la lista.',
+    type: 'warning',
+  });
 
+  if (row.location?.type?.status != 'desplegable') {
+    return ElMessage({
+      message: `Activo no se encuentra disponible para asignar.`,
+      type: 'warning',
+    });
+  }
   assignments.assets.unshift(row);
   filters.serial = '';
 }
-
-const selectedAsset = computed<string>({
-  get() {
-    return '';
-  },
-  set(value: string ) {
-    const item = assets.rows.filter((asset) => asset.serial == value)[0];
-    if(item) handleSelectAsset(item)
-  }
-})
 
 const deleteAssignment = (row: Asset) => {
   const index = assignments.assets.indexOf(row);
@@ -296,14 +286,14 @@ const setPlaces = async (search: string, cb: (arg: any) => void) => {
   }
 }
 
-const setAssets = async (query: string) => {
+const setAssets = async (query: string, cb: (arg: Asset[]) => void) => {
   try {
     loadingAssets.value = true;
     const data = await assetService.getAssets({ serial: query })
 
-    assets.rows = data?.value?.rows || [];
-    assets.total = data?.value?.total || 0;
     loadingAssets.value = false;
+
+    cb(data?.value?.rows || [])
   } catch (error) {
     loadingAssets.value = false;
   }
@@ -379,3 +369,4 @@ onUnmounted(() => {
   align-items: center;
 }
 </style>
+

@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-const userStore = useUserStore()
 const props = defineProps({
   data: {
     type: Array as PropType<Maintenance[]>,

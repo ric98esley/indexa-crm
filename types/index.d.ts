@@ -46,6 +46,17 @@ declare global {
     profile: Profile;
     ability: string[];
   }
+
+  interface CreateUser {
+    username: string;
+    email: string;
+    role: string;
+    isActive: boolean;
+    password: string;
+    groupId?: number;
+    profile: Profile;
+
+  }
   interface Category extends Base {
     description: string;
     type: string;

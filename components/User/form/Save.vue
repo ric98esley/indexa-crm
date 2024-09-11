@@ -1,36 +1,67 @@
 <script lang="ts" setup>
-import { useUserStore } from '~/stores/userStore.js';
+const props = defineProps({
+  editUser: {
+    type: Boolean,
+    default: false
+  },
+  userId: Number,
+  groups: Array
+})
+
+const user = reactive<CreateUser>({
+  username: '',
+  email: '',
+  password: '',
+  role: '',
+  isActive: true,
+  groupId: undefined,
+  profile: {
+    name: '',
+    lastName: '',
+    cardId: '',
+    phone: ''
+  }
+})
 
 const userFormRef = ref()
 
 const allowSubmit = ref<boolean>(false);
 
-const userStore = useUserStore();
 const UserService = useUsers();
-const GroupsService = useGroups();
-
 const userService = new UserService();
+
+const GroupsService = useGroups();
 const groupService = new GroupsService();
 
 const loadingGroup = ref(false);
 
-const props = defineProps({
-  loadingUser: Boolean,
-  editUser: Boolean,
-  userId: Number,
-  groups: Array
-})
 
-const emit = defineEmits(['update:loadingUser', 'onSubmit'])
-
-const loadingUser = computed({
-  get() {
-    return props.loadingUser
-  },
-  set(loadingUser) {
-    emit('update:loadingUser', loadingUser)
+const setUser = (data: User) => {
+  user.username = data.username;
+  user.email = data.email;
+  user.role = data.role;
+  user.isActive = data.isActive;
+  user.groupId = data.group?.id;
+  user.profile = {
+    name: data.profile?.name,
+    lastName: data.profile?.lastName,
+    cardId: data.profile?.cardId,
+    phone: data.profile?.phone
   }
-})
+}
+
+const getUser = async (id?: number) => {
+  if (!id) return;
+  if (id === 0) return;
+  if (props.editUser) {
+    const rta = await userService.getUser(id);
+    if (!rta) return;
+    setUser(rta);
+  }
+}
+
+
+const emit = defineEmits(['update:loadingUser', 'submit'])
 
 const groups = reactive<{
   rows: Group[],
@@ -45,10 +76,10 @@ const roles = [
   { label: "Receptor", value: "receptor" },
   { label: "Asistente", value: "asistente" },
   { label: "Observador", value: "observador" },
-  { label: "Administrador", value: "administrador"},
+  { label: "Administrador", value: "administrador" },
   { label: "Taquilla", value: "taquilla" },
-  { label: "Tecnico", value: "tecnico"},
-  { label: "Secretaria", value: "secretaria"},
+  { label: "Técnico", value: "tecnico" },
+  { label: "Secretaria", value: "secretaria" },
 ];
 
 const rules = {
@@ -86,7 +117,7 @@ const setGroup = async (query?: string) => {
   try {
     const search = {
       name: query,
-      limit: 10,
+      limit: 200,
       offset: 0
     }
     loadingGroup.value = true;
@@ -99,101 +130,58 @@ const setGroup = async (query?: string) => {
 }
 
 
-const createUser = async () => {
-  try {
-    loadingUser.value = true;
-
-    const { data, error } = await userService.createUser(userStore.user);
-
-    if (error.value) throw new Error();
-
-    userStore.$reset();
-
-  } catch (error) {
-    loadingUser.value = false;
-  }
+const saveUser = () => {
+  emit('submit', user);
 }
 
-const editUser = async () => {
-  try {
-    loadingUser.value = true;
-    await userService.editUser(userStore.user);
-    userStore.$reset()
-  } catch (error) {
-    loadingUser.value = false
-  }
-}
-
-const saveUser = async () => {
-  try {
-    if(props.editUser) {
-      await editUser()
-    } else {
-      await createUser()
-    }
-    
-  } catch (error) {
-    
-  } finally {
-    emit('onSubmit')
-  }
-}
-
-const validateUser = (props: FormItemProp, isValid: boolean, message: string) => {
-  allowSubmit.value = isValid;
-}
-
-watch(() => props.editUser ,async () => {
-  if(props.editUser == true) {
-    await setGroup(userStore.user.group?.code);
-  }
+watch(() => props.userId, async () => {
+  await getUser(props.userId);
 })
 
 onMounted(async () => {
-  if(props.editUser == true) {
-    await setGroup(userStore.user.group?.code);
-  }
+  await setGroup('');
+  await getUser(props.userId);
 })
 
 </script>
 
 <template>
-  <el-form ref="userFormRef" @validate="validateUser" label-position="top" label-width="auto" autocomplete="off"
-    status-icon require-asterisk-position="right" @submit.prevent="saveUser()" :rules="rules" :model="userStore.user">
+  <el-form ref="userFormRef" label-position="top" label-width="auto" autocomplete="off"
+    status-icon require-asterisk-position="right" @submit.prevent="saveUser()" :rules="rules" :model="user">
     <h3 class="text-lg">Datos de usuario</h3>
     <p class="mb-4">Credenciales para entrar al sistema</p>
 
     <el-row :gutter="20">
       <el-col :md="18">
         <el-form-item label="Usuario" prop="username">
-          <el-input v-model="userStore.user.username" placeholder="joe"></el-input>
+          <el-input v-model="user.username" placeholder="joe"></el-input>
         </el-form-item>
       </el-col>
       <el-col :span="4">
         <el-form-item label="Activar" prop="isActive">
-          <el-switch v-model="userStore.user.isActive" class="ml-2" />
+          <el-switch v-model="user.isActive" class="ml-2" />
         </el-form-item>
       </el-col>
       <el-col>
         <el-form-item label="Correo electrónico" prop="email">
-          <el-input v-model="userStore.user.email" placeholder="ejemplo@ejemplo.com"></el-input>
+          <el-input v-model="user.email" placeholder="ejemplo@ejemplo.com"></el-input>
         </el-form-item>
       </el-col>
       <el-col v-if="!props.editUser">
         <el-form-item label="Contraseña (Obligatoria)" prop="password">
-          <el-input v-model="userStore.user.password" placeholder="Clave ultra secreta"></el-input>
+          <el-input v-model="user.password" placeholder="Clave ultra secreta"></el-input>
         </el-form-item>
       </el-col>
       <el-col>
         <el-form-item label="Rol" prop="role">
-          <el-select class="w-full" v-model="userStore.user.role" filterable placeholder="Elige el rol">
+          <el-select class="w-full" v-model="user.role" filterable placeholder="Elige el rol">
             <el-option v-for="item in roles" :key="item.label" :label="item.label" :value="item.value!"></el-option>
           </el-select>
         </el-form-item>
       </el-col>
       <el-col>
         <el-form-item label="Grupo">
-          <el-select class="w-full" v-model="userStore.user.groupId" filterable remote placeholder="Elige un grupo"
+          <el-select class="w-full" v-model="user.groupId" filterable remote placeholder="Elige un grupo"
             :loading="loadingGroup" :remote-method="setGroup">
             <el-option v-for="item in groups.rows" :key="item.id" :label="item.name" :value="item.id!">
               <span style="float: left">{{ item.name }}</span>
@@ -202,28 +190,28 @@ onMounted(async () => {
         </el-form-item>
       </el-col>
     </el-row>
-    <el-col v-if="!props.editUser">
+    <el-col>
       <div class="mt-2 mb-4">
         <h3 class="text-lg">Perfil del usuario</h3>
         <p>Refiere a datos de contacto</p>
       </div>
       <el-form-item label="Nombre" prop="profile.name">
-        <el-input v-model="userStore.user.profile.name" placeholder="Ingrese el nombre"></el-input>
+        <el-input v-model="user.profile.name" placeholder="Ingrese el nombre"></el-input>
       </el-form-item>
       <el-form-item label="Apellido" prop="profile.lastName">
-        <el-input v-model="userStore.user.profile.lastName" placeholder="Ingrese el apellido"></el-input>
+        <el-input v-model="user.profile.lastName" placeholder="Ingrese el apellido"></el-input>
       </el-form-item>
       <el-form-item label="Cédula o RIF" prop="profile.cardId" type="number">
-        <el-input v-model="userStore.user.profile.cardId" placeholder="Ingrese la cédula"></el-input>
+        <el-input v-model="user.profile.cardId" placeholder="Ingrese la cédula"></el-input>
       </el-form-item>
       <el-form-item label="Teléfono" prop="profile.phone">
-        <el-input v-model="userStore.user.profile.phone" placeholder="Ingrese el teléfono" prop="profile.phone"
+        <el-input v-model="user.profile.phone" placeholder="Ingrese el teléfono" prop="profile.phone"
           type="number"></el-input>
       </el-form-item>
     </el-col>
     <el-form-item>
       <el-button type="primary" native-type="submit"
-        :disabled="!allowSubmit || !userStore.user.username || !userStore.user.email || !(props.editUser || userStore.user.password)">
+        :disabled="!user.username || !user.email">
         Guardar
       </el-button>
     </el-form-item>

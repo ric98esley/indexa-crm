@@ -1,7 +1,7 @@
 <template>
   <el-container direction="vertical" class="p-4">
     <el-row>
-      <PageHeader name="Usuarios" >
+      <PageHeader name="Usuarios">
         <template #buttons>
           <NuxtLink href="/users/roles" v-role="['superuser']">
             <el-button type="primary">Roles</el-button>
@@ -10,62 +10,16 @@
       </PageHeader>
       <el-col :span="24">
         <el-col>
-          <el-table :data="users.rows" v-loading="loadingUser">
-            <el-table-column type="index" width="50" />
-            <el-table-column type="expand" width="50">
-              <template #default="{ row }">
-                <el-row :span="24" :gutter="24">
-                  <el-col :span="22" :offset="2">
-                    Fecha de creación: {{ new Date(row.createdAt).toLocaleString('es-VE') }}
-                  </el-col>
-                </el-row>
-              </template>
-            </el-table-column>
-            <el-table-column prop="username" label="Usuario" :min-width="minWidth">
-              <template #header>
-                <el-input v-model="filters.username" placeholder="Nombre" clearable />
-              </template>
-            </el-table-column>
-            <el-table-column prop="profile.name" label="Nombre" :min-width="minWidth" />
-            <el-table-column label="Apellido" prop="profile.lastName" :min-width="minWidth"/>
-            <el-table-column label="Rol" prop="role" :min-width="minWidth">
-              <template #header>
-                <el-input v-model="filters.role" placeholder="Rol" clearable />
-              </template>
-            </el-table-column>
-            <el-table-column label="Grupo" prop="group.name" :min-width="minWidth">
-              <template #header>
-                <el-input v-model="filters.group" placeholder="Grupo" clearable />
-              </template>
-            </el-table-column>
-            <el-table-column label="Acciones" width="140">
-              <template #default="{ row }">
-                <el-row justify="space-between">
-                  <el-button type="info" circle @click="editUser(row)" v-can="['users:update']">
-                    <Icon name="ep:edit" />
-                  </el-button>
-                  <!-- <NuxtLink :to="`/users/${row.id}`">
-                    <el-button type="primary" circle>
-                      <Icon name="ep:view" />
-                    </el-button>
-                  </NuxtLink> -->
-                  <el-button type="danger" circle @click="removeUser(row.id)" v-can="['users:delete']">
-                    <Icon name="ep:delete" />
-                  </el-button>
-                </el-row>
-              </template>
-            </el-table-column>
-          </el-table>
-          <Pagination v-model:offset="filters.offset" v-model:limit="filters.limit" :total="users.total" />
+          <UserView :data="users.rows" v-model:filters="filters" :total="users.total" @refresh="setUsers" />
         </el-col>
       </el-col>
       <el-col>
         <el-dialog v-model="modals.create" @close="edit = false">
           <template #header>
-            <h2 class="text-xl">{{ edit == true ? 'Editar el usuario ' : 'Crear Usuario' }}</h2>
+            <h2 class="text-xl">Crear Usuario</h2>
           </template>
           <template #default>
-            <UserFormSave v-model:loading-user="loadingUser" v-model:edit-user="edit" :on-submit="setUsers()" />
+            <UserFormSave v-model:loading-user="loadingUser"  @submit="handlerSubmit" />
           </template>
         </el-dialog>
       </el-col>
@@ -84,10 +38,6 @@
 </template>
 
 <script setup lang="ts">
-import { useUserStore } from '~/stores/userStore.js';
-const userStore = useUserStore();
-
-
 definePageMeta({
   middleware: [
     'nuxt-permissions'
@@ -101,7 +51,6 @@ definePageMeta({
 });
 
 const loadingUser = ref(false);
-const minWidth = ref(120);
 
 const edit = ref(false);
 
@@ -135,23 +84,6 @@ const modals = reactive({
   menu: false
 });
 
-const editUser = (row: User) => {
-  edit.value = true;
-
-  userStore.setUser(row)
-
-  modals.create = true;
-}
-
-const removeUser = async (id: number) => {
-  try {
-    await userService.removeUser({ id })
-
-    loadingUser.value = true;
-  } catch (error) {
-    console.log(error)
-  }
-}
 
 const setUsers = async () => {
   try {
@@ -174,6 +106,16 @@ const setUsers = async () => {
   }
 }
 
+const createUser = async (user: CreateUser) => {
+  await userService.createUser(user);
+}
+
+const handlerSubmit = async (user: CreateUser) => {
+  await createUser(user)
+  modals.create = false
+  setUsers()
+}
+
 watch(filters, useDebounce(async () => {
   await setUsers()
 }, 500)
@@ -186,7 +128,6 @@ watch(loadingUser, useDebounce(async () => {
 }))
 
 watch(edit, async () => {
-  if (!edit.value) userStore.resetUser();
 })
 
 onMounted(async () => {

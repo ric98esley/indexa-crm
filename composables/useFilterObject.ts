@@ -1,8 +1,6 @@
-import { stringify } from "querystring";
-
-export const useFilterObject = (obj: any) => {
+export const useFilterObject = (obj: {[key: string]: any}) => {
   // Crea un objeto vacío para almacenar los valores filtrados
-  let filtered = {};
+  let filtered: {[key: string]: any} = {};
   // Recorre las propiedades del objeto con un bucle for...in
   for (let key in obj) {
     // Comprueba si el valor de la propiedad es distinto de undefined y de string vacío
