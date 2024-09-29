@@ -27,7 +27,7 @@
                 </el-table-column>
                 <el-table-column label="Procedencia" min-width="120">
                   <template #default="{ row }">
-                    <Nuxt-Link :to="`/places/${row.to.id}`">
+                    <Nuxt-Link :to="`/places/${row.to?.id}`">
                       <span class="text-teal-500 underline">
                         {{ row.to?.code }} - {{ row.to?.name }} / {{ row.to?.group?.code }} {{
                           row.to?.group.name }}

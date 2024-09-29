@@ -10,26 +10,19 @@ const emit = defineEmits(['submit'])
 const saveCategoryRef =  ref();
 
 const CategoriesService = useCategories();
-const SpecificationService = useSpecifications();
 
-const specificationsService = new SpecificationService();
 const categoriesService = new CategoriesService()
 const loadingCategory = ref(false);
-const loadingCustomFields = ref(false);
 
 const category = reactive<{
   id?: number,
   name?: string,
   description: string
-  customFields: number[],
-  removeFields: number[],
   type: string
 }>({
   id: undefined,
   name: '',
   description: '',
-  customFields: [],
-  removeFields: [],
   type: ''
 });
 
@@ -39,21 +32,12 @@ const categoryType = [
   { label: "Accesorio", value: "accessory" }
 ];
 
-const specification = reactive<{
-  rows: Specification[],
-  total: number,
-}>({
-  rows: [],
-  total: 0
-})
-
 const createCategory = async () => {
   try {
     loadingCategory.value = true;
 
     const { data } = await categoriesService.createCategory({
       name: category.name,
-      customFields: category.customFields,
       description: category.description,
       type: category.type
     })
@@ -62,8 +46,6 @@ const createCategory = async () => {
 
     category.id = undefined;
     category.name = '';
-    category.customFields = [];
-    category.removeFields = [];
     return data.value
   } catch (error) {
     loadingCategory.value = false;
@@ -78,8 +60,6 @@ const patchCategory = async () => {
     const body = {
       id: category.id,
       name: category.name,
-      customFields: category.customFields,
-      removeFields: category.removeFields,
       type: category.type,
       ...(category.description && {
         description: category.description
@@ -96,27 +76,6 @@ const patchCategory = async () => {
     console.error(error)
   }
 }
-
-const setSpecification = async (name: string) => {
-  try {
-    loadingCustomFields.value = true;
-    const data = await specificationsService.getSpecification({ name });
-
-    if (!data) throw new Error();
-
-    specification.rows = data?.rows || [];
-    specification.total = data?.total || 0;
-
-    loadingCustomFields.value = false;
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-const removeField = (field: number) => {
-  category.removeFields?.push(field)
-}
-
 const setCategory = async () => {
   if (props.id == 0 || props.id == undefined) {
     saveCategoryRef.value?.resetFields();
@@ -125,12 +84,9 @@ const setCategory = async () => {
   const res = await categoriesService.getCategory(props.id);
 
   if (res) {
-    const fields = res.customFields!.map((field) => field.id!)
-    specification.rows = res.customFields || [];
     category.id = res.id;
     category.name = res.name;
     category.description = res.description;
-    category.customFields = fields;
     category.type = res.type;
   }
 }
@@ -175,13 +131,6 @@ onMounted(async () => {
     >
     <el-form-item label="Nombre" prop="name">
       <el-input v-model="category.name" placeholder="Ingrese aquí el nombre" prop="name"></el-input>
-    </el-form-item>
-    <el-form-item label="Campos personalizados" v-if="category.type === 'asset'" props="customFields">
-      <el-select class="w-full" v-model="category.customFields" multiple filterable reserve-keyword
-        placeholder="Por favor escoge un campo personalizado" :loading="loadingCustomFields" @remove-tag="removeField"
-        remote :remote-method="(name: string) => setSpecification(name)">
-        <el-option v-for="item in specification.rows" :key="item.id" :label="item.name" :value="item.id!" />
-      </el-select>
     </el-form-item>
     <el-form-item label="Tipo" props="type">
       <el-select class="w-full" v-model="category.type">

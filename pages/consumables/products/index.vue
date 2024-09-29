@@ -78,7 +78,7 @@ const productToEdit = ref<number | undefined>(0);
 
 const filters = reactive({
   limit: 10,
-  offset: 0,
+  offset: 1,
   name: '',
   code: '',
   category: '',
@@ -95,15 +95,6 @@ const response = reactive<{
 const modals = reactive({
   create: false,
   edit: false
-});
-
-
-const type = reactive<{
-  id?: number,
-  name: string
-}>({
-  id: undefined,
-  name: ''
 });
 
 const editProduct = (row: Product) => {

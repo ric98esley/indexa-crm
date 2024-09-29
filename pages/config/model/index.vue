@@ -61,7 +61,6 @@
 </template>
 
 <script setup lang="ts">
-
 definePageMeta({
   middleware: [
     'nuxt-permissions'
@@ -129,28 +128,8 @@ const submitHandler = async () => {
 }
 
 const removeCategory = async (id: number) => {
-  try {
-    const { data, error } = await useFetch<Model>(`/assets/models/${id}`, {
-      method: 'delete'
-    })
-
-    if (error.value) {
-      loadingModels.value = false;
-      ElNotification({
-        message: 'Error al borrar el modelo intente de nuevo mas tarde.'
-      });
-      return
-    }
-
-    ElNotification({
-      message: 'El modelo ha sido borrada.'
-    })
-    await setModels()
-  } catch (error) {
-    ElNotification({
-      message: 'Error al borrar el modelo intente de nuevo mas tarde.'
-    })
-  }
+  const data = await modelsServices.deleteModel(id);
+  await setModels();
 }
 
 

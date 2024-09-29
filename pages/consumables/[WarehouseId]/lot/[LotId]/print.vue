@@ -22,7 +22,7 @@
             <th>Descripción</th>
             <th>Cantidad</th>
           </tr>
-          <tr v-for="(movement, index) in response.movements" v-bind:key="index">
+          <tr v-for="(movement, index) in movements.rows" v-bind:key="index">
             <td>{{ index + 1 }}</td>
             <td>{{ new Date(movement.createdAt!).toLocaleString() }}</td>
             <td>{{ movement.target?.product.code }}</td>
@@ -37,7 +37,7 @@
           <tr>
             <th colspan="4">
               <b>
-                Cantidad de asignados: {{ response.movements.length }}
+                Cantidad de asignados: {{ movements.total }}
               </b>
             </th>
           </tr>
@@ -90,9 +90,13 @@ const response = reactive<Lot>({
   customer: '',
   type: '',
   description: '',
-  movements: [],
   createdBy: undefined,
   createdAt: ''
+});
+
+const movements = reactive<{ rows: ConsumableMovement[], total: number }>({
+  rows: [],
+  total: 0
 });
 
 const setLot = async () => {
@@ -100,14 +104,24 @@ const setLot = async () => {
     warehouseId: route.params.WarehouseId.toString(),
     id: route.params.LotId.toString()
   });
+
+  const resMovements =
+    await consumableService
+      .getLotMovements(Number(route.params.WarehouseId), Number(route.params.LotId)
+  );
+
+  if (resMovements) {
+    movements.rows = resMovements.rows;
+    movements.total = resMovements.total;
+  }
   if (lot) {
     response.customer = lot.customer;
     response.type = lot.type;
     response.description = lot.description;
-    response.movements = lot.movements;
     response.createdBy = lot.createdBy;
     response.createdAt = lot.createdAt
   }
+
 }
 
 onMounted(async () => {

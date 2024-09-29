@@ -182,7 +182,6 @@ declare global {
     locationId?: number;
     createdBy?: User;
     location?: Place;
-    movements: ConsumableMovement[];
   }
 
 

@@ -133,7 +133,7 @@ const movementStatus = ({
           <el-input v-model="filters.location" placeholder="Agencia" clearable />
         </template>
         <template #default="{ row }">
-          <NuxtLink :href="`/places/${row.to.id}`" target="_blank">
+          <NuxtLink :href="`/places/${row.to?.id}`" target="_blank">
             <span class="text-teal-500 underline">
               {{ row.to?.code }}
               - {{ row.to?.name }}
@@ -161,7 +161,7 @@ const movementStatus = ({
             <el-button class="mr-2" type="primary" circle @click="setOrder(row.order.id)">
               <Icon name="ep:memo" />
             </el-button>
-            <NuxtLink :href="`/assets/${row.asset.id}`" target="_blank">
+            <NuxtLink :href="`/assets/${row.asset?.id}`" target="_blank">
               <el-button type="success" circle>
                 <Icon name="ep:view" />
               </el-button>

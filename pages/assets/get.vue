@@ -16,7 +16,7 @@
               <el-select class="w-full" v-model="status">
                 <el-option label="Asignado (Desde taquillas)" value="asignado" />
                 <el-option label="Desplegable (Desde depósitos)" value="desplegable" />
-                <el-option label="Pendiente (Desde depósitos de depósitos de revisión)" value="pendiente" />
+                <el-option label="Pendiente (Desde depósitos de revisión)" value="pendiente" />
               </el-select>
             </el-form-item>
             <el-form-item label="Deposito (Por defecto)">

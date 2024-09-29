@@ -70,7 +70,7 @@
             <h2>Crear nuevo grupo</h2>
           </template>
           <template #default>
-            <GroupFormSave @on-submit="submitHandler"/>
+            <GroupFormSave @on-submit="submitHandler" />
           </template>
         </el-dialog>
         <el-dialog v-model="modals.edit">
@@ -78,7 +78,7 @@
             <h2>Editar grupo</h2>
           </template>
           <template #default>
-            <GroupFormSave :id="groupToEdit" @on-submit="submitHandler"/>
+            <GroupFormSave :id="groupToEdit" @on-submit="submitHandler" />
           </template>
         </el-dialog>
       </el-container>
@@ -90,7 +90,6 @@
         </div>
       </el-col>
     </el-row>
-
   </el-container>
 </template>
 
@@ -101,6 +100,9 @@ definePageMeta({
   ],
   permissions: ['groups:read', 'groups:update', 'groups:delete', 'groups:create'],
 });
+
+const GroupService = useGroups()
+const groupService = new GroupService()
 
 const groupToEdit = ref<number | undefined>(undefined);
 
@@ -132,7 +134,6 @@ const modals = reactive({
 });
 
 const getGroups = async ({
-  id,
   name,
   manager,
   code,
@@ -140,7 +141,6 @@ const getGroups = async ({
   limit = 10,
   offset = 0
 }: {
-  id?: number,
   name?: string,
   manager?: string,
   code?: string,
@@ -148,49 +148,18 @@ const getGroups = async ({
   limit?: number,
   offset?: number
 }) => {
-  try {
-    loadingGroup.value = true;
-    const { data, error } = await useApi<{ total: number, rows: Group[] }>('/groups',
-      {
-        params: {
-          ...(name != '' && !name && id && {
-            id
-          }),
-          ...(name != '' && name && {
-            name
-          }),
-          ...(code != '' && code && {
-            code
-          }),
-          ...(parent != '' && parent && {
-            parent
-          }),
-          ...(manager != '' && manager && {
-            manager
-          }),
-          ...(offset && {
-            offset: (offset - 1) * limit
-          }),
-          ...(limit && {
-            limit
-          })
-        }
-      }
-    );
-    if (error.value) {
-      ElNotification({
-        message: 'Error al obtener las marcas intente de nuevo mas tarde'
-      })
-    }
+  loadingGroup.value = true;
+  const data = await groupService.getGroups({
+    name,
+    manager,
+    code,
+    parent,
+    limit,
+    offset
+  })
 
-    loadingGroup.value = false;
-    return data.value
-  } catch (error) {
-    loadingGroup.value = false;
-    ElNotification({
-      message: 'Error al obtener las marcas intente de nuevo mas tarde'
-    })
-  }
+  loadingGroup.value = false;
+  return data
 }
 const editGroup = (row: Group) => {
   modals.edit = true;
@@ -198,28 +167,8 @@ const editGroup = (row: Group) => {
 }
 
 const removeGroup = async (id: number) => {
-  try {
-    const { data, error } = await useFetch<Group>(`/groups/${id}`, {
-      method: 'delete'
-    })
-
-    if (error.value) {
-      loadingGroup.value = false;
-      ElNotification({
-        message: 'Error al borrar el grupo intente de nuevo mas tarde.'
-      });
-      return
-    }
-
-    ElNotification({
-      message: 'El grupo ha sido borrada.'
-    })
-    await setGroups()
-  } catch (error) {
-    ElNotification({
-      message: 'Error al borrar el grupo intente de nuevo mas tarde.'
-    })
-  }
+  await groupService.deleteGroup(id);
+  await setGroups();
 }
 
 const submitHandler = async () => {

@@ -92,12 +92,6 @@
                 <el-input v-model="filters.brand" placeholder="Nombre de la marca" clearable />
               </el-form-item>
               <el-row justify="space-between">
-                <el-form-item label="Ordenar por">
-                  <el-select v-model="filters.sort" placeholder="Ordenar por">
-                    <el-option v-for="option in sortBy" :key="option.value" :value="option.value" :label="option.label">
-                    </el-option>
-                  </el-select>
-                </el-form-item>
                 <el-form-item label="Tipo de orden">
                   <el-select v-model="filters.order" placeholder="Tipo de orden">
                     <el-option v-for="option in sortType" :key="option.value" :value="option.value" :label="option.label">
@@ -183,31 +177,31 @@ const sortBy = [
   },
   {
     label: 'Código',
-    value: 'code'
+    value: 'location.code'
   },
   {
     label: 'Serial',
-    value: 'serial'
+    value: 'asset.serial'
   },
   {
     label: 'Categoría',
-    value: 'category'
+    value: 'asset.model.category.name'
   },
   {
     label: 'Modelo',
-    value: 'model'
+    value: 'asset.model.name'
   },
   {
     label: 'Marca',
-    value: 'brand'
+    value: 'asset.model.brand.name'
   },
   {
     label: 'Grupo',
-    value: 'group'
+    value: 'to.group.code'
   },
   {
     label: 'Lugar',
-    value: 'location'
+    value: 'to.code'
   },
   {
     label: 'Tipo de movimiento',
@@ -219,16 +213,9 @@ const sortBy = [
   },
   {
     label: 'Estado',
-    value: 'status'
+    value: 'asset.status'
   },
-  {
-    label: 'Usuario',
-    value: 'user'
-  },
-  {
-    label: 'Acciones',
-    value: 'actions'
-  }
+
 ]
 
 const sortType = [

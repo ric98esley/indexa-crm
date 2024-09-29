@@ -147,8 +147,8 @@ export const useProducts = () => {
           description,
           category,
           unit,
-          limit,
-          offset,
+          limit: limit,
+          offset: offset && (offset - 1) * (limit || 0),
         });
         const { data, error } = await useApi<{
           total: number;

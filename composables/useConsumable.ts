@@ -1,5 +1,3 @@
-import { AnyNaptrRecord } from "dns";
-
 export const useConsumable = () => {
   return class AssetsServices {
     private URL = '/consumables'
@@ -46,59 +44,59 @@ export const useConsumable = () => {
           params: {
             ...(status &&
               status?.length > 0 && {
-                status: status.join(','),
-              }),
+              status: status.join(','),
+            }),
             ...(search &&
               search != '' && {
-                search,
-              }),
+              search,
+            }),
             ...(name != '' &&
               name && {
-                name,
-              }),
+              name,
+            }),
             ...(code != '' &&
               code && {
-                code,
-              }),
+              code,
+            }),
             ...(group != '' &&
               group && {
-                group,
-              }),
+              group,
+            }),
             ...(groupId && {
               groupId,
             }),
             ...(manager != '' &&
               manager && {
-                manager,
-              }),
+              manager,
+            }),
             ...(type != '' &&
               type && {
-                type,
-              }),
+              type,
+            }),
             ...(rif != '' &&
               rif && {
-                rif,
-              }),
+              rif,
+            }),
             ...(address != '' &&
               address && {
-                address,
-              }),
+              address,
+            }),
             ...(order != '' &&
               order && {
-                order,
-              }),
+              order,
+            }),
             ...(sort != '' &&
               sort && {
-                sort,
-              }),
+              sort,
+            }),
             ...(endDate != '' &&
               endDate && {
-                endDate,
-              }),
+              endDate,
+            }),
             ...(startDate != '' &&
               startDate && {
-                startDate,
-              }),
+              startDate,
+            }),
             ...(offset && {
               offset: (offset - 1) * limit,
             }),
@@ -327,11 +325,11 @@ export const useConsumable = () => {
           min
         }
         await useApi<Consumable>(`${this.URL}/${locationId}/products/${productId}`,
-        {
-          method: 'PATCH',
-          body
-        })
-      } catch (error) {}
+          {
+            method: 'PATCH',
+            body
+          })
+      } catch (error) { }
     }
 
     async getLots({
@@ -375,7 +373,7 @@ export const useConsumable = () => {
         });
       }
     }
-    async getOneLot({ id , warehouseId}: { id: number | string , warehouseId: number | string}) {
+    async getOneLot({ id, warehouseId }: { id: number | string, warehouseId: number | string }) {
       try {
         const { data, error } = await useApi<Lot>(`${this.URL}/${warehouseId}/lots/${id}`);
         if (error.value) {
@@ -389,6 +387,17 @@ export const useConsumable = () => {
           type: 'error',
         });
       }
+    }
+
+    async getLotMovements(warehouseId: number, lotId: number) {
+      const { data, error } 
+        = await useApi<{ rows: ConsumableMovement[], total: number }>(`${this.URL}/${warehouseId}/lots/${lotId}/movements`)
+
+      if (error.value) {
+        throw createError(error.value.data.message)
+      }
+
+      return data.value
     }
   };
 };

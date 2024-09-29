@@ -144,25 +144,18 @@ export const useModels = () => {
       }
     }
     async deleteModel(id: number) {
-      try {
-        const { data, error } = await useApi<Model>(`${this.URL}/${id}`, {
-          method: 'DELETE'
-        });
-        if (error.value) {
-          throw new Error(error.value.data.message);
-        }
-        ElNotification({
-          title: 'Modelo eliminada correctamente',
-          message: `Se elimino la Modelo ${data.value?.name} correctamente`,
-          type: 'success'
-        });
-        return { data, error }
-      } catch (error:any) {
-        ElNotification({
-          title: 'Error al eliminar la Modelo intente de nuevo mas tarde',
-          message: error.message,
-        })
+      const { data, error } = await useApi<Model>(`${this.URL}/${id}`, {
+        method: 'DELETE'
+      });
+      if (error.value) {
+        throw createError(error.value.data.message);
       }
+      ElNotification({
+        title: 'Modelo eliminada correctamente',
+        message: `Se elimino la Modelo ${data.value?.name} correctamente`,
+        type: 'success'
+      });
+      return data.value
     }
   }
 }
